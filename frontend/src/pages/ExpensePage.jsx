@@ -39,8 +39,8 @@ const [message, setMessage] = useState('');
   };
 
   return (
-    ////margin-top 4 and max width of container is 600px
-    <Container className="mt-3" style={{ maxWidth: '600px' , position: 'absolute', top: '20%', left: '30%', transform: 'translateY(-10%)'}}> 
+    // max width of container is 600px, centered
+    <Container className="mt-3" style={{ maxWidth: '600px', margin: '0 auto' }}> 
       <Card>
         <Card.Body>
         {/* //adds margin bottom 4 and centers the title */}

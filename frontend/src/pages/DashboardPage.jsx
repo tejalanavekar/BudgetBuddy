@@ -1,81 +1,181 @@
-import React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import CategoryChart from '../components/CategoryChart';
+import '../styles/home.css';
 
 const DashboardPage = () => {
-    const[expenses, setExpenses] = useState([]);
-    const [totalExpense, setTotalExpense] = useState({total:0, thisMonth:0, totalCount:0});
+    const [allExpenses, setAllExpenses] = useState([]); 
+    const [filteredExpenses, setFilteredExpenses] = useState([]); 
+    const [summary, setSummary] = useState({ thisMonth: 0, lastMonth: 0, count: 0 });
 
-    useEffect(() =>{
-        axios.get('http://localhost:5000/expenses') // Fetching data from backend
-        .then((response) => {
-            const data = response.data;
-            setExpenses(data);
+    // --- HELPER FUNCTIONS ---
 
-            // Calculate totals
-            const totalAmount = data.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
-            const count = data.length;
-            //Find the current month and calculate the totals for this month
-            const currentMonth = new Date().getMonth();
-            const thisMonthTotal = data.filter(expense => new Date(expense.date).getMonth() === currentMonth)
-                                   .reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
-            //Enter the final amounts in the state
-            setTotalExpense({total: totalAmount, thisMonth: thisMonthTotal, totalCount: count});
-        }).catch((error) => 
-            console.error('Error fetching expenses:', error));
-        },[]); // [] ensures this runs once on component mount
+    // 1. Get Today's Year-Month in "YYYY-MM" format (Local Time safe)
+    const getCurrentMonthISO = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        return `${year}-${month}`;
+    };
 
-        // JSX for rendering the dashboard
+    // 2. Generate Last 12 Months for Dropdown
+    const getLast12Months = () => {
+        const months = [];
+        const now = new Date();
+        
+        for (let i = 0; i < 12; i++) {
+            // Create a date object for the 1st of the month, i months ago
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            months.push(`${year}-${month}`);
+        }
+        return months;
+    };
+
+    // 3. Format "YYYY-MM" to readable "November 2025"
+    const formatMonthLabel = (isoDate) => {
+        const [year, month] = isoDate.split('-');
+        const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+        return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+    };
+
+    // 4. Get Previous Month ISO string from a given ISO string
+    const getPreviousMonthISO = (currentIso) => {
+        const [year, month] = currentIso.split('-').map(Number);
+        const date = new Date(year, month - 1 - 1, 1); // Subtract 1 for index, 1 for prev month
+        const prevYear = date.getFullYear();
+        const prevMonth = String(date.getMonth() + 1).padStart(2, '0');
+        return `${prevYear}-${prevMonth}`;
+    };
+
+    // --- STATE ---
+    const [selectedDate, setSelectedDate] = useState(getCurrentMonthISO()); 
+
+    // --- EFFECTS ---
+
+    // Fetch Data
+    useEffect(() => {
+        axios.get('http://localhost:5000/expenses')
+            .then((response) => {
+                setAllExpenses(response.data);
+            })
+            .catch((error) => console.error('Error fetching expenses:', error));
+    }, []);
+
+    // Filter Logic
+    useEffect(() => {
+        if (allExpenses.length === 0) return;
+
+        // Parse selected Year/Month
+        const [selYear, selMonth] = selectedDate.split('-').map(Number);
+
+        // Filter for Selected Month
+        const currentMonthData = allExpenses.filter(e => {
+            const d = new Date(e.date);
+            return d.getFullYear() === selYear && (d.getMonth() + 1) === selMonth;
+        });
+
+        // Filter for Previous Month (for comparison)
+        const prevIso = getPreviousMonthISO(selectedDate);
+        const [prevYear, prevMonth] = prevIso.split('-').map(Number);
+        
+        const prevMonthData = allExpenses.filter(e => {
+            const d = new Date(e.date);
+            return d.getFullYear() === prevYear && (d.getMonth() + 1) === prevMonth;
+        });
+
+        // Calculate Totals
+        const totalThisMonth = currentMonthData.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+        const totalLastMonth = prevMonthData.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+
+        setFilteredExpenses(currentMonthData);
+        setSummary({
+            thisMonth: totalThisMonth,
+            lastMonth: totalLastMonth,
+            count: currentMonthData.length
+        });
+
+    }, [allExpenses, selectedDate]);
+
+
     return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">Dashboard</h1>
+        <div className="dashboard-container">
+            {/* Dashboard Header with Filter */}
+            <div className="dashboard-header">
+                <h2>Overview</h2>
+                <div className="date-filter">
+                    <label>Period:</label>
+                    <select 
+                        value={selectedDate} 
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                        className="month-select wide"
+                    >
+                        {getLast12Months().map(dateStr => (
+                            <option key={dateStr} value={dateStr}>
+                                {formatMonthLabel(dateStr)}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center mb-6">
-        <div className="bg-white shadow rounded p-4">
-          <p className="text-gray-500">Total Spent</p>
-          <p className="text-2xl font-bold text-red-600">₹{totalExpense.total.toFixed(2)}</p>
-        </div>
-        <div className="bg-white shadow rounded p-4">
-          <p className="text-gray-500">This Month</p>
-          <p className="text-2xl font-bold text-blue-600">₹{totalExpense.thisMonth.toFixed(2)}</p>
-        </div>
-        <div className="bg-white shadow rounded p-4">
-          <p className="text-gray-500">Total Expenses</p>
-          <p className="text-2xl font-bold text-green-600">{totalExpense.count}</p>
-        </div>
-      </div>
+            {/* Summary Tiles */}
+            <div className="summary-grid">
+                <div className="summary-tile">
+                    <div className="label">Spent — {formatMonthLabel(selectedDate)}</div>
+                    <div className="value big-blue">₹{(summary.thisMonth || 0).toFixed(2)}</div>
+                </div>
+                <div className="summary-tile">
+                    <div className="label">Spent — Previous Month</div>
+                    <div className="value text-muted">₹{(summary.lastMonth || 0).toFixed(2)}</div>
+                </div>
+                <div className="summary-tile">
+                    <div className="label">Transactions</div>
+                    <div className="value text-green">{summary.count}</div>
+                </div>
+            </div>
 
-      {/* Expense Table */}
-      <div className="bg-white shadow p-4 rounded overflow-x-auto">
-        <h2 className="text-xl font-semibold mb-3">Recent Expenses</h2>
-        <table className="min-w-full table-auto text-left border">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-2 border">Date</th>
-              <th className="p-2 border">Description</th>
-              <th className="p-2 border">Category</th>
-              <th className="p-2 border">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {expenses.length > 0 ? expenses.map((exp) => (
-              <tr key={exp._id} className="hover:bg-gray-50">
-                <td className="p-2 border">{new Date(exp.date).toLocaleDateString()}</td>
-                <td className="p-2 border">{exp.description}</td>
-                <td className="p-2 border">{exp.category}</td>
-                <td className="p-2 border text-red-600 font-medium">₹{parseFloat(exp.amount).toFixed(2)}</td>
-              </tr>
-            )) : (
-              <tr>
-                <td colSpan="4" className="text-center py-4 text-gray-500">No expenses yet</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+            {/* Main Grid: Recent List & Chart */}
+            <div className="dashboard-content-grid">
+                {/* Left: Recent Expenses List */}
+                <div className="card-box">
+                    <h5 className="mb-3">Recent Expenses</h5>
+                    <div className="recent-list">
+                        {filteredExpenses.length > 0 ? (
+                            // Sort by date descending, take top 5
+                            filteredExpenses
+                                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                                .slice(0, 5)
+                                .map((e) => (
+                                <div className="list-item" key={e._id}>
+                                    <div className="item-left">
+                                        <div className="desc">{e.description}</div>
+                                        <div className="sub-text">{new Date(e.date).toLocaleDateString()} · {e.category}</div>
+                                    </div>
+                                    <div className="item-right">
+                                        ₹{parseFloat(e.amount).toFixed(2)}
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="empty-state">No expenses for {formatMonthLabel(selectedDate)}</div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Right: Chart */}
+                <div className="card-box chart-box">
+                    <h5 className="mb-3">Spend by Category</h5>
+                    {filteredExpenses.length > 0 ? (
+                        <CategoryChart expenses={filteredExpenses} />
+                    ) : (
+                        <div className="empty-state">No data to display</div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default DashboardPage;

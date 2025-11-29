@@ -1,22 +1,37 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import ExpensePage from "./pages/ExpensePage";  
 import DashboardPage from "./pages/DashboardPage";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import Home from "./pages/Home";
+import ExpenseModal from "./components/ExpenseModal";
+import Profile from "./pages/Profile";
+import './styles/auth.css';
 
 function App() {
+  const isAuth = () => {
+    return localStorage.getItem('bt_auth') === 'true' || sessionStorage.getItem('bt_auth') === 'true';
+  };
+
   return (
     <Router>
-      <nav className="navbar navbar-expand navbar-light bg-light mb-4">
-        <div className="container">
-          <Link className="navbar-brand" to="/">Budget Tracker</Link>
-          <div className="navbar-nav">
-            <Link className="nav-link" to="/">Add Expense</Link>
-            <Link className="nav-link" to="/dashboard">Dashboard</Link>
-          </div>
-        </div>
-      </nav>
       <Routes>
-        <Route path="/" element={<ExpensePage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+
+        <Route
+          path="/home"
+          element={isAuth() ? <Home /> : <Navigate to="/signin" replace />}
+        >
+          <Route index element={<DashboardPage />} />
+          <Route path="expense" element={<ExpenseModal />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+        </Route>
+
+        <Route path="/profile" element={isAuth() ? <Profile /> : <Navigate to="/signin" replace />} />
+
+        <Route path="/" element={<Navigate to={isAuth() ? '/home' : '/signin'} replace />} />
+        <Route path="*" element={<Navigate to={isAuth() ? '/home' : '/signin'} replace />} />
       </Routes>
     </Router>
   );
