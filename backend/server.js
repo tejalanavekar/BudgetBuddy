@@ -1,20 +1,29 @@
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
+import express from 'express';
+import mongoose from 'mongoose';
+import path from 'path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-require('dotenv').config();
+const __dirname = dirname(fileURLToPath(import.meta.url));
+import dotenv from 'dotenv';
+dotenv.config();
+import cors from 'cors';
+import Expense from './models/Expense.js';
+import User from './models/User.js';
 const app = express();
-const port = process.env.PORT || 5000;
+const port = 5000;
+
+// Startup sanity checks (do NOT log secrets)
+console.log('Startup checks:');
+console.log('- ATLAS_URI present:', !!process.env.ATLAS_URI);
+console.log('- __dirname:', __dirname);
+console.log('- process.cwd():', process.cwd());
 
 app.use(cors());
 app.use(express.json());
 
-const uri = process.env.ATLAS_URI; // Get this from MongoDB Atlas
+const uri = "mongodb+srv://budgetbuddy_db_user:***REDACTED***@cluster0.mpctjtc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"; // Get this from MongoDB Atlas
 mongoose.connect(uri);
-
-const Expense = require('./models/Expense');
-const User = require('./models/User');
-
 
 const connection = mongoose.connection;
 connection.once('open', () => {
@@ -76,3 +85,16 @@ app.get('/users', async (req, res) => {
         res.status(500).json({ message: 'Error fetching users', error: error.message });
     }
 });
+
+
+// Dev debug endpoint to report presence of required env vars (no secrets returned)
+if (process.env.NODE_ENV !== 'production') {
+    app.get('/api/debug/env', (req, res) => {
+        res.json({
+            atlas: !!process.env.ATLAS_URI,
+            openai: !!process.env.OPENAI_API_KEY,
+            node: process.version,
+            cwd: process.cwd()
+        });
+    });
+}

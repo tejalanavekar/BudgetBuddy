@@ -1,3 +1,4 @@
+import BACKEND_URL from '../config.js';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/auth.css';
@@ -22,7 +23,7 @@ const SignUp = () => {
 
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/users', {
+      const res = await fetch(`${BACKEND_URL}/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ firstName, lastName, phone, email, password })

@@ -23,7 +23,7 @@ const Home = () => {
       <nav className="top-navbar">
         {/* Left: Brand */}
         <div className="nav-brand">
-          <h1>Budget Buddy</h1>
+          <h1>BUDGET BUDDY</h1>
         </div>
 
         {/* Center-Left: Navigation Links */}

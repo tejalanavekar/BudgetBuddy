@@ -1,3 +1,4 @@
+import BACKEND_URL from '../config.js';
 import React, { useState } from 'react';
 import {Form, Button, Container, Card, Alert} from 'react-bootstrap';
 // ExpensePage component for adding new expenses and useState for form handling, so setForm is the action where in user inputs the data and the state is being changed from form to setForm
@@ -21,7 +22,7 @@ const [message, setMessage] = useState('');
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevents the default form submission behavior(reloading of page after submission)
     try {
-      const res = await fetch('http://localhost:5000/expenses', {
+      const res = await fetch(`${BACKEND_URL}/expenses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },// data we are sending is in JSON Format
         body: JSON.stringify(form) // Converting the form data to a JSON string
@@ -79,6 +80,11 @@ const [message, setMessage] = useState('');
                 <option value="Transport">Transport</option>
                 <option value="Entertainment">Entertainment</option>
                 <option value="Utilities">Utilities</option>
+                <option value="Health">Health</option>
+                <option value="Education">Education</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Travel">Travel</option>
+                <option value="Savings">Savings</option>
                 <option value="Other">Other</option>
                 
               </Form.Select>

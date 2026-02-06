@@ -30,8 +30,9 @@ function App() {
 
         <Route path="/profile" element={isAuth() ? <Profile /> : <Navigate to="/signin" replace />} />
 
-        <Route path="/" element={<Navigate to={isAuth() ? '/home' : '/signin'} replace />} />
-        <Route path="*" element={<Navigate to={isAuth() ? '/home' : '/signin'} replace />} />
+        {/* Always show sign-in first on root and unknown routes */}
+        <Route path="/" element={<Navigate to="/signin" replace />} />
+        <Route path="*" element={<Navigate to="/signin" replace />} />
       </Routes>
     </Router>
   );

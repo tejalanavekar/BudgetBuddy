@@ -1,12 +1,16 @@
+import BACKEND_URL from '../config.js';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import CategoryChart from '../components/CategoryChart';
+// import ChatAssistant from '../components/ChatAssistant';
 import '../styles/home.css';
 
 const DashboardPage = () => {
     const [allExpenses, setAllExpenses] = useState([]); 
     const [filteredExpenses, setFilteredExpenses] = useState([]); 
     const [summary, setSummary] = useState({ thisMonth: 0, lastMonth: 0, count: 0 });
+    const [sortOption, setSortOption] = useState('date-desc');
+    const [categoryFilter, setCategoryFilter] = useState('All');
 
     // --- HELPER FUNCTIONS ---
 
@@ -56,7 +60,7 @@ const DashboardPage = () => {
 
     // Fetch Data
     useEffect(() => {
-        axios.get('http://localhost:5000/expenses')
+        axios.get(`${BACKEND_URL}/expenses`)
             .then((response) => {
                 setAllExpenses(response.data);
             })
@@ -98,6 +102,27 @@ const DashboardPage = () => {
 
     }, [allExpenses, selectedDate]);
 
+    // Derived categories for the selected month
+    const categories = Array.from(new Set(filteredExpenses.map(e => e.category).filter(Boolean)));
+
+    // Compute displayed recent items after applying category filter and sort
+    const getDisplayedRecent = () => {
+        // Filter by category (if any)
+        let items = filteredExpenses.filter(e => categoryFilter === 'All' ? true : e.category === categoryFilter);
+
+        // Sort according to sortOption
+        const itemsCopy = [...items];
+        if (sortOption === 'amount-desc') {
+            itemsCopy.sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount));
+        } else if (sortOption === 'amount-asc') {
+            itemsCopy.sort((a, b) => parseFloat(a.amount) - parseFloat(b.amount));
+        } else { // date-desc
+            itemsCopy.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+
+        return itemsCopy.slice(0, 5);
+    };
+
 
     return (
         <div className="dashboard-container">
@@ -105,7 +130,7 @@ const DashboardPage = () => {
             <div className="dashboard-header">
                 <h2>Overview</h2>
                 <div className="date-filter">
-                    <label>Period:</label>
+                    {/* <label>Month: </label> */}
                     <select 
                         value={selectedDate} 
                         onChange={(e) => setSelectedDate(e.target.value)}
@@ -123,11 +148,11 @@ const DashboardPage = () => {
             {/* Summary Tiles */}
             <div className="summary-grid">
                 <div className="summary-tile">
-                    <div className="label">Spent — {formatMonthLabel(selectedDate)}</div>
+                    <div className="label">{formatMonthLabel(selectedDate)}</div>
                     <div className="value big-blue">₹{(summary.thisMonth || 0).toFixed(2)}</div>
                 </div>
                 <div className="summary-tile">
-                    <div className="label">Spent — Previous Month</div>
+                    <div className="label">{formatMonthLabel(getPreviousMonthISO(selectedDate))}</div>
                     <div className="value text-muted">₹{(summary.lastMonth || 0).toFixed(2)}</div>
                 </div>
                 <div className="summary-tile">
@@ -140,29 +165,54 @@ const DashboardPage = () => {
             <div className="dashboard-content-grid">
                 {/* Left: Recent Expenses List */}
                 <div className="card-box">
-                    <h5 className="mb-3">Recent Expenses</h5>
-                    <div className="recent-list">
-                        {filteredExpenses.length > 0 ? (
-                            // Sort by date descending, take top 5
-                            filteredExpenses
-                                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                                .slice(0, 5)
-                                .map((e) => (
-                                <div className="list-item" key={e._id}>
-                                    <div className="item-left">
-                                        <div className="desc">{e.description}</div>
-                                        <div className="sub-text">{new Date(e.date).toLocaleDateString()} · {e.category}</div>
-                                    </div>
-                                    <div className="item-right">
-                                        ₹{parseFloat(e.amount).toFixed(2)}
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="empty-state">No expenses for {formatMonthLabel(selectedDate)}</div>
-                        )}
+    <h5 className="mb-2">Recent Expenses</h5>
+
+    <div className="recent-filters">
+        <div className="filter-group">
+            <label className="filter-label">Category</label>
+            <select className="filter-select" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+                <option value="All">All</option>
+                {categories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                ))}
+            </select>
+        </div>
+
+        <div className="filter-group">
+            <label className="filter-label">Sort</label>
+            <select className="filter-select" value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
+                <option value="date-desc">Newest</option>
+                <option value="amount-desc">Max spent</option>
+                <option value="amount-asc">Amount ↑</option>
+            </select>
+        </div>
+    </div>
+
+    <div className="recent-list">
+        {filteredExpenses.length > 0 ? (
+            getDisplayedRecent().map((e) => (
+                <div className="list-item" key={e._id}>
+                    <div className="item-left">
+                        <div className="cat-icon">
+                            {e.category ? e.category.charAt(0).toUpperCase() : '?'}
+                        </div>
+                        <div>
+                            <div className="desc">{e.description}</div>
+                            <div className="sub-text">
+                                {new Date(e.date).toLocaleDateString()} · {e.category}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="item-right">
+                        -₹{parseFloat(e.amount).toFixed(2)}
                     </div>
                 </div>
+            ))
+        ) : (
+            <div className="empty-state">No expenses found for this month.</div>
+        )}
+    </div>
+</div>
 
                 {/* Right: Chart */}
                 <div className="card-box chart-box">
@@ -174,6 +224,7 @@ const DashboardPage = () => {
                     )}
                 </div>
             </div>
+                    <ChatAssistant />
         </div>
     );
 };
