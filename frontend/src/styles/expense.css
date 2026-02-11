@@ -1,0 +1,80 @@
+/* Container and Card */
+.expense-form-wrapper {
+  background: linear-gradient(180deg, #87b3cb 0%, #fbfbfc 100%);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: var(--shadow-lg); /* Uses variables from your home.css */
+  margin-top: 40px; /* Moves box further down */
+  border: 1px solid #e2e8f0;
+}
+
+/* Custom Labels */
+.form-label-custom {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Modern Inputs */
+.input-custom {
+  background-color: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  transition: all 0.2s ease;
+}
+
+.input-custom:focus {
+  background-color: #ffffff !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1) !important;
+}
+
+/* Receipt Preview Styling */
+.receipt-preview-container {
+  position: relative;
+  border: 2px dashed var(--border-light);
+  border-radius: 15px;
+  padding: 10px;
+  background: #fdfdfd;
+}
+
+.img-preview {
+  max-width: 100%;
+  max-height: 250px;
+  border-radius: 10px;
+  object-fit: contain;
+}
+
+.remove-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* Primary Button */
+.btn-primary-custom {
+  background-color: var(--accent) !important;
+  border: none !important;
+  padding: 14px !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+  transition: transform 0.2s ease !important;
+}
+
+.btn-primary-custom:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(13, 110, 253, 0.3);
+}

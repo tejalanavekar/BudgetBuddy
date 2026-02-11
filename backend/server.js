@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import multer from 'multer';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 import dotenv from 'dotenv';
@@ -12,7 +13,7 @@ import Expense from './models/Expense.js';
 import User from './models/User.js';
 const app = express();
 const port = 5000;
-
+const upload = multer();
 // Startup sanity checks (do NOT log secrets)
 console.log('Startup checks:');
 console.log('- ATLAS_URI present:', !!process.env.ATLAS_URI);
@@ -21,8 +22,8 @@ console.log('- process.cwd():', process.cwd());
 
 app.use(cors());
 app.use(express.json());
+const uri = process.env.ATLAS_URI;
 
-const uri = "mongodb+srv://budgetbuddy_db_user:***REDACTED***@cluster0.mpctjtc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"; // Get this from MongoDB Atlas
 mongoose.connect(uri);
 
 const connection = mongoose.connection;
@@ -31,15 +32,17 @@ connection.once('open', () => {
 })
 
 // POST /expenses endpoint
-app.post('/expenses', async (req, res) => {
-    try {
-        const { description, amount, category, date } = req.body;
-        const expense = new Expense({ description, amount, category, date });
-        await expense.save();
-        res.status(201).json({ message: 'Expense added successfully', expense });
-    } catch (error) {
-        res.status(400).json({ message: 'Error adding expense', error: error.message });
-    }
+app.post('/expenses', upload.single('receipt'), async (req, res) => {
+    console.log('req.body:', req.body);
+  try {
+    const { description, amount, category, date } = req.body;
+    const expense = new Expense({ description, amount, category, date });
+    await expense.save();
+    res.status(201).json({ message: 'Expense added successfully', expense });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: 'Error adding expense', error: error.message });
+  }
 });
 
 app.get('/expenses', async (req, res) => {

@@ -1,15 +1,58 @@
 /* Centered dialog styles for sign-in */
 .auth-wrapper {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.4); /* Dark semi-transparent overlay */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Aligns to top instead of center */
+  padding-top: 80px; /* This moves the box down from the top */
+  z-index: 1000;
+  overflow-y: auto; /* Allows scrolling if the form is long */
+}
+
+.auth-dialog.expense-modal-adjustment {
+  /* background: white; */
+  width: 680px;
+  max-width: 95%;
+  border-radius: 24px;
+  position: relative;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  animation: modalSlideDown 0.3s ease-out;
+  position: relative; /* This "anchors" the close button inside the box */
+  background: white !important;
+  padding: 40px; /* Gives internal breathing room */
+  border-radius: 28px;
+
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f1f5f9; /* Light grey circle */
+  border: none;
+  color: #64748b;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(158, 205, 218, 0.35);
-  z-index: 50;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 100;
 }
 
-
+.modal-close-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  transform: rotate(90deg); /* Subtle modern rotation effect */
+}
 .auth-card {
   width: 820px;
   max-width: 94%;
@@ -103,3 +146,7 @@
 }
 
 .auth-footer { text-align:center; margin-top:12px; }
+@keyframes modalSlideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

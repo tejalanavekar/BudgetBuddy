@@ -2,7 +2,7 @@ import BACKEND_URL from '../config.js';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import CategoryChart from '../components/CategoryChart';
-// import ChatAssistant from '../components/ChatAssistant';
+
 import '../styles/home.css';
 
 const DashboardPage = () => {
@@ -224,7 +224,7 @@ const DashboardPage = () => {
                     )}
                 </div>
             </div>
-                    <ChatAssistant />
+                    {/* <ChatAssistant /> Removed: Component not found */}
         </div>
     );
 };
