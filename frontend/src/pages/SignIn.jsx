@@ -1,41 +1,57 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import API from '../api/axiosInstance.js';
+import { useAuth } from '../context/AuthContext.jsx'; 
 import '../styles/auth.css';
 
 // Modern centered sign-in card with optional logo area and helper links
 
 const SignIn = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth(); //pulls the login function from the AuthContext
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
     // Simple front-end check (replace with real auth later)
-    if (!username || !password) {
-      setError('Please enter correct username and password.');
+    if (!email || !password) {
+      setError('Please enter correct email and password.');
+      setIsSubmitting(false);
       return;
     }
 
-    // Simulate successful sign in
-    const user = { username };
-    if (remember) {
-      localStorage.setItem('bt_user', JSON.stringify(user));
-      localStorage.setItem('bt_auth', 'true');
-    } else {
-      sessionStorage.setItem('bt_user', JSON.stringify(user));
-      sessionStorage.setItem('bt_auth', 'true');
-    }
+    try {
+            // 1. Call your actual backend: POST /api/users/login
+            const response = await API.post('/users/login', {
+                email,
+                password
+            });
 
-    navigate('/home');
-  };
+            // 2. The backend returns: { userId, firstName, message }
+            // We save this into our global AuthContext
+            login({
+                userId: response.data.userId,
+                firstName: response.data.firstName
+            });
 
-  const handleForgot = (e) => {
-    e.preventDefault();
-    setError('Password reset not implemented in this demo.');
-  };
+            // 3. Success! Move to home
+            navigate('/home');
+        } catch (err) {
+            // 4. Handle errors from the backend (like "Invalid password" or "User not found")
+            const message = err.response?.data?.message || 'Something went wrong. Please try again.';
+            setError(message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    
 
   return (
     <div className="auth-wrapper">
@@ -50,13 +66,14 @@ const SignIn = () => {
           {error && <div className="auth-error">{error}</div>}
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
-              <label className="form-label">Username or Email</label>
+              <label className="form-label">Email Address</label>
               <input
                 className="form-input"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type='email'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                autoFocus
+                required
               />
             </div>
 
@@ -75,11 +92,18 @@ const SignIn = () => {
               <label className="remember">
                 <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Remember me
               </label>
-              <button className="link-btn" onClick={handleForgot}>Forgot password?</button>
+              <button 
+              type="button" 
+              className="link-btn" 
+              onClick={() => alert("Password reset functionality coming soon!")}
+              >
+    Forgot password?
+  </button>
             </div>
 
-            <button type="submit" className="auth-submit">Sign In</button>
-
+            <button type="submit" className="auth-submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Authenticating...' : 'Sign In'}  
+            </button>
             <div className="auth-footer">
               <span>New user? </span><Link to="/signup">Create an account</Link>
             </div>

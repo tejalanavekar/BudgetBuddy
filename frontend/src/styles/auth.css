@@ -1,18 +1,17 @@
 /* Centered dialog styles for sign-in */
 .auth-wrapper {
-  position: fixed;
-  top: 0;
-  left: 0;
+  
   width: 100vw;
-  height: 100vh;
-  background: rgba(15, 23, 42, 0.4); /* Dark semi-transparent overlay */
+  min-height: 100vh;
+  background: #8FA3B8; /* Dark semi-transparent overlay */
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* Aligns to top instead of center */
-  padding-top: 80px; /* This moves the box down from the top */
+  align-items: center; /* Aligns to top instead of center */
   z-index: 1000;
   overflow-y: auto; /* Allows scrolling if the form is long */
 }
+
+
 
 .auth-dialog.expense-modal-adjustment {
   /* background: white; */
@@ -149,4 +148,86 @@
 @keyframes modalSlideDown {
   from { transform: translateY(-20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+/* SignUp page css */
+.auth-wrapper.single-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: white; /* Very light slate gray */
+  padding: 40px 20px;
+}
+
+.brand-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.brand-logo {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.brand-greeting {
+  font-size: 2rem;
+  color: #1a1a1a;
+  margin-bottom: 5px;
+}
+
+.brand-subtext {
+  color: #64748b;
+  font-size: 1.1rem;
+}
+
+/* The Single Detail Card */
+.auth-card-simple {
+  background: linear-gradient(180deg, #87b3cb 0%, #eef7ff 100%);
+  width: 100%;
+  max-width: 450px;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+/* Splitwise-style input labels */
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+/* High-Impact Button (Orange/Green like your reference) */
+.auth-submit-alt {
+  width: 100%;
+  padding: 14px;
+  background-color: #ff5722; /* Vibrant Orange */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.auth-submit-alt:active {
+  transform: scale(0.98);
 }
