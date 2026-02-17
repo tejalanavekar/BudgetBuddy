@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
             {!loading && children} 
         
         </AuthContext.Provider>
-    );// if user exists then its true 
+    );
 };
 
 // Custom hook to use the AuthContext easily

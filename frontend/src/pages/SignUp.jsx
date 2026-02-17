@@ -22,10 +22,11 @@ const SignUp = () => {
     setError('');
     setLoading(true);
     try {
-      const res = await API.post('/users', formData);
+      const res = await API.post('/api/users', formData);
       login({ userId: res.data.userId, firstName: formData.firstName });
       navigate('/home');
     } catch (err) {
+      console.error("Signup Error Details:", err.response);
       setError(err.response?.data?.message || 'Server error');
     } finally {
       setLoading(false);
@@ -44,8 +45,8 @@ const SignUp = () => {
       {/* Brand Header */}
       <div className="brand-header">
         <h1 className="brand-logo">Budget Buddy</h1>
-        <h2 className="brand-greeting">Introduce Yourself</h2>
-        <p className="brand-subtext">Hi there! Let's get you started.</p>
+        <h2 className="brand-greeting">Hi there! Let's get you started.</h2>
+        <p className="brand-subtext">Introduce Yourself!</p>
       </div>
 
       {/* Main Detail Card */}

@@ -1,3 +1,10 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden; /* This is the ultimate fix for horizontal scrolling */
+}
+
 /* Centered dialog styles for sign-in */
 .auth-wrapper {
   
@@ -8,7 +15,9 @@
   justify-content: center;
   align-items: center; /* Aligns to top instead of center */
   z-index: 1000;
-  overflow-y: auto; /* Allows scrolling if the form is long */
+  overflow-y: auto; 
+  overflow-x: hidden;
+  box-sizing: border-box;/* Allows scrolling if the form is long */
 }
 
 
@@ -104,7 +113,7 @@
 
 
 .form-group { margin-bottom: 12px; }
-.form-label { display:block; margin-bottom:6px; font-weight:600; }
+.form-label { display:block; margin-bottom:6px; font-size:30px; font-weight:600; }
 .form-input {
   width: 100%;
   padding: 10px 12px;
@@ -155,10 +164,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 100vh;
+  /* width: 100%; */
   background-color: white; /* Very light slate gray */
-  padding: 40px 20px;
+  padding: 2vh 20px 40px 20px;
+  overflow-x: hidden; 
+  
+  box-sizing: border-box;
 }
 
 .brand-header {
@@ -167,33 +180,36 @@
 }
 
 .brand-logo {
-  font-size: 1.5rem;
+  font-size: 40px;
   color: #2c3e50;
-  font-weight: 700;
+  font-weight: 800;
   margin-bottom: 20px;
-  text-align: left;
+  text-align: center;
 }
 
 .brand-greeting {
-  font-size: 2rem;
+  font-size: 25px;
   color: #1a1a1a;
   margin-bottom: 5px;
 }
 
 .brand-subtext {
-  color: #64748b;
-  font-size: 1.1rem;
+  color: #262c33;
+  font-size: 25px;
+  font-weight: 600;
 }
 
 /* The Single Detail Card */
 .auth-card-simple {
   background: linear-gradient(180deg, #87b3cb 0%, #eef7ff 100%);
   width: 100%;
-  max-width: 450px;
-  padding: 40px;
+  max-width: 500px;
+  padding: 30px;
+  margin-bottom: 20px;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
+  /* box-sizing: border-box; */
 }
 
 /* Splitwise-style input labels */
@@ -211,7 +227,12 @@
   width: 100%;
 }
 
-.form-row .form-group {
+.form-row  {
+  flex: 1;
+}
+
+.form-group{
+  margin-bottom: 15px;
   flex: 1;
 }
 /* High-Impact Button (Orange/Green like your reference) */

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import React from 'react';
 import ExpensePage from "./pages/ExpensePage";  
 import DashboardPage from "./pages/DashboardPage";

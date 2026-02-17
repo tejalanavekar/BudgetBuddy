@@ -28,7 +28,7 @@ const SignIn = () => {
 
     try {
             // 1. Call your actual backend: POST /api/users/login
-            const response = await API.post('/users/login', {
+            const response = await API.post('/api/users/login', {
                 email,
                 password
             });
@@ -44,6 +44,7 @@ const SignIn = () => {
             navigate('/home');
         } catch (err) {
             // 4. Handle errors from the backend (like "Invalid password" or "User not found")
+            console.error("Login Error Details:", err.response);
             const message = err.response?.data?.message || 'Something went wrong. Please try again.';
             setError(message);
         } finally {
