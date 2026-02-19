@@ -1,11 +1,12 @@
 import BACKEND_URL from '../config.js';
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import axios from 'axios';
 import CategoryChart from '../components/CategoryChart';
-
+import { useAuth } from '../context/AuthContext.jsx';
 import '../styles/home.css';
 
 const DashboardPage = () => {
+    const { user } = useAuth();
     const [allExpenses, setAllExpenses] = useState([]); 
     const [filteredExpenses, setFilteredExpenses] = useState([]); 
     const [summary, setSummary] = useState({ thisMonth: 0, lastMonth: 0, count: 0 });
@@ -60,12 +61,14 @@ const DashboardPage = () => {
 
     // Fetch Data
     useEffect(() => {
-        axios.get(`${BACKEND_URL}/expenses`)
+        if (!user || !user.userId) return;
+
+        axios.get(`${BACKEND_URL}/expenses?userId=${user.userId}`)
             .then((response) => {
                 setAllExpenses(response.data);
             })
             .catch((error) => console.error('Error fetching expenses:', error));
-    }, []);
+    }, [user]);
 
     // Filter Logic
     useEffect(() => {

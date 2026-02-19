@@ -31,7 +31,7 @@ export const getExpenses = async (req, res) =>{
         }
 
         const expenses = (await Expense.find({userId})).sort({date: -1}); // Filter by userId and sort by date descending
-        res.json(expenses);
+        res.status(200).json(expenses);
     }
     catch(error) {
         res.status(500).json({ message: 'Error fetching expenses', error: error.message });
