@@ -29,8 +29,8 @@ const Home = () => {
         {/* Center-Left: Navigation Links */}
         <div className="nav-links">
           <Link 
-            to="/home" 
-            className={`nav-item ${location.pathname === '/home' ? 'active' : ''}`}
+            to="/home/dashboard"   
+            className={`nav-item ${location.pathname === '/home' || location.pathname === '/home/dashboard' ? 'active' : ''}`}
           >
             Dashboard
           </Link>

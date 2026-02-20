@@ -2,11 +2,12 @@ import BACKEND_URL from '../config.js';
 import React, { useState } from 'react';
 import {Form, Button, Container, Card, Alert, Row, Col} from 'react-bootstrap';
 import '../styles/expense.css';
-
+import { useAuth } from '../context/AuthContext.jsx';
 // ExpensePage component for adding new expenses and useState for form handling, so setForm is the action where in user inputs the data and the state is being changed from form to setForm
 //setForm to update the object when user inputs in the fields
 
 const ExpensePage = () => {
+  const { user } = useAuth(); // Get the authenticated user from context
   const [form, setForm] = useState({
     description: '',
     amount: '',
@@ -40,9 +41,14 @@ const handleFileChange = (e) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    if (!user?.userId) {
+      setMessage({ type: 'danger', text: 'User not identified. Please log in again.' });
+      return;
+    }
     
     // 3. Constructing FormData for Multipart Upload (Text + File)
     const formData = new FormData();
+    formData.append('userId', user.userId); // Include userId in the form data
     formData.append('description', form.description);
     formData.append('amount', form.amount);
     formData.append('category', form.category);
@@ -58,7 +64,7 @@ const handleFileChange = (e) => {
 
       if (res.ok) {
         setMessage({ type: 'success', text: 'Expense added successfully!' });
-        setForm({ description: '', amount: '', category: 'Food', date: '' });
+        setForm({ description: '', amount: '', category: 'Food', date: new Date().toISOString().split('T')[0] });
         setReceipt(null);
         setPreview(null);
       } else {
@@ -72,8 +78,17 @@ const handleFileChange = (e) => {
     }
   };
 
+  if (!user) {
+    return (
+      <div style={{ padding: '100px', textAlign: 'center', color: '#0f172a' }}>
+        <h3>Loading your profile...</h3>
+      </div>
+    );
+  }
+
   return (
-    <div className="expense-form-wrapper">
+    <div className="expense-main-content" >
+    <div className="expense-form-wrapper" >
       <div className="form-header text-center mb-4">
         <h2 className="display-6 fw-bold text-dark">Add New Expense</h2>
         <p className="text-muted">Fill in the details to track your spending</p>
@@ -158,6 +173,7 @@ const handleFileChange = (e) => {
 
       {message.text && <Alert variant={message.type} className="mt-4 border-0 shadow-sm">{message.text}</Alert>}
     </div>
+</div>
   );
 };
 

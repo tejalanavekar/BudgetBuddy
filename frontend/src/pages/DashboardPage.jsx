@@ -63,7 +63,8 @@ const DashboardPage = () => {
     useEffect(() => {
         if (!user || !user.userId) return;
 
-        axios.get(`${BACKEND_URL}/expenses?userId=${user.userId}`)
+        axios.get(`${BACKEND_URL}/expenses`, {
+        params: { userId: user.userId }})
             .then((response) => {
                 setAllExpenses(response.data);
             })

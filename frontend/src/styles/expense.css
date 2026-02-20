@@ -1,10 +1,26 @@
 /* Container and Card */
+
+.expense-main-content {
+  /* margin-top: px !important;  */
+  padding: 20px;
+  position: relative;
+  /* Higher z-index ensures it sits on top of any background layers */
+  z-index: 5; 
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
 .expense-form-wrapper {
   background: linear-gradient(180deg, #87b3cb 0%, #fbfbfc 100%);
-  padding: 30px;
+  backdrop-filter: blur(10px);
+  width: 100%;
+  max-width: 800px;
+  padding: 40px;
   border-radius: 15px;
   box-shadow: var(--shadow-lg); /* Uses variables from your home.css */
-  margin-top: 40px; /* Moves box further down */
+  
+  
   border: 1px solid #e2e8f0;
 }
 
@@ -43,7 +59,7 @@
 
 .img-preview {
   max-width: 100%;
-  max-height: 250px;
+  height: auto;
   border-radius: 10px;
   object-fit: contain;
 }

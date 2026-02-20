@@ -17,7 +17,8 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center; /* Aligns to top instead of center */
-  z-index: 1000;
+  z-index: 1;
+  position: relative;
   overflow-y: auto; 
   overflow-x: hidden;
   box-sizing: border-box;/* Allows scrolling if the form is long */
