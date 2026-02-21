@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link, Outlet, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import '../styles/home.css';
-
+import { useAuth } from '../context/AuthContext.jsx';
 const Home = () => {
+  const { logout } = useAuth();
   const auth = localStorage.getItem('bt_auth') === 'true' || sessionStorage.getItem('bt_auth') === 'true';
   const location = useLocation();
   
@@ -56,14 +57,27 @@ const Home = () => {
 
         {/* Right: User Profile */}
         <div className="nav-profile">
-          <div
-            className="profile-circle"
-            onClick={() => navigate('/profile')}
-            title="Account Details"
-          >
-            {initials}
-          </div>
-        </div>
+  <div className="profile-dropdown-wrapper">
+    <div className="profile-circle" title="Account">
+      {initials}
+    </div>
+    <div className="profile-dropdown">
+    
+      <hr className="dropdown-divider" />
+      <button className="dropdown-item" onClick={() => navigate('/profile')}>
+        👤 Profile
+      </button>
+      <button className="dropdown-item" onClick={() => navigate('/home/expense')}>
+        Past Expenses
+      </button>
+      
+      <hr className="dropdown-divider" />
+      <button className="dropdown-item danger" onClick={() => { logout(); navigate('/signin'); }}>
+        🚪 Sign Out
+      </button>
+    </div>
+  </div>
+</div>
       </nav>
 
       {/* Main Content Area */}

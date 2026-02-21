@@ -94,3 +94,126 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 15px rgba(13, 110, 253, 0.3);
 }
+
+/* ── OCR Progress Bar ───────────────────────────── */
+.ocr-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.ocr-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+/* ── Items Section ──────────────────────────────── */
+.items-preview {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.items-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 8px 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #94a3b8;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 6px;
+}
+
+.item-row-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.item-row-edit:last-of-type { border-bottom: none; }
+
+.item-input-name {
+  flex: 2;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+  background: white;
+}
+
+.item-input-name:focus { border-color: #3b82f6; }
+
+.item-input-category {
+  flex: 1.5;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 13px;
+  outline: none;
+  background: white;
+}
+
+.item-input-price {
+  flex: 1;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  text-align: right;
+  outline: none;
+  background: white;
+}
+
+.item-delete-btn {
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 11px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.item-delete-btn:hover { background: #fecaca; }
+
+.add-item-btn {
+  width: 100%;
+  padding: 8px;
+  background: #f0fdf4;
+  border: 1px dashed #86efac;
+  border-radius: 8px;
+  color: #16a34a;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: block;
+}
+
+.add-item-btn:hover { background: #dcfce7; }
+
+.items-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 4px 0;
+  font-weight: 700;
+  font-size: 14px;
+  color: #1a202c;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 8px;
+}
