@@ -28,7 +28,7 @@ const SignIn = () => {
 
     try {
             // 1. Call your actual backend: POST /api/users/login
-            const response = await API.post('/api/users/login', {
+            const response = await API.post('/users/login', {
                 email,
                 password
             });

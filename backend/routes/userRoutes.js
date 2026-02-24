@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, loginUser, getUsers } from '../controllers/userController.js';
+import { registerUser, loginUser, getUsers, getUserProfile, changePassword } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -11,5 +11,10 @@ router.post('/login', loginUser);
 
 // Maps to GET /api/users (Debug/Admin only)
 router.get('/', getUsers); 
+
+router.get('/:userId', getUserProfile);
+
+//Update the user password 
+router.put('/:userId/password', changePassword);
 
 export default router;

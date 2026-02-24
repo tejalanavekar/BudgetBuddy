@@ -332,12 +332,13 @@ body, html {
 .profile-dropdown-wrapper {
   position: relative;
   display: inline-block;
+  padding-bottom: 12px;
 }
 
 .profile-dropdown {
   display: none;
   position: absolute;
-  top: calc(100% + 12px);
+  top: calc(100% - 0px);
   right: 0;
   background: white;
   border-radius: 16px;
@@ -350,6 +351,11 @@ body, html {
   text-align: center;
 }
 
+.profile-dropdown::before {
+  content: '';
+  display: block;
+  height: 12px; /* ← creates visual spacing without breaking hover */
+}
 /* Show on hover */
 .profile-dropdown-wrapper:hover .profile-dropdown {
   display: block;

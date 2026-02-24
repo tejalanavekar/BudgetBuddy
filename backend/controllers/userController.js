@@ -74,3 +74,35 @@ export const getUsers = async (req, res)=>{
         res.status(500).json({ message: 'Error fetching users', error: error.message });
     }
 };
+
+//Profile page
+export const getUserProfile = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const user = await User.findById(userId).select('-password'); // exclude password
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching profile', error: error.message });
+    }
+};
+
+//Change password
+//PUT /api/users/:userId/password — change password
+export const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        //Find user WITH password this time (we need it to compare)
+        const user = await User.findById(req.params.userId);
+        // 2. Check current password is correct
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) return res.status(400).json({ message: 'Current password is incorrect' });
+
+        // 3. Hash the new password and save
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+        res.status(200).json({ message: 'Password updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating password', error: error.message });
+    }
+};

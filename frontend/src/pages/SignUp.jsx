@@ -22,7 +22,7 @@ const SignUp = () => {
     setError('');
     setLoading(true);
     try {
-      const res = await API.post('/api/users', formData);
+      const res = await API.post('/users', formData);
       login({ userId: res.data.userId, firstName: formData.firstName });
       navigate('/home');
     } catch (err) {
