@@ -2,7 +2,7 @@
 :root {
   --primary: #0f172a;       /* Dark Slate */
   --accent: #0d6efd;
-  --bg-app: rgba(158, 205, 218, 0.35);        /* Bright Blue */
+  --bg-app: #e8edf5;      /* Bright Blue */
   --brand-gradient: linear-gradient(180deg, #87b3cb 0%, #fbfbfc 100%);
   --card-bg: #ffffff;
   --text-main: #334155;

@@ -1,8 +1,8 @@
-import BACKEND_URL from '../config.js';
-import React, { use, useEffect, useState } from 'react';
-import axios from 'axios';
+
+import React, { useEffect, useState } from 'react';
 import CategoryChart from '../components/CategoryChart';
 import { useAuth } from '../context/AuthContext.jsx';
+import API from '../api/axiosInstance.js';
 import '../styles/home.css';
 
 const DashboardPage = () => {
@@ -63,7 +63,7 @@ const DashboardPage = () => {
     useEffect(() => {
         if (!user || !user.userId) return;
 
-        axios.get(`${BACKEND_URL}/expenses`, {
+        API.get(`/expenses`, {
         params: { userId: user.userId }})
             .then((response) => {
                 setAllExpenses(response.data);

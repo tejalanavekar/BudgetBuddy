@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 //Inpput validation, checking for  the user if it  already exists  and also is the  password stroong enough and  also storing the password in hashed format in DB
 //POST/users
@@ -51,9 +52,15 @@ export const loginUser = async (req, res) =>{
         if(!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid password' });
         }
+        const token = jwt.sign(
+            { userId: user._id },        // what to store inside token
+            process.env.JWT_SECRET,      // secret key from .env
+            { expiresIn: '7d' }          // token expires in 7 days
+        );
 
         res.status(200).json({
             message: 'Login successful',
+            token,
             userId: user._id,
             firstName: user.firstName,
         });

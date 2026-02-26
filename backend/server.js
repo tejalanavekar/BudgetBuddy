@@ -15,7 +15,12 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Standard Middleware
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
+    credentials: true
+}));
 app.use(express.json());
 
 // Startup Sanity Checks (Keep these for debugging in dev)

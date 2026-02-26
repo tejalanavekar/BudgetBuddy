@@ -1,4 +1,4 @@
-import BACKEND_URL from '../config.js';
+import API from '../api/axiosInstance.js';
 import React, { useState } from 'react';
 import {Form, Button, Container, Card, Alert, Row, Col} from 'react-bootstrap';
 import '../styles/expense.css';
@@ -238,11 +238,7 @@ const handleFileChange = async (e) => {
     if (receipt) formData.append('receipt', receipt); //image file 
 
     try {
-      const res = await fetch(`${BACKEND_URL}/expenses`, {
-        method: 'POST',
-        // Note: Do NOT set 'Content-Type' headers; the browser does it automatically for FormData
-        body: formData, 
-      });
+      const res = await API.post(`/expenses`, formData);
 
       if (res.ok) {
         setMessage({ type: 'success', text: 'Expense added successfully!' });

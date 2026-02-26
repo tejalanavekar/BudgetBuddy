@@ -17,16 +17,12 @@ const API = axios.create({
 // --- REQUEST INTERCEPTOR ---
 API.interceptors.request.use(
     (config) => {
-        // 1. Fetch user data from storage
-        const user = JSON.parse(localStorage.getItem('bt_user')); //grabs the user object which wwas filled during the signin process
+        // Get token from localStorage
+        const token = localStorage.getItem('bt_token');
 
-        const isAuthRoute = config.url.includes('/login') || (config.url.includes('/users'));
-        
-        // 2. Add Auth Headers
-        // If you move to JWT tokens later, you'd put 'Bearer <token>' here
-        if (user && user.userId && !isAuthRoute) { //if user exists and the user id exists and its not an auth route then we will add the user id to the request header
-            config.params = { ...config.params, userId: user.userId };
-            config.headers['x-user-id'] = user.userId;  //instead of passing the  user id everytime, it passes in http header
+        // Add Bearer token to every request if it exists
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
         }
 
         return config;
@@ -35,6 +31,7 @@ API.interceptors.request.use(
         return Promise.reject(error);
     }
 );
+
 
 // --- RESPONSE INTERCEPTOR ---
 API.interceptors.response.use(

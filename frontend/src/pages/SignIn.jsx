@@ -27,26 +27,40 @@ const SignIn = () => {
     }
 
     try {
+      console.log('Attempting login to:', API.defaults.baseURL + '/users/login');
             // 1. Call your actual backend: POST /api/users/login
             const response = await API.post('/users/login', {
                 email,
                 password
             });
+            console.log('Full response data:', response.data);
+            console.log('Token from response:', response.data.token);
 
             // 2. The backend returns: { userId, firstName, message }
             // We save this into our global AuthContext
+            //Saving the token in localstorage which allows to persists the users session
+            // localStorage.setItem('bt_token', response.data.token);
             login({
                 userId: response.data.userId,
                 firstName: response.data.firstName
-            });
+            }, response.data.token);
 
             // 3. Success! Move to home
             navigate('/home');
         } catch (err) {
-            // 4. Handle errors from the backend (like "Invalid password" or "User not found")
-            console.error("Login Error Details:", err.response);
-            const message = err.response?.data?.message || 'Something went wrong. Please try again.';
-            setError(message);
+        // ← REPLACE your current catch with this:
+        console.error("1. Error name:", err.name);
+        console.error("2. Error message:", err.message);
+        console.error("3. Error code:", err.code);
+        console.error("4. Has response?", !!err.response);
+        console.error("5. Has request?", !!err.request);
+        console.error("6. Response data:", err.response?.data);
+        console.error("7. Response status:", err.response?.status);
+        console.error("8. Config URL:", err.config?.url);
+        console.error("9. Config baseURL:", err.config?.baseURL);
+
+        const message = err.response?.data?.message || 'Something went wrong. Please try again.';
+        setError(message);
         } finally {
             setIsSubmitting(false);
         }

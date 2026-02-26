@@ -15,15 +15,17 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    const login = (userData) => {
+    const login = (userData, token) => {
         localStorage.setItem('bt_user', JSON.stringify(userData)); //updates the  localstorage with the new data and still saves it after the tab is closed
         localStorage.setItem('bt_auth', 'true');
+        localStorage.setItem('bt_token', token); // Save the token for future requests
         setUser(userData);
     };
 
     const logout = () => {
         localStorage.removeItem('bt_user');
         localStorage.removeItem('bt_auth');
+        localStorage.removeItem('bt_token'); // Remove the token on logout
         setUser(null);
     };
 

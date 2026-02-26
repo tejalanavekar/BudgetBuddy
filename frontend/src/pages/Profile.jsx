@@ -1,12 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth }  from '../context/AuthContext';
-import BACKEND_URL from '../config';
-import axios from 'axios';
+import API from '../api/axiosInstance.js';
 import '../styles/profile.css';
 
 const Profile = () => {
-  console.log('BACKEND_URL is:', BACKEND_URL);
+  
   const {user , logout} = useAuth();
   const navigate = useNavigate();
 
@@ -20,6 +19,7 @@ const Profile = () => {
   const [passwordMsg, setPasswordMsg]       = useState({ type: '', text: '' });
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
+  //Taking the first letter from the firstname and first from the lastname
   const initials = profile
     ? `${(profile.firstName || '').charAt(0)}${(profile.lastName || '').charAt(0)}`.toUpperCase()
     : '?';
@@ -32,39 +32,43 @@ const Profile = () => {
     Education: '📚', Shopping: '🛍️', Travel: '✈️', Savings: '💰', Other: '📦'
   };
   
-  // Fetch full profile from backend
+  // Fetch full profile from backend -> instead of just name and  email
+  //?. is used  to not  crashing if user is null
+  //setProfile(res.data) -> save the entire profile to state and hide the  loading screen by setting it false or else  throw error
   useEffect(() => {
-    if (!user?.userId) return;
-    axios.get(`${BACKEND_URL}/users/${user.userId}`)
+    if (!user?.userId) return; 
+    API.get(`/users/${user.userId}`)
       .then(res => { setProfile(res.data); setProfileLoading(false); })
       .catch(err => { console.error(err); setProfileError('Could not load profile.'); setProfileLoading(false); });
-  }, [user]);
+  }, [user]); // reruns if user changes
 
-  // Fetch expenses
+  // Fetch expenses, axios converts into query string for  that params.
   useEffect(() => {
     if (!user?.userId) return;
-    axios.get(`${BACKEND_URL}/expenses`, { params: { userId: user.userId } })
+    API.get(`/expenses`, { params: { userId: user.userId } })
       .then(res => { setExpenses(res.data); setExpensesLoading(false); })
       .catch(() => setExpensesLoading(false));
   }, [user]);
 
-  const totalSpent = expenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
-  const latestExpense = expenses[0];
+  //Compute the stats
+  //parseFloat is used to ensure that the amount is treated as a number, and if it's missing or invalid, it defaults to 0.
+  const totalSpent = expenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0); //reduce is used to calculate the total amount spent by iterating through each expense and summing up the amounts. 
+  const latestExpense = expenses[0]; //expenses sorted by date desc
   const categoryTotals = expenses.reduce((acc, e) => {
-    acc[e.category] = (acc[e.category] || 0) + parseFloat(e.amount || 0);
+    acc[e.category] = (acc[e.category] || 0) + parseFloat(e.amount || 0); //gets the  existing total or assigns 0 if not seen that category
     return acc;
   }, {});
-  const topCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
+  const topCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]; //Object entries converts the categoryTotals object into an array of [category, total] pairs
   const thisMonthTotal = expenses
     .filter(e => {
       const d = new Date(e.date); const now = new Date();
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     })
-    .reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+    .reduce((sum, e) => sum + parseFloat(e.amount || 0), 0); //filter keeps for current month and  year, reduce sums them all
 
   // Password change
   const handlePasswordChange = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); //stops form from refreshing the  page
     if (passwordForm.newPass !== passwordForm.confirm) {
       setPasswordMsg({ type: 'error', text: 'New passwords do not match.' }); return;
     }
@@ -73,12 +77,12 @@ const Profile = () => {
     }
     setIsChangingPassword(true);
     try {
-      await axios.put(`${BACKEND_URL}/users/${user.userId}/password`, {
+      await API.put(`/users/${user.userId}/password`, {
         currentPassword: passwordForm.current,
         newPassword: passwordForm.newPass
       });
       setPasswordMsg({ type: 'success', text: '✅ Password updated successfully!' });
-      setPasswordForm({ current: '', newPass: '', confirm: '' });
+      setPasswordForm({ current: '', newPass: '', confirm: '' }); //clear form
     } catch (err) {
       setPasswordMsg({ type: 'error', text: err.response?.data?.message || 'Failed to update password.' });
     } finally {
@@ -86,7 +90,7 @@ const Profile = () => {
     }
   };
 
-  const handleSignOut = () => { logout(); navigate('/signin'); };
+  const handleSignOut = () => { logout(); navigate('/signin'); };// signout and  show the  sign in page again 
 
   if (profileLoading) return (
     <div className="profile-loading">
@@ -122,6 +126,7 @@ const Profile = () => {
           </div>
         </div>
       </div>
+    {/* Stats strip */}
     <div className="stats-strip">
         <div className="stat-card">
           <span className="stat-icon">💸</span>
