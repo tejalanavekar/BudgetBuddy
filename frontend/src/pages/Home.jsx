@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, Outlet, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import '../styles/home.css';
 import { useAuth } from '../context/AuthContext.jsx';
+import '../styles/dashboard.css'; 
 const Home = () => {
   const { logout } = useAuth();
   const auth = localStorage.getItem('bt_auth') === 'true' || sessionStorage.getItem('bt_auth') === 'true';
@@ -64,7 +64,7 @@ const Home = () => {
     <div className="profile-dropdown">
     
       <hr className="dropdown-divider" />
-      <button className="dropdown-item" onClick={() => navigate('/profile')}>
+      <button className="dropdown-item" style={{ justifyContent: 'center' }} onClick={() => navigate('/profile')}>
         👤 Profile
       </button>
       <button className="dropdown-item" onClick={() => navigate('/home/expense')}>

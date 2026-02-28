@@ -17,6 +17,7 @@ const CATEGORY_KEYWORDS = {
     'sugar', 'salt', 'spice', 'sauce', 'noodles', 'pasta', 'soup'],
   Transport:  ['uber', 'ola', 'taxi', 'fuel', 'petrol', 'diesel', 'auto', 'bus', 'metro', 'train', 'cab', 'transport', 'fare'],
   Utilities:  ['electricity', 'water', 'gas', 'internet', 'wifi', 'broadband', 'bill', 'recharge', 'mobile', 'phone', 'utility', 'rent', 'Ralphs', 'subscription', 'emi', 'loan', 'credit card', 'market', 'supermarket', 'grocery', 'mart'],
+  Entertainment: ['movie', 'netflix', 'spotify', 'concert', 'game', 'amusement', 'park', 'entertainment', 'show', 'event', 'theater', 'museum', 'zoo', 'sports', 'car', 'club', 'music', 'workshop', 'festival'],
   Health:     ['pharmacy', 'medical', 'clinic', 'hospital', 'doctor', 'medicine', 'chemist', 'health', 'lab', 'diagnostic'],
   Education:  ['school', 'college', 'university', 'course', 'books', 'stationery', 'tuition', 'library', 'education', 'notebook',  'pens', 'diary', 'stationary', 'folder'],
   Shopping:   ['amazon', 'mall', 'store', 'shop', 'retail',  'clothing', 'electronics', 'shopping'],
@@ -131,7 +132,7 @@ const extractItems = (text) => {
   return items;
 };
 
-const CATEGORIES = ['Food','Transport','Utilities','Health','Education','Shopping','Travel','Savings','Other'];
+const CATEGORIES = ['Food','Transport','Utilities','Entertainment','Health','Education','Shopping','Travel','Savings','Other'];
 const ExpensePage = () => {
   const { user } = useAuth(); // Get the authenticated user from context
   const [form, setForm] = useState({
@@ -237,24 +238,31 @@ const handleFileChange = async (e) => {
     formData.append('items',       JSON.stringify(extractedItems));
     if (receipt) formData.append('receipt', receipt); //image file 
 
-    try {
-      const res = await API.post(`/expenses`, formData);
+    // ✅ Fix — axios style:
+try {
+    const res = await API.post(`/expenses`, formData);
 
-      if (res.ok) {
+    // axios: res.data contains the response, no res.ok needed
+    setMessage({ type: 'success', text: 'Expense added successfully!' });
+    setForm({ description: '', amount: '', category: 'Food', date: new Date().toISOString().split('T')[0] });
+    setReceipt(null);
+    setPreview(null);
+    setExtractedItems([]);
+
+} catch (err) {
+    console.error('Submit error:', err);
+    // Check if expense actually saved despite the error
+    if (err.response?.data?.message === 'Expense added successfully') {
         setMessage({ type: 'success', text: 'Expense added successfully!' });
         setForm({ description: '', amount: '', category: 'Food', date: new Date().toISOString().split('T')[0] });
         setReceipt(null);
         setPreview(null);
         setExtractedItems([]);
-      } else {
-        const errorData = await res.json();
-        setMessage({ type: 'danger', text: errorData.error || 'Failed to add expense.' });
-      }
-    } catch (err) {
-      setMessage({ type: 'danger', text: 'Connection error. Please check your server.' });
-    } finally {
-      setIsSubmitting(false);
+        return;
     }
+    const msg = err.response?.data?.message || 'Failed to add expense.';
+    setMessage({ type: 'danger', text: msg });
+}
   };
 
   const clearReceipt = () => {
