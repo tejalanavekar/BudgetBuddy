@@ -7,14 +7,13 @@ const API = axios.create({
     baseURL: BACKEND_URL,
     timeout: 10000, // 10 seconds timeout if server doesn't  respond, it will kill the request
     headers: {
-        'Content-Type': 'application/json',
         'Accept': 'application/json', // Telling i am sending you json, i expect json back
     },
 });
 
 // Automatically attach the User ID to requests if needed, 
 // or handle Token-based auth here in the future.
-// --- REQUEST INTERCEPTOR ---
+// --- REQUEST INTERCEPTOR --- -> runs before every request leaves the browser
 API.interceptors.request.use(
     (config) => {
         // Get token from localStorage
@@ -24,6 +23,9 @@ API.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+        if (!(config.data instanceof FormData)) {
+        config.headers['Content-Type'] = 'application/json';  //  For like uploads and all it wiill set header on its own
+    }
 
         return config;
     },
@@ -33,7 +35,7 @@ API.interceptors.request.use(
 );
 
 
-// --- RESPONSE INTERCEPTOR ---
+// --- RESPONSE INTERCEPTOR --- rund after every response comes back , 401-> token expired or missing
 API.interceptors.response.use(
     (response) => response, 
     (error) => {
@@ -45,7 +47,7 @@ API.interceptors.response.use(
         if (status === 401 && !url.includes('/login')) {
             // If backend returns 401 (Unauthorized), force logout
                 localStorage.clear();
-                window.location.href = '/signin';
+                window.location.href = '/signin';  // hard redirect 
                 
             }
             

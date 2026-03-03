@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import API from '../api/axiosInstance.js';
+import {registerUser} from '../api/services';
 import { useAuth  } from '../context/AuthContext.jsx'; 
 import { useNavigate , Link } from 'react-router-dom';
 import '../styles/auth.css';
@@ -22,11 +22,10 @@ const SignUp = () => {
     setError('');
     setLoading(true);
     try {
-      const res = await API.post('/users', formData);
+      const res = await registerUser(formData);
       login({ userId: res.data.userId, firstName: formData.firstName });
       navigate('/home');
     } catch (err) {
-      console.error("Signup Error Details:", err.response);
       setError(err.response?.data?.message || 'Server error');
     } finally {
       setLoading(false);

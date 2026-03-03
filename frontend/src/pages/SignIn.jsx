@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import API from '../api/axiosInstance.js';
+import { loginUser } from '../api/services/authService.js'; 
 import { useAuth } from '../context/AuthContext.jsx'; 
 import '../styles/auth.css';
 
@@ -29,10 +29,7 @@ const SignIn = () => {
     try {
       console.log('Attempting login to:', API.defaults.baseURL + '/users/login');
             // 1. Call your actual backend: POST /api/users/login
-            const response = await API.post('/users/login', {
-                email,
-                password
-            });
+            const response = await loginUser({ email, password });
             console.log('Full response data:', response.data);
             console.log('Token from response:', response.data.token);
 
@@ -48,17 +45,6 @@ const SignIn = () => {
             // 3. Success! Move to home
             navigate('/home');
         } catch (err) {
-        // ← REPLACE your current catch with this:
-        console.error("1. Error name:", err.name);
-        console.error("2. Error message:", err.message);
-        console.error("3. Error code:", err.code);
-        console.error("4. Has response?", !!err.response);
-        console.error("5. Has request?", !!err.request);
-        console.error("6. Response data:", err.response?.data);
-        console.error("7. Response status:", err.response?.status);
-        console.error("8. Config URL:", err.config?.url);
-        console.error("9. Config baseURL:", err.config?.baseURL);
-
         const message = err.response?.data?.message || 'Something went wrong. Please try again.';
         setError(message);
         } finally {
