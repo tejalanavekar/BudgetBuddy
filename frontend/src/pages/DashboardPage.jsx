@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import CategoryChart from '../components/CategoryChart';
 import { useAuth } from '../context/AuthContext.jsx';
-import API from '../api/axiosInstance.js';
+import { getExpenses } from '../api/services/expenseService.js';
 import '../styles/dashboard.css';
 
 const CATEGORY_EMOJI = {
@@ -50,9 +50,9 @@ const DashboardPage = () => {
   // ── Fetch Expenses ────────────────────────────────────────────────
   useEffect(() => {
     if (!user?.userId) return;
-    API.get(`/expenses`, { params: { userId: user.userId } })
-      .then(res => setAllExpenses(res.data))
-      .catch(err => console.error('Error fetching expenses:', err));
+    getExpenses(user.userId)
+    .then(res => setAllExpenses(res.data))
+    .catch(err => console.error('Error fetching expenses:', err));
   }, [user]);
 
   // ── Filter + Summary ──────────────────────────────────────────────

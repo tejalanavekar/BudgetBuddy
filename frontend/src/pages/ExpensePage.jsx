@@ -1,4 +1,4 @@
-import API from '../api/axiosInstance.js';
+import { addExpense } from '../api/services/expenseService.js';
 import React, { useState } from 'react';
 import {Form, Button, Container, Card, Alert, Row, Col} from 'react-bootstrap';
 import '../styles/expense.css';
@@ -240,7 +240,7 @@ const handleFileChange = async (e) => {
 
     // ✅ Fix — axios style:
 try {
-    const res = await API.post(`/expenses`, formData);
+    const res = await addExpense(formData);
 
     // axios: res.data contains the response, no res.ok needed
     setMessage({ type: 'success', text: 'Expense added successfully!' });
@@ -250,7 +250,6 @@ try {
     setExtractedItems([]);
 
 } catch (err) {
-    console.error('Submit error:', err);
     // Check if expense actually saved despite the error
     if (err.response?.data?.message === 'Expense added successfully') {
         setMessage({ type: 'success', text: 'Expense added successfully!' });

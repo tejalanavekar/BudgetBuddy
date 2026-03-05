@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth }  from '../context/AuthContext';
-import API from '../api/axiosInstance.js';
+import { getUserProfile , getExpenses , changePassword } from '../api/services';
 import '../styles/profile.css';
 
 const Profile = () => {
@@ -37,17 +37,17 @@ const Profile = () => {
   //setProfile(res.data) -> save the entire profile to state and hide the  loading screen by setting it false or else  throw error
   useEffect(() => {
     if (!user?.userId) return; 
-    API.get(`/users/${user.userId}`)
-      .then(res => { setProfile(res.data); setProfileLoading(false); })
-      .catch(err => { console.error(err); setProfileError('Could not load profile.'); setProfileLoading(false); });
+    getUserProfile(user.userId)
+    .then(res => { setProfile(res.data); setProfileLoading(false); })
+    .catch(err => { console.error(err); setProfileError('Could not load profile.'); setProfileLoading(false); });
   }, [user]); // reruns if user changes
 
   // Fetch expenses, axios converts into query string for  that params.
   useEffect(() => {
     if (!user?.userId) return;
-    API.get(`/expenses`, { params: { userId: user.userId } })
-      .then(res => { setExpenses(res.data); setExpensesLoading(false); })
-      .catch(() => setExpensesLoading(false));
+    getExpenses(user.userId)
+    .then(res => { setExpenses(res.data); setExpensesLoading(false); })
+    .catch(() => setExpensesLoading(false));
   }, [user]);
 
   //Compute the stats
@@ -77,9 +77,9 @@ const Profile = () => {
     }
     setIsChangingPassword(true);
     try {
-      await API.put(`/users/${user.userId}/password`, {
-        currentPassword: passwordForm.current,
-        newPassword: passwordForm.newPass
+      await changePassword(user.userId, {
+      currentPassword: passwordForm.current,
+      newPassword: passwordForm.newPass
       });
       setPasswordMsg({ type: 'success', text: '✅ Password updated successfully!' });
       setPasswordForm({ current: '', newPass: '', confirm: '' }); //clear form
