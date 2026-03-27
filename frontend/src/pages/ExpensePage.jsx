@@ -1,4 +1,4 @@
-import { addExpense } from '../api/services/expenseService.js';
+import { addExpense, scanReceiptWithVision } from '../api/services/expenseService.js';
 import React, { useState } from 'react';
 import {Form, Button, Container, Card, Alert, Row, Col} from 'react-bootstrap';
 import '../styles/expense.css';
@@ -52,17 +52,53 @@ const guessCategory = (text) => {
 //regex -> total amount : xyz.cents(2 decimals)
 //replace , with . as in some countries they write as 175,22-> 175.22(fixed)
 const extractAmount = (text) => {
-  const totalMatch = text.match(/total[^\d]*(\d+[\.,]\d{2})/i);
-  if (totalMatch) return totalMatch[1].replace(',', '.');
-  const allPrices = [...text.matchAll(/\b(\d{1,6}[\.,]\d{2})\b/g)]
-    .map(m => parseFloat(m[1].replace(',', '.')));
-  if (allPrices.length > 0) return Math.max(...allPrices).toFixed(2);
+  const lines = text.split('\n');
+
+  // Strategy 1 — look for a line containing "total" but NOT subtotal/gratuity/tax/tip
+  for (const line of lines) {
+    const lower = line.toLowerCase();
+    if (
+      lower.includes('total') &&
+      !lower.includes('subtotal') &&
+      !lower.includes('sub total') &&
+      !lower.includes('gratuity') &&
+      !lower.includes('tip') &&
+      !lower.includes('tax')
+    ) {
+      const match = line.match(/(\d+[\.,]\d{2})/);
+      if (match) return parseFloat(match[1].replace(',', '.')).toFixed(2);
+    }
+  }
+
+  // Strategy 2 — look for lines with "due" or "charged" or "visa/mastercard/cash"
+  for (const line of lines) {
+    const lower = line.toLowerCase();
+    if (
+      lower.includes('due') ||
+      lower.includes('charged') ||
+      lower.includes('visa') ||
+      lower.includes('mastercard') ||
+      lower.includes('cash')
+    ) {
+      const match = line.match(/(\d+[\.,]\d{2})/);
+      if (match) return parseFloat(match[1].replace(',', '.')).toFixed(2);
+    }
+  }
+
+  // Strategy 3 — last resort, take the LAST price on the receipt
+  // (receipts usually end with the final amount)
+  const allPrices = [...text.matchAll(/\b(\d{1,4}[\.,]\d{2})\b/g)]
+    .map(m => parseFloat(m[1].replace(',', '.')))
+    .filter(p => p > 0 && p < 10000); // sanity cap
+
+  if (allPrices.length > 0) return allPrices[allPrices.length - 1].toFixed(2);
+
   return '';
 };
 
 // ── Helper: Extract date ──────────────────────────────────────────
 //For both USA based format and India/international format
-const extractDate = (text, dateFormat = 'DD/MM/YYYY') => {  // ← accept dateFormat param
+const extractDate = (text, dateFormat = 'MM/DD/YYYY') => {  // ← accept dateFormat param
   const patterns = [
     
     // Pattern 1 — no change
@@ -76,10 +112,10 @@ const extractDate = (text, dateFormat = 'DD/MM/YYYY') => {  // ← accept dateFo
       regex: /(\d{2})[\/\-](\d{2})[\/\-](\d{4})/, 
       format: (m) => {
         if (dateFormat === 'MM/DD/YYYY') {
-          return `${m[3]}-${m[1]}-${m[2]}`;  // USA
-        } else {
-          return `${m[3]}-${m[2]}-${m[1]}`;  // India/International
-        }
+        return `${m[3]}-${m[1]}-${m[2]}`;  // ← year first, then month, then day
+          } else {
+          return `${m[3]}-${m[2]}-${m[1]}`;  // India: day and month swapped
+    }
       }
     },
 
@@ -104,7 +140,24 @@ const extractDate = (text, dateFormat = 'DD/MM/YYYY') => {  // ← accept dateFo
 // ── Helper: Extract description (store name = first meaningful line) ──
 //filters and splits into meaningful data
 const extractDescription = (text) => {
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 3 && isNaN(l));
+  const skipPatterns = ['reprint', 'receipt', 'welcome', 'thank you', 'please', 
+    'your order', 'accuracy', 'cafe #', 'phone:', 'order number', 
+    'cashier', 'blvd', 'street', 'ave ', 'road', 'drive',
+    'if you', 'keep this', 'www.', 'http', '.com',];
+  const lines = text.split('\n')
+    .map(l => l.trim())
+    .filter(l => {
+      if (l.length <= 3) return false;
+      if (!isNaN(l)) return false;
+      if (l.match(/^\d{2}[\/\-]\d{2}[\/\-]\d{4}/)) return false; // date line
+      if (l.match(/^\d+\s/)) return false;       // ← lines starting with numbers (addresses like "3711 Sports Arena")
+      if (l.includes('#')) return false;
+      if (l.match(/\d{3}[-.\s]\d{3,4}/)) return false; // ← phone numbers
+      const lower = l.toLowerCase();
+      if (skipPatterns.some(p => lower.includes(p))) return false;
+      return true;
+    });
+
   return lines[0] || '';
 };
 
@@ -112,7 +165,11 @@ const extractDescription = (text) => {
 //basically words other than skipwords are pushed into the data, for the information to be added 
 const extractItems = (text) => {
   const items = [];
-  const skipWords = ['total', 'subtotal', 'tax', 'tip', 'discount', 'change', 'cash', 'balance', 'amount', 'bill'];
+  const skipWords = ['total', 'subtotal', 'sub total', 'tax', 'tip', 'discount', 
+                   'change', 'cash', 'balance', 'amount', 'bill', 
+                   'gratuity', 'visa', 'mastercard', 'amex', 'acct', 
+                   'auth', 'trans', 'apl', 'aid', 'savings', 'charged',
+                   'due', 'payment', 'reward', 'points'];
   const lines = text.split('\n');
 
   for (const line of lines) {
@@ -149,7 +206,6 @@ const ExpensePage = () => {
   const [message, setMessage] = useState({ type: '', text: '' }); //manages the Success or Error notifications shown to the user.
   const [isSubmitting, setIsSubmitting] = useState(false); //tracks whether a network request is currently in progress.
   const [isScanning, setIsScanning]         = useState(false); //OCR in progress
-  const [scanProgress, setScanProgress]     = useState(0); 
 
 // e basically is an object that represents the event that triggered the function, typically an input change event(keystroke)
 
@@ -167,44 +223,43 @@ const handleFileChange = async (e) => {
     setReceipt(file);
     setPreview(URL.createObjectURL(file));
     setIsScanning(true);
-    setScanProgress(0);
     setExtractedItems([]);
     setMessage({ type: 'info', text: '🔍 Scanning receipt...' });
 
     try {
-      const worker = await createWorker('eng', 1, {
-        logger: (m) => {
-          if (m.status === 'recognizing text') {
-            setScanProgress(Math.round(m.progress * 100)); // updating the progress of text recognitiion
-          }
-        }
-      });
+    const res = await scanReceiptWithVision(file);
+    const { parsed } = res.data;
 
-      const { data: { text } } = await worker.recognize(file); //main OCR -> returns raw text string
-      await worker.terminate(); //clear up the memory
+    if (parsed) {
+      const categorizedItems = (parsed.items || []).map(item => ({
+        ...item,
+        category: categorizeItem(item.name)
+      }));
+      setExtractedItems(categorizedItems);
 
-      console.log('OCR Raw Text:', text); // remove before production
-
-      const items = extractItems(text);
-      setExtractedItems(items);
+      const combinedText = [
+        parsed.description,
+        ...categorizedItems.map(i => i.name)
+      ].join(' ');
 
       setForm(prev => ({
         ...prev,
-        amount:      extractAmount(text)      || prev.amount,
-        date:        extractDate(text)        || prev.date,
-        description: extractDescription(text) || prev.description,
-        category:    guessCategory(text)      || prev.category,
+        amount:      parsed.amount      || prev.amount,
+        date:        parsed.date        || prev.date,
+        description: parsed.description || prev.description,
+        category:    parsed.category    || guessCategory(combinedText) || prev.category,
       }));
-
-      setMessage({ type: 'success', text: 'Receipt scanned! Review and correct any fields below.' });
-    } catch (err) {
-      console.error('OCR Error:', err);
-      setMessage({ type: 'warning', text: 'Could not scan receipt. Please fill in manually.' });
-    } finally {
-      setIsScanning(false);
-      setScanProgress(0);
     }
-  };
+
+    setMessage({ type: 'success', text: '✅ Receipt scanned! Review and correct any fields below.' });
+
+  } catch (err) {
+    console.error('Scan error:', err);
+    setMessage({ type: 'warning', text: '⚠️ Could not scan receipt. Please fill in manually.' });
+  } finally {
+    setIsScanning(false);
+  }
+};
 
   const updateItem = (index, field, value) => {
     const updated = [...extractedItems];
@@ -295,7 +350,7 @@ try {
                 <Form.Label className="form-label-custom">
                   Upload Receipt
                   {isScanning && (
-                    <span className="text-primary ms-2">— Scanning {scanProgress}%</span>
+                    <span className="text-primary ms-2">— Scanning with Google Vision...</span>
                   )}
                 </Form.Label>
                 <Form.Control
@@ -305,9 +360,9 @@ try {
                   disabled={isScanning}
                 />
                 {isScanning && (
-                  <div className="ocr-progress-bar mt-2">
-                    <div className="ocr-progress-fill" style={{ width: `${scanProgress}%` }} />
-                  </div>
+                <div className="ocr-progress-bar mt-2">
+                <div className="ocr-progress-fill ocr-progress-pulse" />
+                </div>
                 )}
               </Form.Group>
 

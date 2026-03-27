@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { loginUser } from '../api/services/authService.js'; 
+import { loginUser } from '../api/services'; 
 import { useAuth } from '../context/AuthContext.jsx'; 
 import '../styles/auth.css';
 
@@ -17,6 +17,9 @@ const SignIn = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('email:', email);      // add this
+    console.log('password:', password);
+    console.log('loginUser is:', loginUser);
     setError('');
     setIsSubmitting(true);
     // Simple front-end check (replace with real auth later)
@@ -27,29 +30,31 @@ const SignIn = () => {
     }
 
     try {
-      console.log('Attempting login to:', API.defaults.baseURL + '/users/login');
-            // 1. Call your actual backend: POST /api/users/login
-            const response = await loginUser({ email, password });
-            console.log('Full response data:', response.data);
-            console.log('Token from response:', response.data.token);
+      console.log('Attempting login with:', { email, password });
+      // 1. Call your actual backend: POST /api/users/login
+      const response = await loginUser({ email, password });
+      console.log('LoginUser promise resolved:', response);
+      console.log('Full response data:', response.data);
+      console.log('Token from response:', response.data.token);
 
-            // 2. The backend returns: { userId, firstName, message }
-            // We save this into our global AuthContext
-            //Saving the token in localstorage which allows to persists the users session
-            // localStorage.setItem('bt_token', response.data.token);
-            login({
-                userId: response.data.userId,
-                firstName: response.data.firstName
-            }, response.data.token);
+      // 2. The backend returns: { userId, firstName, message }
+      // We save this into our global AuthContext
+      //Saving the token in localstorage which allows to persists the users session
+      // localStorage.setItem('bt_token', response.data.token);
+      login({
+        userId: response.data.userId,
+        firstName: response.data.firstName
+      }, response.data.token);
 
-            // 3. Success! Move to home
-            navigate('/home');
-        } catch (err) {
-        const message = err.response?.data?.message || 'Something went wrong. Please try again.';
-        setError(message);
-        } finally {
-            setIsSubmitting(false);
-        }
+      // 3. Success! Move to home
+      navigate('/home');
+    } catch (err) {
+      console.log('LoginUser promise rejected:', err);
+      const message = err.response?.data?.message || 'Something went wrong. Please try again.';
+      setError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
     };
 
     

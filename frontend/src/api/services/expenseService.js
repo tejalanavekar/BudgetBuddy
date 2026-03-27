@@ -8,6 +8,14 @@ export const getExpenses = (userId) =>
 
 //POST /expenses
 //// We override Content-Type here as a safety net for file uploads
+
+export const scanReceiptWithVision = (imageFile) => {
+  const formData = new FormData();
+  formData.append('receipt', imageFile);
+  return API.post('/expenses/scan-receipt', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
 export const addExpense = (formData) =>
     API.post('/expenses', formData, {
         headers: {
