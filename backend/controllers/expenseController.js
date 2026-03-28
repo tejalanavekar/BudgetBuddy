@@ -1,44 +1,155 @@
+// ── PUT /api/expenses/:id ─────────────────────────────────────────────
 import Expense from '../models/Expense.js';
 import axios from 'axios';
 
-// ── Category Detection Helper ────────────────────────────────────
-const detectCategory = (description) => {
-  if (!description) return 'Other';
+
+
+// ── Helper: Extract merchant name from receipt (smart extraction) ──
+const extractMerchantName = (lines) => {
+  // Strategy 1: Look near phone numbers (merchant usually before phone)
+  for (let i = 0; i < lines.length - 1; i++) {
+    const nextLine = lines[i + 1];
+    // Check if next line is a phone number
+    if (/\b\d{3}[-.\s]\d{3,4}[-.\s]\d{4}\b/.test(nextLine)) {
+      const candidate = lines[i].trim();
+      // Valid merchant name if reasonable length and not a skip pattern
+      if (candidate.length > 2 && candidate.length <= 50 && 
+          !candidate.match(/\d{5,}/) && // Not a long number
+          !candidate.toLowerCase().includes('thank')) {
+        return candidate;
+      }
+    }
+  }
+  
+  // Strategy 2: Look near address (ZIP code pattern: 5 digits)
+  for (let i = 0; i < lines.length; i++) {
+    if (/\b\d{5}\b/.test(lines[i])) {
+      // Search backwards for merchant name
+      for (let j = i - 1; j >= Math.max(0, i - 3); j--) {
+        const candidate = lines[j].trim();
+        if (candidate.length > 2 && candidate.length <= 50 && 
+            !candidate.match(/^\d+/) && // Doesn't start with number
+            !candidate.toLowerCase().includes('address')) {
+          return candidate;
+        }
+      }
+    }
+  }
+  
+  // Strategy 3: Look for clean line at top (not a policy/greeting)
+  const skipTop = ['thank', 'welcome', 'no refund', 'return', 'please', 'your order'];
+  for (let i = 0; i < Math.min(5, lines.length); i++) {
+    const candidate = lines[i].trim();
+    const lower = candidate.toLowerCase();
+    if (candidate.length > 2 && candidate.length <= 50 &&
+        !skipTop.some(s => lower.includes(s))) {
+      return candidate;
+    }
+  }
+  
+  return '';
+};
+
+// ── Helper: Infer category from items (context-based) ──
+const inferCategoryFromItems = (items) => {
+  if (!items || items.length === 0) return null;
+  
+  // Define category keywords for each type
+  const categoryKeywords = {
+    Food: ['burger', 'pizza', 'fries', 'chicken', 'beef', 'pasta', 'bread', 'rice', 
+            'dal', 'paneer', 'curry', 'roti', 'naan', 'meal', 'food', 'drink', 'coffee',
+            'tea', 'juice', 'beer', 'wine', 'appetizer', 'dessert', 'ice cream'],
+    Shopping: ['paneer', 'yogurt', 'milk', 'butter', 'cheese', 'vegetable', 'fruit',
+               'onion', 'tomato', 'potato', 'carrot', 'spinach', 'spice', 'flour',
+               'oil', 'sugar', 'salt', 'soap', 'shampoo', 'toothpaste', 'clothing',
+               'shoe', 'shirt', 'pant', 'dress', 'hat', 'bag', 'book'],
+    Transport: ['fuel', 'gas', 'petrol', 'diesel', 'toll', 'parking', 'fare', 'ticket'],
+    Entertainment: ['movie', 'ticket', 'concert', 'game', 'show', 'museum', 'park'],
+    Health: ['medicine', 'pharmacy', 'doctor', 'tablet', 'vitamin', 'health'],
+    Education: ['book', 'pen', 'notebook', 'stationery', 'course', 'tuition'],
+    Travel: ['hotel', 'flight', 'room', 'resort'],
+  };
+  
+  const scores = {};
+  let totalMatches = 0;
+  
+  // Count keyword matches in item names
+  for (const item of items) {
+    const itemLower = item.name.toLowerCase();
+    for (const [category, keywords] of Object.entries(categoryKeywords)) {
+      if (keywords.some(kw => itemLower.includes(kw))) {
+        scores[category] = (scores[category] || 0) + 1;
+        totalMatches++;
+      }
+    }
+  }
+  
+  // Return category with most matches (if any matches found)
+  if (totalMatches === 0) return null;
+  
+  const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
+  return best ? best[0] : null;
+};
+
+// ── Category Detection Helper (Enhanced) ────────────────────────────
+const detectCategory = (description, items = []) => {
+  if (!description) {
+    // Try inferring from items if no description
+    const inferred = inferCategoryFromItems(items);
+    return inferred || 'Other';
+  }
   
   const desc = description.toLowerCase().trim();
   
-  // Transportation
-  if (/\b(lyft|uber|taxi|cab|transit|train|bus|metro|parking|gas station|shell|chevron|bp|exxon|amtrak)\b/.test(desc)) {
-    return 'Transportation';
+  // Quick match for major brands (lean list)
+  const majorBrands = {
+    'Transport': ['lyft', 'uber', 'taxi', 'didi', 'ola'],
+    'Food': ['starbucks', 'mcdonalds', 'subway', 'chipotle', 'panera'],
+    'Shopping': ['amazon', 'walmart', 'target', 'costco', 'kroger']
+  };
+  
+  for (const [category, keywords] of Object.entries(majorBrands)) {
+    if (keywords.some(kw => desc.includes(kw))) {
+      return category;
+    }
   }
   
-  // Dining
-  if (/\b(restaurant|cafe|coffee|pizza|burger|food|bar|diner|grill|dining|bakery|ice cream|starbucks|mcdonalds|chick-fil-a|subway|chipotle|panera|wendy's)\b/.test(desc)) {
-    return 'Dining';
+  // Broader category matching
+  if (/\b(taxi|cab|bus|uber|lyft|didi|ola|metro|train|parking|gas|petrol|fuel|toll)\b/.test(desc)) {
+    return 'Transport';
   }
   
-  // Shopping
-  if (/\b(store|market|shop|mall|retail|amazon|walmart|target|costco|supermarket|grocery|best buy|whole foods|trader joe's|kroger)\b/.test(desc)) {
+  if (/\b(restaurant|cafe|coffee|pizza|burger|food|bar|diner|bakery|ice cream)\b/.test(desc)) {
+    return 'Food';
+  }
+  
+  if (/\b(store|market|shop|mall|retail|supermarket|grocery|bazaar|safeway|albertsons)\b/.test(desc)) {
     return 'Shopping';
   }
   
-  // Entertainment
-  if (/\b(movie|cinema|theater|concert|game|entertainment|museum|amusement|ticket|regal|amc|cinemark)\b/.test(desc)) {
+  if (/\b(movie|cinema|theater|concert|game|entertainment|museum|amusement|ticket)\b/.test(desc)) {
     return 'Entertainment';
   }
   
-  // Utilities & Bills
-  if (/\b(electric|water|gas bill|internet|phone|utility|cable|verizon|at&t|comcast|duke energy)\b/.test(desc)) {
+  if (/\b(electric|water|gas bill|internet|phone|utility|cable)\b/.test(desc)) {
     return 'Utilities';
   }
   
-  // Health & Fitness
-  if (/\b(gym|health|doctor|hospital|pharmacy|medical|fitness|clinic|cvs|walgreens|la fitness|planet fitness)\b/.test(desc)) {
+  if (/\b(pharmacy|medical|clinic|hospital|doctor|medicine|health)\b/.test(desc)) {
     return 'Health';
   }
   
-  // Default
-  return 'Other';
+  if (/\b(school|college|university|course|books|education|library)\b/.test(desc)) {
+    return 'Education';
+  }
+  
+  if (/\b(hotel|flight|airlines|airbnb|booking|travel|trip|tour)\b/.test(desc)) {
+    return 'Travel';
+  }
+  
+  // Fallback: Try to infer from items
+  const inferred = inferCategoryFromItems(items);
+  return inferred || 'Other';
 };
 
 // ── Receipt Text Parser ───────────────────────────────────────────
@@ -93,17 +204,18 @@ const parseReceiptText = (text) => {
   // ── Date ─────────────────────────────────────────────────────────
   let date = new Date().toISOString().split('T')[0];
 
+  // First pass: Look for dates in all lines (more aggressive search)
   for (const line of lines) {
     // Pattern: YYYY-MM-DD
     const m2 = line.match(/(\d{4})-(\d{2})-(\d{2})/);
     if (m2) { date = `${m2[1]}-${m2[2]}-${m2[3]}`; break; }
 
-    // Pattern: MM/DD/YYYY or MM-DD-YYYY
-    const m1 = line.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
-    if (m1) { date = `${m1[3]}-${m1[1]}-${m1[2]}`; break; }
+    // Pattern: MM/DD/YYYY or MM-DD-YYYY (with flexible whitespace)
+    const m1 = line.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if (m1) { date = `${m1[3]}-${m1[1].padStart(2,'0')}-${m1[2].padStart(2,'0')}`; break; }
 
-    // Pattern: "Month DD YYYY" or "Month DD, YYYY"
-    const m3 = line.match(/(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{4})/i);
+    // Pattern: "Month DD, YYYY" or "Month DD YYYY" or "DD Month YYYY"
+    const m3 = line.match(/(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?,?\s+(\d{4})/i);
     if (m3) {
       const months = { jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',
                        jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12' };
@@ -111,60 +223,52 @@ const parseReceiptText = (text) => {
       break;
     }
 
-    // Pattern: "MONTH DD YYYY" (text-based, e.g., "MARCH 25 2026")
-    const m4 = line.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{1,2})\s+(\d{4})/i);
+    // Pattern: "MONTH DD, YYYY" or "MONTH DD YYYY" (text-based, e.g., "MARCH 25, 2026" or "Mar 25 2026")
+    const m4 = line.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?,?\s+(\d{1,2}),?\s+(\d{4})/i);
     if (m4) {
       const months = { jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',
                        jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12' };
       date = `${m4[3]}-${months[m4[1].toLowerCase().slice(0,3)]}-${m4[2].padStart(2,'0')}`;
       break;
     }
+
+    // Pattern: "DD-Month-YYYY" or "DD/Month/YYYY" (e.g., "25-Mar-2026")
+    const m5 = line.match(/(\d{1,2})[\/\-](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\/\-](\d{4})/i);
+    if (m5) {
+      const months = { jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',
+                       jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12' };
+      date = `${m5[3]}-${months[m5[2].toLowerCase().slice(0,3)]}-${m5[1].padStart(2,'0')}`;
+      break;
+    }
   }
 
   // ── Description ──────────────────────────────────────────────────
-  // Strategy 1: Look for merchant name in first few lines (usually top of receipt)
-  const skipPatterns = [
-    'reprint', 'receipt', 'welcome', 'thank you', 'please', 'note:',
-    'your order', 'accuracy', 'phone:', 'order number', 'cashier',
-    'blvd', 'street', 'ave', 'road', 'drive', 'if you', 'keep this',
-    'www.', '.com', 'cafe #', 'suite', 'floor', 'just let', 'associate',
-    'thanks for', 'ride with', 'hour', 'tax', 'fee', 'visa', 'cash',
-    'mastercard', 'amex', 'charged', 'debit card', 'us$', '©', 'help',
-    'transaction', 'reference', 'confirmation', 'invoice'
-  ];
-
-  let description = '';
+  // Use smart merchant extraction instead of hardcoded keywords
+  let description = extractMerchantName(lines);
   
-  // First pass: Look in the first 10 lines for merchant name
-  for (let i = 0; i < Math.min(10, lines.length); i++) {
-    const line = lines[i];
-    
-    if (line.length <= 2 || line.length > 100) continue;
-    if (!isNaN(line)) continue;
-    if (line.match(/^\d+$/)) continue;
-    if (line.match(/\d{3}[-.\s]\d{3,4}/)) continue;
-    if (line.match(/^\d{2}[\/\-]\d{2}/)) continue;
-    if (line.includes('#')) continue;
-    if (/^\d+[\.,]\d{2}$/.test(line)) continue; // Pure prices
-    
-    const lower = line.toLowerCase();
-    if (skipPatterns.some(p => lower.includes(p))) continue;
-    
-    // Found a potential merchant name
-    description = line;
-    break;
-  }
-  
-  // Fallback: If no merchant found in first 10 lines, search entire receipt
+  // Fallback: If smart extraction didn't work, use pattern-based extraction
   if (!description) {
-    for (const line of lines) {
+    const skipPatterns = [
+      'reprint', 'receipt', 'welcome', 'thank you', 'please', 'note:',
+      'your order', 'accuracy', 'phone:', 'order number', 'cashier',
+      'blvd', 'street', 'ave', 'road', 'drive', 'if you', 'keep this',
+      'www.', '.com', 'cafe #', 'suite', 'floor', 'just let', 'associate',
+      'hour', 'tax', 'fee', 'visa', 'cash', 'refund', 'return',
+      'mastercard', 'amex', 'charged', 'debit card', 'us$', '©', 'help',
+      'transaction', 'reference', 'confirmation', 'invoice'
+    ];
+
+    // Look in the first 10 lines for a clean description
+    for (let i = 0; i < Math.min(10, lines.length); i++) {
+      const line = lines[i];
+      
       if (line.length <= 2 || line.length > 100) continue;
       if (!isNaN(line)) continue;
-      if (line.match(/^\d+\s/)) continue;
+      if (line.match(/^\d+$/)) continue;
       if (line.match(/\d{3}[-.\s]\d{3,4}/)) continue;
       if (line.match(/^\d{2}[\/\-]\d{2}/)) continue;
       if (line.includes('#')) continue;
-      if (/^\d+\.?\d*$/.test(line)) continue;
+      if (/^\d+[\.,]\d{2}$/.test(line)) continue;
       
       const lower = line.toLowerCase();
       if (skipPatterns.some(p => lower.includes(p))) continue;
@@ -186,7 +290,9 @@ const parseReceiptText = (text) => {
 
   const items = [];
   const processedLines = new Set();
-  const mainCategory = detectCategory(description);
+  
+  // Will determine category after extracting items, so we can use context-based inference
+  let category = '';
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -207,7 +313,8 @@ const parseReceiptText = (text) => {
           name.length > 1 &&
           name.length < 100 &&
           !processedLines.has(line)) {
-        items.push({ name, price, category: mainCategory });
+        // Use description for now, will update after extracting all items
+        items.push({ name, price, category: description });
         processedLines.add(line);
       }
     } else {
@@ -224,14 +331,14 @@ const parseReceiptText = (text) => {
             name.length > 1 &&
             name.length < 100 &&
             !processedLines.has(line)) {
-          items.push({ name, price, category: mainCategory });
+          items.push({ name, price, category: description });
           processedLines.add(line);
         }
       }
     }
   }
 
-  return { amount, date, description, items, category: detectCategory(description) };
+  return { amount, date, description, items, category: detectCategory(description, items) };
 };
 
 // ────────────────────────────────────────────────────────────────
@@ -323,5 +430,51 @@ export const getExpenses = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ message: 'Error fetching expenses', error: error.message });
+  }
+};
+
+// Update an existing expense
+export const updateExpense = async (req, res) => {
+  try {
+    const expenseId = req.params.id;
+    const userId = req.user._id; // from protect middleware
+
+    // Find the expense and ensure it belongs to the user
+    const expense = await Expense.findOne({ _id: expenseId, userId });
+    if (!expense) {
+      return res.status(404).json({ message: 'Expense not found or unauthorized' });
+    }
+
+    // Update fields if provided
+    if (req.body.description) expense.description = req.body.description;
+    if (req.body.amount) expense.amount = req.body.amount;
+    if (req.body.category) expense.category = req.body.category;
+    if (req.body.date) expense.date = req.body.date;
+    if (req.body.items) {
+      try {
+        expense.items = JSON.parse(req.body.items);
+      } catch {
+        expense.items = [];
+      }
+    }
+    // Handle new receipt upload
+    if (req.file) {
+      expense.receiptPath = req.file.originalname;
+      // If you store the file buffer, you can add: expense.receiptBuffer = req.file.buffer;
+    }
+
+    await expense.save();
+    res.status(200).json({ message: 'Expense updated successfully', expense });
+  } catch (error) {
+    res.status(400).json({ message: 'Error updating expense', error: error.message });
+  }
+};
+// Delete an expense
+export const deleteExpense = async (req, res) => {
+  try {
+    await Expense.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: 'Expense deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting expense', error: error.message });
   }
 };

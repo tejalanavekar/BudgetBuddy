@@ -1,15 +1,21 @@
 /* Container and Card */
 
 .expense-main-content {
-  /* margin-top: px !important;  */
   padding: 20px;
   position: relative;
-  /* Higher z-index ensures it sits on top of any background layers */
   z-index: 5; 
   width: 100%;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
+  min-height: 100vh;
+}
+.edit-expense-preview-col {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
 }
 .expense-form-wrapper {
   background: linear-gradient(180deg, #87b3cb 0%, #fbfbfc 100%);

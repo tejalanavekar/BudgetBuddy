@@ -8,6 +8,7 @@ import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
 import ExpenseModal from "./components/ExpenseModal";
 import Profile from "./pages/Profile";
+import EditExpensePage from "./pages/EditExpensePage";
 import './styles/auth.css';
 // Simple Error Boundary
 
@@ -83,6 +84,15 @@ function App() {
                   <Profile />
                 </ProtectedRoute>
               } 
+            />
+
+            <Route
+              path="/edit-expense/:id"
+              element={
+                <ProtectedRoute>
+                  <EditExpensePage />
+                </ProtectedRoute>
+              }
             />
 
             <Route path="/" element={<Navigate to="/signin" replace />} />

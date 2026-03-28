@@ -15,7 +15,7 @@ const CATEGORY_KEYWORDS = {
     'eat', 'kitchen', 'diner', 'bakery', 'coffee', 'tea', 'meal',
     'potato', 'carrot', 'spinach', 'paneer', 'curd', 'oil', 'flour',
     'sugar', 'salt', 'spice', 'sauce', 'noodles', 'pasta', 'soup'],
-  Transport:  ['uber', 'ola', 'taxi', 'fuel', 'petrol', 'diesel', 'auto', 'bus', 'metro', 'train', 'cab', 'transport', 'fare'],
+  Transport:  ['uber', 'lyft', 'ola', 'taxi', 'fuel', 'petrol', 'diesel', 'auto', 'bus', 'metro', 'train', 'cab', 'transport', 'fare'],
   Utilities:  ['electricity', 'water', 'gas', 'internet', 'wifi', 'broadband', 'bill', 'recharge', 'mobile', 'phone', 'utility', 'rent', 'Ralphs', 'subscription', 'emi', 'loan', 'credit card', 'market', 'supermarket', 'grocery', 'mart'],
   Entertainment: ['movie', 'netflix', 'spotify', 'concert', 'game', 'amusement', 'park', 'entertainment', 'show', 'event', 'theater', 'museum', 'zoo', 'sports', 'car', 'club', 'music', 'workshop', 'festival'],
   Health:     ['pharmacy', 'medical', 'clinic', 'hospital', 'doctor', 'medicine', 'chemist', 'health', 'lab', 'diagnostic'],

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import CategoryChart from '../components/CategoryChart';
 import { useAuth } from '../context/AuthContext.jsx';
-import { getExpenses } from '../api/services/expenseService.js';
+import { getExpenses , deleteExpense } from '../api/services/expenseService.js';
 import '../styles/dashboard.css';
+import { useNavigate } from 'react-router-dom';
 
 const CATEGORY_EMOJI = {
   Food: '🍔', Transport: '🚗', Utilities: '💡', Health: '💊',
@@ -10,6 +11,7 @@ const CATEGORY_EMOJI = {
 };
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [allExpenses, setAllExpenses]           = useState([]);
   const [filteredExpenses, setFilteredExpenses] = useState([]);
@@ -106,10 +108,34 @@ const DashboardPage = () => {
     return 'Good evening';
   };
 
+  // -- Action Handlers --
+  const handleEdit = (expense) => {
+    // Redirect to the EditExpensePage with the expense id
+    navigate(`/edit-expense/${expense._id}`);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this expense?")) {
+      try {
+        await deleteExpense(id);
+        // Remove from local state so the UI updates immediately
+        setAllExpenses(allExpenses.filter(exp => exp._id !== id));
+      } catch (err) {
+        console.error("Failed to delete:", err);
+        alert("Could not delete expense.");
+      }
+    }
+  };
+
+  const handleView = (expense) => {
+    // Redirect to receipts/history tab and pass the specific ID to highlight it
+    navigate('/receipts', { state: { highlightId: expense._id } });
+  };
+
   // ── Render ────────────────────────────────────────────────────────
   
-return (
-  <>
+  return (
+    <>
     {/* Header */}
     <div className="dashboard-header-area">
       <div>
@@ -177,7 +203,7 @@ return (
           <div className="expense-list">
             {filteredExpenses.length > 0 ? (
               getDisplayedRecent().map(e => (
-                <div className="expense-item" key={e._id}>
+                <div className="expense-item" key={e._id} onClick={() => handleView(e)}>
                   <div className="expense-emoji">{CATEGORY_EMOJI[e.category] || '📦'}</div>
                   <div className="expense-info">
                     <div className="expense-desc">{e.description}</div>
@@ -188,8 +214,27 @@ return (
                       <span className="expense-cat-badge">{e.category}</span>
                     </div>
                   </div>
-                  <div className="expense-amount">-₹{parseFloat(e.amount).toFixed(2)}</div>
-                </div>
+                  <div className="expense-right-side">
+                  <div className="expense-amount">-${parseFloat(e.amount).toFixed(2)}</div>
+                  {/* 2. Added Action Buttons here */}
+            <div className="expense-actions">
+              <button 
+                className="action-btn edit-btn" 
+                onClick={(event) => { event.stopPropagation(); handleEdit(e); }}
+                title="Edit"
+              >
+                ✏️
+              </button>
+              <button 
+                className="action-btn delete-btn" 
+                onClick={(event) => { event.stopPropagation(); handleDelete(e._id); }}
+                title="Delete"
+              >
+                🗑️
+              </button>
+            </div>
+          </div>
+          </div>
               ))
             ) : (
               <div className="empty-state">

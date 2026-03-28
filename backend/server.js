@@ -29,6 +29,14 @@ if (process.env.NODE_ENV !== 'production') {
     console.log('- ATLAS_URI present:', !!process.env.ATLAS_URI);
     console.log('- process.cwd():', process.cwd());
 }
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Serve uploads directory statically
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use('/api/users', userRoutes);
 app.use('/api/expenses', expenseRoutes);
  

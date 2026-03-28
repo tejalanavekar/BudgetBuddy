@@ -280,10 +280,47 @@ body, html {
 .expense-item {
   display: flex;
   align-items: center;
+  justify-content: space-between; /* This pushes info left and amount right */
   gap: 14px;
   padding: 14px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   transition: background 0.15s;
+}
+
+.expense-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+  padding-left: 8px; /* Optional: adds a slight "pop" effect on hover */
+  border-radius: 8px;
+}
+
+.expense-right-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.expense-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  padding: 2px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.action-btn:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.delete-btn:hover {
+  color: #dc3545; /* Red for delete */
 }
 
 .expense-item:last-child { border-bottom: none; }
