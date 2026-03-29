@@ -1,14 +1,59 @@
+/* Match dashboard background for Edit Expense page */
+.expense-bg {
+  min-height: 100vh;
+  width: 100vw;
+  background:
+    radial-gradient(ellipse at top left,    rgba(20,184,166,0.35) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(14,116,144,0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at center,       rgba(15,118,110,0.18) 0%, transparent 70%),
+    linear-gradient(160deg, #2e8fa2 0%, #3fa3c4 40%, #4fb6e0 70%, #b3e0f2 100%);
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/* Back Button Styling */
+.back-btn {
+  position: absolute;
+  left: 40px;
+  top: 40px;
+  background: #e3e9f4;
+  color: #1a237e;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  z-index: 10;
+  transition: background 0.2s;
+}
+.back-btn:hover {
+  background: #cfd8dc;
+}
 /* Container and Card */
 
-.expense-main-content {
-  padding: 20px;
-  position: relative;
-  z-index: 5; 
-  width: 100%;
+/* Centering Wrapper for Edit Expense */
+.expense-center-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  width: 100vw;
+  position: relative;
+}
+
+.expense-main-content {
+  padding: 20px;
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
 }
 .edit-expense-preview-col {
   display: flex !important;
@@ -70,25 +115,24 @@
   object-fit: contain;
 }
 
-.remove-btn {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  background: #ff4d4d;
-  color: white;
+.back-btn {
+  margin-bottom: 18px;
+  background: #e3e9f4;
+  color: #1a237e;
   border: none;
-  border-radius: 50%;
-  width: 25px;
-  height: 25px;
-  font-size: 12px;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  z-index: 10;
+  transition: background 0.2s;
+  align-self: flex-start;
 }
-
-/* Primary Button */
-.btn-primary-custom {
-  background-color: var(--accent) !important;
-  border: none !important;
-  padding: 14px !important;
+.back-btn:hover {
+  background: #cfd8dc;
+}
   border-radius: 12px !important;
   font-weight: 700 !important;
   font-size: 16px !important;

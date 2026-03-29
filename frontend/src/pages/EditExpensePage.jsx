@@ -70,8 +70,11 @@ const EditExpensePage = () => {
   };
 
   return (
-    <div className="expense-main-content">
-      <div className="expense-form-wrapper">
+    <div className="expense-bg">
+      <div className="expense-center-wrapper">
+        <div className="expense-main-content">
+          <button className="back-btn" onClick={() => navigate('/home')}>{'< Back'}</button>
+          <div className="expense-form-wrapper">
         <div className="form-header text-center mb-4">
           <h2 className="display-6 fw-bold text-dark">Edit Expense</h2>
           <p className="text-muted">Update your expense details below</p>
@@ -174,7 +177,9 @@ const EditExpensePage = () => {
             {message.text}
           </Alert>
         )}
+        </div>
       </div>
+    </div>
     </div>
   );
 };
