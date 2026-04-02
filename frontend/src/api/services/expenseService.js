@@ -24,8 +24,15 @@ export const addExpense = (formData) =>
     });
 
 //PUT /expenses/:id
-export const updateExpense = (id, updates) =>
-  API.put(`/expenses/${id}`, updates);
+export const updateExpense = (id, updates) => {
+  // If updates is FormData, set the correct header
+  if (updates instanceof FormData) {
+    return API.put(`/expenses/${id}`, updates, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  }
+  return API.put(`/expenses/${id}`, updates);
+};
 
 //DELETE /expenses/:id
 export const deleteExpense = (id) =>

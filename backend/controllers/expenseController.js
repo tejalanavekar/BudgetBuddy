@@ -1,6 +1,7 @@
 // ── PUT /api/expenses/:id ─────────────────────────────────────────────
 import Expense from '../models/Expense.js';
 import axios from 'axios';
+import fs from 'fs/promises';
 
 
 
@@ -346,13 +347,14 @@ const parseReceiptText = (text) => {
 
 // ── POST /api/expenses/scan-receipt ──────────────────────────────
 export const scanReceipt = async (req, res) => {
-
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No image uploaded' });
     }
 
-    const base64Image = req.file.buffer.toString('base64');
+    // Read file from disk and convert to base64
+    const fileBuffer = await fs.readFile(req.file.path);
+    const base64Image = fileBuffer.toString('base64');
 
     const visionResponse = await axios.post(
       `https://vision.googleapis.com/v1/images:annotate?key=${process.env.GOOGLE_VISION_API_KEY}`,
@@ -402,7 +404,7 @@ export const createExpense = async (req, res) => {
       try { parsedItems = JSON.parse(items); } catch { parsedItems = []; }
     }
 
-    const receiptPath = req.file ? req.file.originalname : null;
+    const receiptPath = req.file ? req.file.filename : null;
 
     const expense = new Expense({
       userId, description, amount, category, date,
@@ -437,7 +439,7 @@ export const getExpenses = async (req, res) => {
 export const updateExpense = async (req, res) => {
   try {
     const expenseId = req.params.id;
-    const userId = req.user._id; // from protect middleware
+    const userId = req.userId || (req.user && req.user._id); // support both
 
     // Find the expense and ensure it belongs to the user
     const expense = await Expense.findOne({ _id: expenseId, userId });
@@ -447,9 +449,9 @@ export const updateExpense = async (req, res) => {
 
     // Update fields if provided
     if (req.body.description) expense.description = req.body.description;
-    if (req.body.amount) expense.amount = req.body.amount;
+    if (req.body.amount) expense.amount = Number(req.body.amount);
     if (req.body.category) expense.category = req.body.category;
-    if (req.body.date) expense.date = req.body.date;
+    if (req.body.date) expense.date = new Date(req.body.date);
     if (req.body.items) {
       try {
         expense.items = JSON.parse(req.body.items);
@@ -459,8 +461,7 @@ export const updateExpense = async (req, res) => {
     }
     // Handle new receipt upload
     if (req.file) {
-      expense.receiptPath = req.file.originalname;
-      // If you store the file buffer, you can add: expense.receiptBuffer = req.file.buffer;
+      expense.receiptPath = req.file.filename;
     }
 
     await expense.save();
@@ -476,5 +477,17 @@ export const deleteExpense = async (req, res) => {
     res.status(200).json({ message: 'Expense deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting expense', error: error.message });
+  }
+};
+
+// Get all expenses with receipts for a user
+export const getAllReceipts = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    if (!userId) return res.status(400).json({ message: 'User ID required' });
+    const expenses = await Expense.find({ userId, receiptPath: { $exists: true, $ne: null } }).sort({ date: -1 });
+    res.status(200).json(expenses);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching receipts', error: error.message });
   }
 };

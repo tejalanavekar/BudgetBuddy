@@ -131,7 +131,7 @@ const Profile = () => {
         <div className="stat-card">
           <span className="stat-icon">💸</span>
           <div className="stat-label">Total Spent</div>
-          <div className="stat-value">₹{totalSpent.toFixed(0)}</div>
+          <div className="stat-value">${totalSpent.toFixed(0)}</div>
           <div className="stat-sub">across all time</div>
         </div>
         <div className="stat-card">
@@ -146,7 +146,7 @@ const Profile = () => {
           <div className="stat-value stat-value--sm">
             {topCategory ? `${CATEGORY_EMOJI[topCategory[0]] || '📦'} ${topCategory[0]}` : '—'}
           </div>
-          <div className="stat-sub">{topCategory ? `₹${topCategory[1].toFixed(0)} spent` : 'No data yet'}</div>
+          <div className="stat-sub">{topCategory ? `$${topCategory[1].toFixed(0)} spent` : 'No data yet'}</div>
         </div>
       </div>
     {/* Body */}
@@ -214,7 +214,7 @@ const Profile = () => {
               <div className="overview-grid">
                 <div className="overview-tile">
                   <div className="overview-tile-label">This Month</div>
-                  <div className="overview-tile-value">₹{thisMonthTotal.toFixed(0)}</div>
+                  <div className="overview-tile-value">${thisMonthTotal.toFixed(0)}</div>
                   <div className="overview-tile-sub">current month spending</div>
                 </div>
                 <div className="overview-tile">
@@ -225,7 +225,7 @@ const Profile = () => {
                 <div className="overview-tile">
                   <div className="overview-tile-label">Avg per Transaction</div>
                   <div className="overview-tile-value">
-                    ₹{expenses.length > 0 ? (totalSpent / expenses.length).toFixed(0) : '0'}
+                    ${expenses.length > 0 ? (totalSpent / expenses.length).toFixed(0) : '0'}
                   </div>
                   <div className="overview-tile-sub">average expense</div>
                 </div>
@@ -252,7 +252,7 @@ const Profile = () => {
                         )}
                       </div>
                     </div>
-                    <div className="expense-amount">₹{parseFloat(latestExpense.amount).toFixed(2)}</div>
+                    <div className="expense-amount">${parseFloat(latestExpense.amount).toFixed(2)}</div>
                   </div>
                 </>
               )}

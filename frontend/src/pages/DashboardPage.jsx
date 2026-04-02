@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import CategoryChart from '../components/CategoryChart';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getExpenses , deleteExpense } from '../api/services/expenseService.js';
 import '../styles/dashboard.css';
 import { useNavigate } from 'react-router-dom';
+
 
 const CATEGORY_EMOJI = {
   Food: '🍔', Transport: '🚗', Utilities: '💡', Health: '💊',
@@ -18,6 +20,7 @@ const DashboardPage = () => {
   const [summary, setSummary]                   = useState({ thisMonth: 0, lastMonth: 0, count: 0 });
   const [sortOption, setSortOption]             = useState('date-desc');
   const [categoryFilter, setCategoryFilter]     = useState('All');
+  
 
   // ── Helpers ──────────────────────────────────────────────────────
   const getCurrentMonthISO = () => {
@@ -47,7 +50,20 @@ const DashboardPage = () => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
   };
 
-  const [selectedDate, setSelectedDate] = useState(getCurrentMonthISO());
+  const location = useLocation();
+  // Read ?month= param on mount
+  const getInitialMonth = () => {
+    const params = new URLSearchParams(location.search);
+    return params.get('month') || getCurrentMonthISO();
+  };
+  const [selectedDate, setSelectedDate] = useState(getInitialMonth());
+
+  // Update selectedDate if URL changes
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const urlMonth = params.get('month');
+    if (urlMonth && urlMonth !== selectedDate) setSelectedDate(urlMonth);
+  }, [location.search]);
 
   // ── Fetch Expenses ────────────────────────────────────────────────
   useEffect(() => {
@@ -110,9 +126,9 @@ const DashboardPage = () => {
 
   // -- Action Handlers --
   const handleEdit = (expense) => {
-    // Redirect to the EditExpensePage with the expense id
-    navigate(`/edit-expense/${expense._id}`);
+    navigate(`/edit-expense/${expense._id}?month=${selectedDate}`);
   };
+  
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this expense?")) {
@@ -125,11 +141,6 @@ const DashboardPage = () => {
         alert("Could not delete expense.");
       }
     }
-  };
-
-  const handleView = (expense) => {
-    // Redirect to receipts/history tab and pass the specific ID to highlight it
-    navigate('/receipts', { state: { highlightId: expense._id } });
   };
 
   // ── Render ────────────────────────────────────────────────────────
@@ -158,13 +169,13 @@ const DashboardPage = () => {
       <div className="stat-card">
         <span className="stat-icon">💸</span>
         <div className="stat-label">{formatMonthLabel(selectedDate)}</div>
-        <div className="stat-value">₹{(summary.thisMonth || 0).toFixed(0)}</div>
+        <div className="stat-value">${(summary.thisMonth || 0).toFixed(2)}</div>
         <div className="stat-sub">current month spending</div>
       </div>
       <div className="stat-card">
         <span className="stat-icon">📅</span>
         <div className="stat-label">{formatMonthLabel(getPreviousMonthISO(selectedDate))}</div>
-        <div className="stat-value">₹{(summary.lastMonth || 0).toFixed(0)}</div>
+        <div className="stat-value">${(summary.lastMonth || 0).toFixed(2)}</div>
         <div className="stat-sub">previous month spending</div>
       </div>
       <div className="stat-card">
@@ -203,7 +214,7 @@ const DashboardPage = () => {
           <div className="expense-list">
             {filteredExpenses.length > 0 ? (
               getDisplayedRecent().map(e => (
-                <div className="expense-item" key={e._id} onClick={() => handleView(e)}>
+                <div className="expense-item" key={e._id}>
                   <div className="expense-emoji">{CATEGORY_EMOJI[e.category] || '📦'}</div>
                   <div className="expense-info">
                     <div className="expense-desc">{e.description}</div>
@@ -220,7 +231,7 @@ const DashboardPage = () => {
             <div className="expense-actions">
               <button 
                 className="action-btn edit-btn" 
-                onClick={(event) => { event.stopPropagation(); handleEdit(e); }}
+                onClick={() => handleEdit(e) }
                 title="Edit"
               >
                 ✏️

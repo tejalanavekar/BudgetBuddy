@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { updateExpense, getExpenses } from '../api/services/expenseService';
 import { useAuth } from '../context/AuthContext';
-import { Form, Button, Row, Col, Alert } from 'react-bootstrap';
+import { Row, Col } from 'react-bootstrap';
 import '../styles/expense.css';
+import '../styles/editExpensePage.css';
 
 const CATEGORIES = ['Food','Transport','Utilities','Entertainment','Health','Education','Shopping','Travel','Savings','Other'];
 
@@ -11,6 +12,9 @@ const EditExpensePage = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const selectedMonth = params.get('month');
   const [form, setForm] = useState({
     description: '',
     amount: '',
@@ -33,7 +37,7 @@ const EditExpensePage = () => {
           category: expense.category,
           date: expense.date ? expense.date.slice(0, 10) : '',
         });
-        if (expense.receiptPath) setPreview(`/uploads/${expense.receiptPath}`);
+        if (expense.receiptPath) setPreview(`http://localhost:5000/uploads/${expense.receiptPath}`);
       }
     });
   }, [id, user]);
@@ -50,11 +54,21 @@ const EditExpensePage = () => {
     setIsSubmitting(true);
     try {
       const formData = new FormData();
-      Object.entries(form).forEach(([key, value]) => formData.append(key, value));
+      // Always send amount as string/number, and date as string
+      formData.append('description', form.description);
+      formData.append('amount', String(form.amount));
+      formData.append('category', form.category);
+      formData.append('date', form.date);
       if (receipt) formData.append('receipt', receipt);
+
+      // Debug: log FormData contents
+      for (let pair of formData.entries()) {
+        console.log(pair[0]+ ':', pair[1]);
+      }
+
       await updateExpense(id, formData);
       setMessage({ type: 'success', text: 'Expense updated successfully!' });
-      setTimeout(() => navigate('/home'), 1200);
+      // No auto-navigation after save
     } catch (err) {
       setMessage({ type: 'danger', text: 'Failed to update expense.' });
     } finally {
@@ -62,7 +76,6 @@ const EditExpensePage = () => {
     }
   };
 
-  // Add clear receipt function for removing preview
   const clearReceipt = () => {
     setPreview(null);
     setReceipt(null);
@@ -73,113 +86,149 @@ const EditExpensePage = () => {
     <div className="expense-bg">
       <div className="expense-center-wrapper">
         <div className="expense-main-content">
-          <button className="back-btn" onClick={() => navigate('/home')}>{'< Back'}</button>
+
+          <button className="back-btn" onClick={() => navigate(`/home/dashboard${selectedMonth ? `?month=${selectedMonth}` : ''}`)}>← Back</button>
+
           <div className="expense-form-wrapper">
-        <div className="form-header text-center mb-4">
-          <h2 className="display-6 fw-bold text-dark">Edit Expense</h2>
-          <p className="text-muted">Update your expense details below</p>
-        </div>
-        <Form onSubmit={handleSubmit} className="modern-form">
-          <Row className="g-4">
-            <Col lg={preview ? 7 : 12}>
-              {/* Upload Receipt */}
-              <Form.Group className="mb-4">
-                <Form.Label className="form-label-custom">Upload Receipt</Form.Label>
-                <Form.Control
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="input-custom file-input"
-                />
-              </Form.Group>
 
-              {/* Description */}
-              <Form.Group className="mb-3">
-                <Form.Label className="form-label-custom">Description</Form.Label>
-                <Form.Control
-                  className="input-custom"
-                  type="text"
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
+            {/* Header */}
+            <div className="eem-header" style={{ borderRadius: '12px 12px 0 0', margin: '-40px -40px 28px -40px' }}>
+              <div>
+                <h3 className="eem-title">Edit Expense</h3>
+                <p className="eem-subtitle">Update your expense details below</p>
+              </div>
+            </div>
 
-              {/* Amount + Date */}
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="form-label-custom">Amount</Form.Label>
-                    <Form.Control
-                      className="input-custom"
-                      type="number"
-                      name="amount"
-                      value={form.amount}
+            <form onSubmit={handleSubmit}>
+              <Row className="g-4">
+                <Col lg={preview ? 7 : 12}>
+
+                  {/* Upload Receipt */}
+                  <div className="eem-field mb-3">
+                    <label className="eem-label">Upload Receipt</label>
+                    <label className="eem-file-label">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        style={{ display: 'none' }}
+                      />
+                      <span className="eem-file-btn">
+                        📤 {preview ? 'Replace Receipt' : 'Choose File'}
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Description */}
+                  <div className="eem-field mb-3">
+                    <label className="eem-label">Description</label>
+                    <input
+                      className="eem-input"
+                      type="text"
+                      name="description"
+                      value={form.description}
                       onChange={handleChange}
+                      placeholder="e.g. JH Bazaar"
                       required
                     />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="form-label-custom">Date</Form.Label>
-                    <Form.Control
-                      className="input-custom"
-                      type="date"
-                      name="date"
-                      value={form.date}
+                  </div>
+
+                  {/* Amount + Date */}
+                  <div className="eem-row mb-3">
+                    <div className="eem-field">
+                      <label className="eem-label">Amount</label>
+                      <input
+                        className="eem-input"
+                        type="number"
+                        name="amount"
+                        value={form.amount}
+                        onChange={handleChange}
+                        placeholder="0.00"
+                        required
+                      />
+                    </div>
+                    <div className="eem-field">
+                      <label className="eem-label">Date</label>
+                      <input
+                        className="eem-input"
+                        type="date"
+                        name="date"
+                        value={form.date}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Category */}
+                  <div className="eem-field mb-4">
+                    <label className="eem-label">Category</label>
+                    <select
+                      className="eem-input eem-select"
+                      name="category"
+                      value={form.category}
                       onChange={handleChange}
-                      required
-                    />
-                  </Form.Group>
+                    >
+                      {CATEGORIES.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Submit */}
+                  <button
+                    className="eem-btn-save w-100"
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting
+                      ? <span className="eem-saving"><span className="eem-spinner" /> Saving...</span>
+                      : 'Save Changes'}
+                  </button>
+
                 </Col>
+
+                {/* Receipt Preview */}
+                {preview && (
+                  <Col lg={5} className="edit-expense-preview-col border-start ps-lg-4">
+                    <div className="eem-field">
+                      <label className="eem-label">Receipt Preview</label>
+                      <div className="eem-new-preview" style={{ flexDirection: 'column', alignItems: 'center', padding: '1rem' }}>
+                        <img
+                          src={preview}
+                          alt="Receipt"
+                          style={{ width: '100%', maxHeight: '220px', objectFit: 'contain', borderRadius: '10px', marginBottom: '0.75rem' }}
+                          onError={e => { e.target.onerror = null; e.target.style.display = 'none'; }}
+                        />
+                        <button type="button" className="eem-remove-receipt" onClick={clearReceipt}>
+                          ✕ Remove
+                        </button>
+                      </div>
+                    </div>
+                  </Col>
+                )}
+
               </Row>
+            </form>
 
-              {/* Category */}
-              <Form.Group className="mb-3">
-                <Form.Label className="form-label-custom">Category</Form.Label>
-                <Form.Select
-                  className="input-custom"
-                  name="category"
-                  value={form.category}
-                  onChange={handleChange}
-                >
-                  {CATEGORIES.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-
-              <Button
-                className="btn-primary-custom w-100 mt-3"
-                type="submit"
-                disabled={isSubmitting}
+            {/* Message */}
+            {message.text && (
+              <div
+                className="eem-error mt-3"
+                style={{
+                  color: message.type === 'success' ? '#1a7a4a' : '#c62828',
+                  background: message.type === 'success' ? '#e6f9f0' : '#fdecea',
+                  borderRadius: '10px',
+                  marginTop: '1rem'
+                }}
               >
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </Col>
-
-            {/* Receipt Preview on the right, matching Add Expense */}
-            {preview && (
-              <Col lg={5} className="edit-expense-preview-col border-start ps-lg-4">
-                <span className="form-label-custom mb-2">Receipt Preview</span>
-                <div className="receipt-preview-container">
-                  <img src={preview} alt="Receipt" className="img-preview" />
-                  <button type="button" className="remove-btn" onClick={clearReceipt}>✕</button>
-                </div>
-              </Col>
+                {message.type === 'success' ? '✅' : '⚠️'} {message.text}
+              </div>
             )}
-          </Row>
-        </Form>
-        {message.text && (
-          <Alert variant={message.type} className="mt-4 border-0 shadow-sm">
-            {message.text}
-          </Alert>
-        )}
+
+          </div>
         </div>
       </div>
-    </div>
     </div>
   );
 };
