@@ -85,14 +85,22 @@ const DashboardPage = () => {
     const prevIso = getPreviousMonthISO(selectedDate);
     const [prevYear, prevMonth] = prevIso.split('-').map(Number);
 
+    // Helper to extract year and month from YYYY-MM-DD string
+    const getYearMonth = (dateStr) => {
+      if (!dateStr || typeof dateStr !== 'string') return [null, null];
+      const parts = dateStr.split('-');
+      if (parts.length < 2) return [null, null];
+      return [parseInt(parts[0]), parseInt(parts[1])];
+    };
+
     const current = allExpenses.filter(e => {
-      const d = new Date(e.date);
-      return d.getFullYear() === selYear && (d.getMonth() + 1) === selMonth;
+      const [y, m] = getYearMonth(e.date);
+      return y === selYear && m === selMonth;
     });
 
     const prev = allExpenses.filter(e => {
-      const d = new Date(e.date);
-      return d.getFullYear() === prevYear && (d.getMonth() + 1) === prevMonth;
+      const [y, m] = getYearMonth(e.date);
+      return y === prevYear && m === prevMonth;
     });
 
     setFilteredExpenses(current);
@@ -219,9 +227,13 @@ const DashboardPage = () => {
                   <div className="expense-info">
                     <div className="expense-desc">{e.description}</div>
                     <div className="expense-meta">
-                      {new Date(e.date).toLocaleDateString('en-IN', {
-                        day: 'numeric', month: 'short', year: 'numeric'
-                      })}
+                      {e.date && /^\d{4}-\d{2}-\d{2}$/.test(e.date)
+                        ? (() => {
+                            const [year, month, day] = e.date.split('-');
+                            const monthName = new Date(e.date + 'T00:00:00').toLocaleString('default', { month: 'short' });
+                            return `${parseInt(day)} ${monthName} ${year}`;
+                          })()
+                        : '—'}
                       <span className="expense-cat-badge">{e.category}</span>
                     </div>
                   </div>

@@ -333,181 +333,163 @@ try {
   );
 
   return (
-    <div className="expense-main-content">
-      <div className="expense-form-wrapper">
-
-        <div className="form-header text-center mb-4">
-          <h2 className="display-6 fw-bold text-dark">Add New Expense</h2>
-          <p className="text-muted">Upload a receipt to auto-fill, or enter details manually</p>
-        </div>
-
-        <Form onSubmit={handleSubmit} className="modern-form">
-          <Row className="g-4">
-            <Col lg={preview ? 7 : 12}>
-
-              {/* Upload Receipt — first so OCR fills fields below */}
-              <Form.Group className="mb-4">
-                <Form.Label className="form-label-custom">
-                  Upload Receipt
-                  {isScanning && (
-                    <span className="text-primary ms-2">— Scanning with Google Vision...</span>
-                  )}
-                </Form.Label>
-                <Form.Control
-                  type="file" accept="image/*"
-                  onChange={handleFileChange}
-                  className="input-custom file-input"
-                  disabled={isScanning}
-                />
-                {isScanning && (
-                <div className="ocr-progress-bar mt-2">
-                <div className="ocr-progress-fill ocr-progress-pulse" />
-                </div>
-                )}
-              </Form.Group>
-
-              {/* Description */}
-              <Form.Group className="mb-3">
-                <Form.Label className="form-label-custom">Description</Form.Label>
-                <Form.Control
-                  className="input-custom"
-                  type="text" name="description"
-                  placeholder="What did you spend on?"
-                  value={form.description} onChange={handleChange} required
-                />
-              </Form.Group>
-
-              {/* Amount + Date */}
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="form-label-custom">Amount</Form.Label>
-                    <Form.Control
-                      className="input-custom"
-                      type="number" name="amount" placeholder="0.00"
-                      value={form.amount} onChange={handleChange} required
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="form-label-custom">Date</Form.Label>
-                    <Form.Control
-                      className="input-custom"
-                      type="date" name="date"
-                      value={form.date} onChange={handleChange} required
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              {/* Category */}
-              <Form.Group className="mb-3">
-                <Form.Label className="form-label-custom">Category</Form.Label>
-                <Form.Select className="input-custom" name="category" value={form.category} onChange={handleChange}>
-                  {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                </Form.Select>
-              </Form.Group>
-
-              {/* Extracted Items — editable */}
-              {(extractedItems.length > 0 || isScanning === false) && extractedItems.length > 0 && (
-                <div className="items-preview mt-3">
-                  <Form.Label className="form-label-custom mb-2">
-                      Edit if incorrect
+    <div className="add-expense-container">
+      <div className="expense-main-content">
+        <div className="expense-form-wrapper">
+          <div className="form-header text-center mb-4">
+            <h2 className="display-6 fw-bold text-dark">Add New Expense</h2>
+            <p className="text-muted">Upload a receipt to auto-fill, or enter details manually</p>
+          </div>
+          <Form onSubmit={handleSubmit} className="modern-form">
+            <Row className="g-4">
+              <Col lg={preview ? 7 : 12}>
+                {/* Upload Receipt — first so OCR fills fields below */}
+                <Form.Group className="mb-4">
+                  <Form.Label className="form-label-custom">
+                    Upload Receipt
+                    {isScanning && (
+                      <span className="text-primary ms-2">— Scanning with Google Vision...</span>
+                    )}
                   </Form.Label>
-
-                  {/* Header row */}
-                  <div className="items-header">
-                    <span style={{ flex: 2 }}>Item Name</span>
-                    <span style={{ flex: 1.5 }}>Category</span>
-                    <span style={{ flex: 1, textAlign: 'right' }}>Price</span>
-                    <span style={{ width: 24 }}></span>
+                  <Form.Control
+                    type="file" accept="image/*"
+                    onChange={handleFileChange}
+                    className="input-custom file-input"
+                    disabled={isScanning}
+                  />
+                  {isScanning && (
+                  <div className="ocr-progress-bar mt-2">
+                  <div className="ocr-progress-fill ocr-progress-pulse" />
                   </div>
-
-                  {extractedItems.map((item, i) => (
-                    <div key={i} className="item-row-edit">
-
-                      {/* Name */}
-                      <input
-                        className="item-input-name"
-                        placeholder="Item name"
-                        value={item.name}
-                        onChange={(e) => updateItem(i, 'name', e.target.value)}
+                  )}
+                </Form.Group>
+                {/* Description */}
+                <Form.Group className="mb-3">
+                  <Form.Label className="form-label-custom">Description</Form.Label>
+                  <Form.Control
+                    className="input-custom"
+                    type="text" name="description"
+                    placeholder="What did you spend on?"
+                    value={form.description} onChange={handleChange} required
+                  />
+                </Form.Group>
+                {/* Amount + Date */}
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="form-label-custom">Amount</Form.Label>
+                      <Form.Control
+                        className="input-custom"
+                        type="number" name="amount" placeholder="0.00"
+                        value={form.amount} onChange={handleChange} required
                       />
-
-                      {/* Category */}
-                      <select
-                        className="item-input-category"
-                        value={item.category}
-                        onChange={(e) => updateItem(i, 'category', e.target.value)}
-                      >
-                        {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                      </select>
-
-                      {/* Price */}
-                      <input
-                        className="item-input-price"
-                        type="number"
-                        placeholder="0.00"
-                        value={item.price}
-                        onChange={(e) => updateItem(i, 'price', parseFloat(e.target.value) || 0)}
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="form-label-custom">Date</Form.Label>
+                      <Form.Control
+                        className="input-custom"
+                        type="date" name="date"
+                        value={form.date} onChange={handleChange} required
                       />
-
-                      {/* Delete */}
-                      <button type="button" className="item-delete-btn" onClick={() => deleteItem(i)}>
-                        ✕
-                      </button>
+                    </Form.Group>
+                  </Col>
+                </Row>
+                {/* Category */}
+                <Form.Group className="mb-3">
+                  <Form.Label className="form-label-custom">Category</Form.Label>
+                  <Form.Select className="input-custom" name="category" value={form.category} onChange={handleChange}>
+                    {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  </Form.Select>
+                </Form.Group>
+                {/* Extracted Items — editable */}
+                {(extractedItems.length > 0 || isScanning === false) && extractedItems.length > 0 && (
+                  <div className="items-preview mt-3">
+                    <Form.Label className="form-label-custom mb-2">
+                        Edit if incorrect
+                    </Form.Label>
+                    {/* Header row */}
+                    <div className="items-header">
+                      <span style={{ flex: 2 }}>Item Name</span>
+                      <span style={{ flex: 1.5 }}>Category</span>
+                      <span style={{ flex: 1, textAlign: 'right' }}>Price</span>
+                      <span style={{ width: 24 }}></span>
                     </div>
-                  ))}
-
-                  {/* Add item manually */}
-                  <button type="button" className="add-item-btn mt-2" onClick={addItem}>
-                    + Add item manually
-                  </button>
-
-                  {/* Items total */}
-                  <div className="items-total mt-2">
-                    <span>Total</span>
-                    <span>${extractedItems.reduce((sum, item) => sum + (item.price || 0), 0).toFixed(2)}</span>
+                    {extractedItems.map((item, i) => (
+                      <div key={i} className="item-row-edit">
+                        {/* Name */}
+                        <input
+                          className="item-input-name"
+                          placeholder="Item name"
+                          value={item.name}
+                          onChange={(e) => updateItem(i, 'name', e.target.value)}
+                        />
+                        {/* Category */}
+                        <select
+                          className="item-input-category"
+                          value={item.category}
+                          onChange={(e) => updateItem(i, 'category', e.target.value)}
+                        >
+                          {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                        </select>
+                        {/* Price */}
+                        <input
+                          className="item-input-price"
+                          type="number"
+                          placeholder="0.00"
+                          value={item.price}
+                          onChange={(e) => updateItem(i, 'price', parseFloat(e.target.value) || 0)}
+                        />
+                        {/* Delete */}
+                        <button type="button" className="item-delete-btn" onClick={() => deleteItem(i)}>
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    {/* Add item manually */}
+                    <button type="button" className="add-item-btn mt-2" onClick={addItem}>
+                      + Add item manually
+                    </button>
+                    {/* Items total */}
+                    <div className="items-total mt-2">
+                      <span>Total</span>
+                      <span>${extractedItems.reduce((sum, item) => sum + (item.price || 0), 0).toFixed(2)}</span>
+                    </div>
                   </div>
-                </div>
-              )}
-
-              {/* Manual add items button (when no receipt scanned) */}
-              {extractedItems.length === 0 && !isScanning && (
-                <button type="button" className="add-item-btn mt-1 mb-3" onClick={addItem}>
-                  + Add items manually
-                </button>
-              )}
-
-            </Col>
-
-            {/* Receipt Preview */}
-            {preview && (
-              <Col lg={5} className="d-flex flex-column align-items-center justify-content-center border-start ps-lg-4">
-                <span className="form-label-custom mb-2">Receipt Preview</span>
-                <div className="receipt-preview-container">
-                  <img src={preview} alt="Receipt" className="img-preview" />
-                  <button type="button" className="remove-btn" onClick={clearReceipt}>✕</button>
-                </div>
+                )}
+                {/* Manual add items button (when no receipt scanned) */}
+                {extractedItems.length === 0 && !isScanning && (
+                  <button type="button" className="add-item-btn mt-1 mb-3" onClick={addItem}>
+                    + Add items manually
+                  </button>
+                )}
               </Col>
-            )}
-          </Row>
-
-          <Button
-            className="btn-primary-custom w-100 mt-3"
-            type="submit"
-            disabled={isSubmitting || isScanning}
-          >
-            {isSubmitting ? 'Saving...' : isScanning ? 'Scanning Receipt...' : 'Add Expense'}
-          </Button>
-        </Form>
-
-        {message.text && (
-          <Alert variant={message.type} className="mt-4 border-0 shadow-sm">
-            {message.text}
-          </Alert>
-        )}
+              {/* Receipt Preview */}
+              {preview && (
+                <Col lg={5} className="d-flex flex-column align-items-center justify-content-center border-start ps-lg-4">
+                  <span className="form-label-custom mb-2">Receipt Preview</span>
+                  <div className="receipt-preview-container">
+                    <img src={preview} alt="Receipt" className="img-preview" />
+                    <button type="button" className="remove-btn" onClick={clearReceipt}>✕</button>
+                  </div>
+                </Col>
+              )}
+            </Row>
+            <Button
+              className="btn-primary-custom w-100 mt-3"
+              type="submit"
+              disabled={isSubmitting || isScanning}
+            >
+              {isSubmitting ? 'Saving...' : isScanning ? 'Scanning Receipt...' : 'Add Expense'}
+            </Button>
+          </Form>
+          {message.text && (
+            <Alert variant={message.type} className="mt-4 border-0 shadow-sm">
+              {message.text}
+            </Alert>
+          )}
+        </div>
       </div>
     </div>
   );

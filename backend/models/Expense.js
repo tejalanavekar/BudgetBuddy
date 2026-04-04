@@ -12,7 +12,7 @@ const expenseSchema = new mongoose.Schema({
   description: { type: String, required: true },
   amount: { type: Number, required: true },
   category: { type: String, required: true },
-  date: { type: Date, required: true },
+  date: { type: String, required: true },
   receiptPath: { type: String },
   items: { type: [itemSchema], default: [] }
 }, { timestamps: true });
