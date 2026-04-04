@@ -439,19 +439,19 @@ export const getExpenses = async (req, res) => {
 export const updateExpense = async (req, res) => {
   try {
     const expenseId = req.params.id;
-    const userId = req.userId || (req.user && req.user._id); // support both
+    // const userId = req.userId || (req.user && req.user._id); // support 
 
     // Find the expense and ensure it belongs to the user
-    const expense = await Expense.findOne({ _id: expenseId, userId });
+    const expense = await Expense.findById(expenseId);
     if (!expense) {
       return res.status(404).json({ message: 'Expense not found or unauthorized' });
     }
 
     // Update fields if provided
-    if (req.body.description) expense.description = req.body.description;
-    if (req.body.amount) expense.amount = Number(req.body.amount);
-    if (req.body.category) expense.category = req.body.category;
-    if (req.body.date) expense.date = new Date(req.body.date);
+    if (req.body.description !== undefined) expense.description = req.body.description;
+    if (req.body.amount !== undefined)      expense.amount = Number(req.body.amount);
+    if (req.body.category !== undefined)    expense.category = req.body.category;
+    if (req.body.date !== undefined) expense.date = req.body.date;
     if (req.body.items) {
       try {
         expense.items = JSON.parse(req.body.items);
@@ -473,6 +473,14 @@ export const updateExpense = async (req, res) => {
 // Delete an expense
 export const deleteExpense = async (req, res) => {
   try {
+    const expense = await Expense.findById(req.params.id);
+    if (!expense) return res.status(404).json({ message: 'Expense not found' });
+
+    // ✅ Verify ownership before deleting
+    if (expense.userId.toString() !== req.userId) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
     await Expense.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: 'Expense deleted successfully' });
   } catch (error) {

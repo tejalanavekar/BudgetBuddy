@@ -47,12 +47,12 @@ const Home = () => {
           >
             Receipts
           </Link>
-          <Link 
+          {/* <Link 
             to="/home/subscriptions" 
             className={`nav-item ${location.pathname.includes('subscriptions') ? 'active' : ''}`}
           >
             Subscriptions
-          </Link>
+          </Link> */}
         </div>
 
         {/* Right: User Profile */}

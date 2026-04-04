@@ -449,6 +449,44 @@ body, html {
   background: transparent;
 }
 
+/* Inline Edit Modal */
+.edit-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.edit-modal-box {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
+.edit-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: rgba(255,255,255,0.8);
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.edit-modal-close:hover {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .dashboard-header-area { padding: 32px 16px 0; flex-direction: column; gap: 16px; align-items: flex-start; }

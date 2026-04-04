@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import CategoryChart from '../components/CategoryChart';
 import { useAuth } from '../context/AuthContext.jsx';
-import { getExpenses , deleteExpense } from '../api/services/expenseService.js';
+import { getExpenses , deleteExpense, updateExpense } from '../api/services/expenseService.js';
 import '../styles/dashboard.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,6 +20,13 @@ const DashboardPage = () => {
   const [summary, setSummary]                   = useState({ thisMonth: 0, lastMonth: 0, count: 0 });
   const [sortOption, setSortOption]             = useState('date-desc');
   const [categoryFilter, setCategoryFilter]     = useState('All');
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [editReceipt, setEditReceipt] = useState(null);
+  const [editPreview, setEditPreview] = useState(null);
+  const [editMessage, setEditMessage] = useState({ type: '', text: '' });
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false);
+
   
 
   // ── Helpers ──────────────────────────────────────────────────────
@@ -27,6 +34,13 @@ const DashboardPage = () => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   };
+
+  const getYearMonth = (dateStr) => {
+  if (!dateStr) return [null, null];
+  // ✅ Handles both "2026-04-01" and "2026-03-31T18:30:00.000Z"
+  const parts = dateStr.split('T')[0].split('-');
+  return [parseInt(parts[0]), parseInt(parts[1])];
+};
 
   const getLast12Months = () => {
     const months = [];
@@ -134,8 +148,57 @@ const DashboardPage = () => {
 
   // -- Action Handlers --
   const handleEdit = (expense) => {
-    navigate(`/edit-expense/${expense._id}?month=${selectedDate}`);
-  };
+  setEditingExpense(expense);
+  setEditForm({
+    description: expense.description,
+    amount: expense.amount,
+    category: expense.category,
+    date: expense.date ? expense.date.slice(0, 10) : '',
+  });
+  setEditPreview(expense.receiptPath 
+    ? `http://localhost:5000/uploads/${expense.receiptPath}` 
+    : null
+  );
+  setEditReceipt(null);
+  setEditMessage({ type: '', text: '' });
+};
+
+const handleEditClose = () => {
+  setEditingExpense(null);
+  setEditForm({});
+  setEditPreview(null);
+  setEditReceipt(null);
+  setEditMessage({ type: '', text: '' });
+};
+
+const handleEditSubmit = async (e) => {
+  e.preventDefault();
+  setIsEditSubmitting(true);
+  try {
+    const formData = new FormData();
+    formData.append('description', editForm.description);
+    formData.append('amount', String(editForm.amount));
+    formData.append('category', editForm.category);
+    formData.append('date', editForm.date);
+    if (editReceipt) formData.append('receipt', editReceipt);
+
+    await updateExpense(editingExpense._id, formData);
+
+    // Update local state so UI refreshes immediately
+    setAllExpenses(prev => prev.map(exp =>
+      exp._id === editingExpense._id
+        ? { ...exp, ...editForm }
+        : exp
+    ));
+
+    setEditMessage({ type: 'success', text: 'Expense updated successfully!' });
+    setTimeout(() => handleEditClose(), 1200);
+  } catch (err) {
+    setEditMessage({ type: 'danger', text: 'Failed to update expense.' });
+  } finally {
+    setIsEditSubmitting(false);
+  }
+};
   
 
   const handleDelete = async (id) => {
@@ -283,6 +346,126 @@ const DashboardPage = () => {
 
       </div>
     </div>
+
+    {/* Inline Edit Modal */}
+{editingExpense && (
+  <div className="edit-modal-overlay" onClick={handleEditClose}>
+    <div className="edit-modal-box" onClick={e => e.stopPropagation()}>
+
+      {/* Header */}
+      <div className="eem-header">
+        <div>
+          <h3 className="eem-title">Edit Expense</h3>
+          <p className="eem-subtitle">Update your expense details below</p>
+        </div>
+        <button className="edit-modal-close" onClick={handleEditClose}>✕</button>
+      </div>
+
+      <form onSubmit={handleEditSubmit} style={{ padding: '24px' }}>
+
+        {/* Upload Receipt */}
+        <div className="eem-field mb-3">
+          <label className="eem-label">Upload Receipt</label>
+          <label className="eem-file-label">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={e => {
+                setEditReceipt(e.target.files[0]);
+                setEditPreview(URL.createObjectURL(e.target.files[0]));
+              }}
+              style={{ display: 'none' }}
+            />
+            <span className="eem-file-btn">
+              📤 {editPreview ? 'Replace Receipt' : 'Choose File'}
+            </span>
+          </label>
+        </div>
+
+        {/* Receipt Preview */}
+        {editPreview && (
+          <div className="eem-field mb-3">
+            <img
+              src={editPreview}
+              alt="Receipt"
+              style={{ width: '100%', maxHeight: '160px', objectFit: 'contain', borderRadius: '10px' }}
+            />
+            <button type="button" className="eem-remove-receipt" onClick={() => { setEditPreview(null); setEditReceipt(null); }}>
+              ✕ Remove
+            </button>
+          </div>
+        )}
+
+        {/* Description */}
+        <div className="eem-field mb-3">
+          <label className="eem-label">Description</label>
+          <input
+            className="eem-input"
+            type="text"
+            value={editForm.description}
+            onChange={e => setEditForm({ ...editForm, description: e.target.value })}
+            required
+          />
+        </div>
+
+        {/* Amount + Date */}
+        <div className="eem-row mb-3">
+          <div className="eem-field">
+            <label className="eem-label">Amount</label>
+            <input
+              className="eem-input"
+              type="number"
+              value={editForm.amount}
+              onChange={e => setEditForm({ ...editForm, amount: e.target.value })}
+              required
+            />
+          </div>
+          <div className="eem-field">
+            <label className="eem-label">Date</label>
+            <input
+              className="eem-input"
+              type="date"
+              value={editForm.date}
+              onChange={e => setEditForm({ ...editForm, date: e.target.value })}
+              required
+            />
+          </div>
+        </div>
+
+        {/* Category */}
+        <div className="eem-field mb-4">
+          <label className="eem-label">Category</label>
+          <select
+            className="eem-input eem-select"
+            value={editForm.category}
+            onChange={e => setEditForm({ ...editForm, category: e.target.value })}
+          >
+            {['Food','Transport','Utilities','Entertainment','Health','Education','Shopping','Travel','Savings','Other']
+              .map(cat => <option key={cat} value={cat}>{cat}</option>)}
+          </select>
+        </div>
+
+        {/* Submit */}
+        <button className="eem-btn-save w-100" type="submit" disabled={isEditSubmitting}>
+          {isEditSubmitting
+            ? <span className="eem-saving"><span className="eem-spinner" /> Saving...</span>
+            : 'Save Changes'}
+        </button>
+
+        {/* Message */}
+        {editMessage.text && (
+          <div className="eem-error mt-3" style={{
+            color: editMessage.type === 'success' ? '#1a7a4a' : '#c62828',
+            background: editMessage.type === 'success' ? '#e6f9f0' : '#fdecea',
+            borderRadius: '10px', marginTop: '1rem'
+          }}>
+            {editMessage.type === 'success' ? '✅' : '⚠️'} {editMessage.text}
+          </div>
+        )}
+      </form>
+    </div>
+  </div>
+)}
   </>
 );
 };
