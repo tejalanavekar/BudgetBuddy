@@ -8,8 +8,8 @@ import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
 import ExpenseModal from "./components/ExpenseModal";
 import Profile from "./pages/Profile";
-import EditExpensePage from "./pages/EditExpensePage";
 import './styles/auth.css';
+import PastExpensesPage from './pages/PastExpensesPage';
 // Simple Error Boundary
 
 // 1. Protected Route Wrapper -> Bouncer that guards  the  entrance
@@ -75,6 +75,7 @@ function App() {
               
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="expense" element={<ExpensePage />} />
+              <Route path="past-expenses" element={<PastExpensesPage />} />
             </Route>
 
             <Route 
@@ -86,14 +87,14 @@ function App() {
               } 
             />
 
-            <Route
+            {/* <Route
               path="/edit-expense/:id"
               element={
                 <ProtectedRoute>
                   <EditExpensePage />
                 </ProtectedRoute>
               }
-            />
+            /> */}
 
             <Route path="/" element={<Navigate to="/signin" replace />} />
             <Route path="*" element={<Navigate to="/signin" replace />} />

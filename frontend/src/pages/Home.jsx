@@ -67,7 +67,7 @@ const Home = () => {
       <button className="dropdown-item" style={{ justifyContent: 'center' }} onClick={() => navigate('/profile')}>
         👤 Profile
       </button>
-      <button className="dropdown-item" onClick={() => navigate('/home/expense')}>
+      <button className="dropdown-item" onClick={() => navigate('/home/past-expenses')}>
         Past Expenses
       </button>
       
