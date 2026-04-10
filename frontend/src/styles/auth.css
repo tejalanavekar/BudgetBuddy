@@ -10,7 +10,7 @@ html, body {
   
   width: 100vw;
   min-height: 100vh;
-  background-image: url('../assets/Signin_background.png');
+  background: linear-gradient(135deg, #384e81 0%, #1e3a5f 50%, #0d6efd 100%);
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
@@ -173,7 +173,7 @@ html, body {
   justify-content: flex-start;
   min-height: 100vh;
   /* width: 100%; */
-  background-image: url('../assets/white_background.jpg');
+  background: linear-gradient(135deg, #384e81 0%, #1e3a5f 50%, #0d6efd 100%);
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
@@ -190,7 +190,7 @@ html, body {
 
 .brand-logo {
   font-size: 40px;
-  color: #1e293b; /* Slightly darker for contrast */
+  color: white;
   text-shadow: 0px 2px 4px rgba(0,0,0,0.05); /* Subtle depth */
   font-weight: 800;
   margin-bottom: 20px;
@@ -199,12 +199,12 @@ html, body {
 
 .brand-greeting {
   font-size: 25px;
-  color: #1a1a1a;
+  color: white;
   margin-bottom: 5px;
 }
 
 .brand-subtext {
-  color: #262c33;
+  color: white;
   font-size: 25px;
   font-weight: 600;
 }

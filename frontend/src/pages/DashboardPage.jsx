@@ -348,35 +348,52 @@ const handleEditSubmit = async (e) => {
     </div>
 
     {/* Inline Edit Modal */}
+
 {editingExpense && (
   <div className="edit-modal-overlay" onClick={handleEditClose}>
     <div className="edit-modal-box" onClick={e => e.stopPropagation()}>
 
       {/* Header */}
-      <div className="eem-header">
+      <div style={{
+        background: 'linear-gradient(135deg, #1a3a5c 0%, #1a6b7c 60%, #2bbfbf 100%)',
+        padding: '20px 24px',
+        borderRadius: '16px 16px 0 0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
         <div>
-          <h3 className="eem-title">Edit Expense</h3>
-          <p className="eem-subtitle">Update your expense details below</p>
+          <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: 700, margin: 0, fontFamily: "'Clash Display', sans-serif" }}>
+            Edit Expense
+          </h3>
+          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', margin: '4px 0 0' }}>
+            Update your expense details below
+          </p>
         </div>
-        <button className="edit-modal-close" onClick={handleEditClose}>✕</button>
+        <button onClick={handleEditClose} style={{
+          background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)',
+          color: '#fff', borderRadius: '50%', width: '32px', height: '32px',
+          fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>✕</button>
       </div>
 
-      <form onSubmit={handleEditSubmit} style={{ padding: '24px' }}>
+      {/* Form Body */}
+      <form onSubmit={handleEditSubmit} style={{ padding: '24px', background: 'white', borderRadius: '0 0 16px 16px' }}>
 
         {/* Upload Receipt */}
-        <div className="eem-field mb-3">
-          <label className="eem-label">Upload Receipt</label>
-          <label className="eem-file-label">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={e => {
-                setEditReceipt(e.target.files[0]);
-                setEditPreview(URL.createObjectURL(e.target.files[0]));
-              }}
-              style={{ display: 'none' }}
-            />
-            <span className="eem-file-btn">
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: '6px' }}>
+            Upload Receipt
+          </label>
+          <label style={{ cursor: 'pointer', display: 'block' }}>
+            <input type="file" accept="image/*"
+              onChange={e => { setEditReceipt(e.target.files[0]); setEditPreview(URL.createObjectURL(e.target.files[0])); }}
+              style={{ display: 'none' }} />
+            <span style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+              background: '#f0f4ff', border: '1.5px dashed #93acd3', borderRadius: '10px',
+              padding: '10px', fontSize: '13px', fontWeight: 600, color: '#1a3a5c', cursor: 'pointer'
+            }}>
               📤 {editPreview ? 'Replace Receipt' : 'Choose File'}
             </span>
           </label>
@@ -384,80 +401,82 @@ const handleEditSubmit = async (e) => {
 
         {/* Receipt Preview */}
         {editPreview && (
-          <div className="eem-field mb-3">
-            <img
-              src={editPreview}
-              alt="Receipt"
-              style={{ width: '100%', maxHeight: '160px', objectFit: 'contain', borderRadius: '10px' }}
-            />
-            <button type="button" className="eem-remove-receipt" onClick={() => { setEditPreview(null); setEditReceipt(null); }}>
+          <div style={{ marginBottom: '16px' }}>
+            <img src={editPreview} alt="Receipt"
+              style={{ width: '100%', maxHeight: '140px', objectFit: 'contain', borderRadius: '10px' }} />
+            <button type="button"
+              onClick={() => { setEditPreview(null); setEditReceipt(null); }}
+              style={{ background: 'none', border: 'none', color: '#e53935', fontSize: '13px', fontWeight: 600, cursor: 'pointer', marginTop: '6px' }}>
               ✕ Remove
             </button>
           </div>
         )}
 
         {/* Description */}
-        <div className="eem-field mb-3">
-          <label className="eem-label">Description</label>
-          <input
-            className="eem-input"
-            type="text"
-            value={editForm.description}
+        <div style={{ marginBottom: '14px' }}>
+          <label style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: '6px' }}>
+            Description
+          </label>
+          <input type="text" value={editForm.description}
             onChange={e => setEditForm({ ...editForm, description: e.target.value })}
             required
-          />
+            style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: '10px', padding: '10px 14px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc', outline: 'none', boxSizing: 'border-box' }} />
         </div>
 
         {/* Amount + Date */}
-        <div className="eem-row mb-3">
-          <div className="eem-field">
-            <label className="eem-label">Amount</label>
-            <input
-              className="eem-input"
-              type="number"
-              value={editForm.amount}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+          <div>
+            <label style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: '6px' }}>
+              Amount
+            </label>
+            <input type="number" value={editForm.amount}
               onChange={e => setEditForm({ ...editForm, amount: e.target.value })}
               required
-            />
+              style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: '10px', padding: '10px 14px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc', outline: 'none', boxSizing: 'border-box' }} />
           </div>
-          <div className="eem-field">
-            <label className="eem-label">Date</label>
-            <input
-              className="eem-input"
-              type="date"
-              value={editForm.date}
+          <div>
+            <label style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: '6px' }}>
+              Date
+            </label>
+            <input type="date" value={editForm.date}
               onChange={e => setEditForm({ ...editForm, date: e.target.value })}
               required
-            />
+              style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: '10px', padding: '10px 14px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc', outline: 'none', boxSizing: 'border-box' }} />
           </div>
         </div>
 
         {/* Category */}
-        <div className="eem-field mb-4">
-          <label className="eem-label">Category</label>
-          <select
-            className="eem-input eem-select"
-            value={editForm.category}
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: '6px' }}>
+            Category
+          </label>
+          <select value={editForm.category}
             onChange={e => setEditForm({ ...editForm, category: e.target.value })}
-          >
+            style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: '10px', padding: '10px 14px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc', outline: 'none', boxSizing: 'border-box', cursor: 'pointer' }}>
             {['Food','Transport','Utilities','Entertainment','Health','Education','Shopping','Travel','Savings','Other']
               .map(cat => <option key={cat} value={cat}>{cat}</option>)}
           </select>
         </div>
 
-        {/* Submit */}
-        <button className="eem-btn-save w-100" type="submit" disabled={isEditSubmitting}>
+        {/* Save Button */}
+        <button type="submit" disabled={isEditSubmitting} style={{
+          width: '100%', padding: '12px', border: 'none', borderRadius: '12px',
+          background: 'linear-gradient(135deg, #1a3a5c, #1a6b7c)',
+          color: '#fff', fontSize: '15px', fontWeight: 700, cursor: isEditSubmitting ? 'not-allowed' : 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+          opacity: isEditSubmitting ? 0.7 : 1, fontFamily: "'Cabinet Grotesk', sans-serif"
+        }}>
           {isEditSubmitting
-            ? <span className="eem-saving"><span className="eem-spinner" /> Saving...</span>
+            ? <><span className="eem-spinner" /> Saving...</>
             : 'Save Changes'}
         </button>
 
         {/* Message */}
         {editMessage.text && (
-          <div className="eem-error mt-3" style={{
+          <div style={{
+            marginTop: '12px', padding: '10px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: 500,
             color: editMessage.type === 'success' ? '#1a7a4a' : '#c62828',
             background: editMessage.type === 'success' ? '#e6f9f0' : '#fdecea',
-            borderRadius: '10px', marginTop: '1rem'
           }}>
             {editMessage.type === 'success' ? '✅' : '⚠️'} {editMessage.text}
           </div>
@@ -465,7 +484,8 @@ const handleEditSubmit = async (e) => {
       </form>
     </div>
   </div>
-)}
+)} 
+
   </>
 );
 };

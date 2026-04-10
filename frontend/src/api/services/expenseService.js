@@ -37,3 +37,7 @@ export const updateExpense = (id, updates) => {
 //DELETE /expenses/:id
 export const deleteExpense = (id) =>
   API.delete(`/expenses/${id}`);
+
+//Getting all the exppenses
+export const getAllReceipts = (userId) =>
+  API.get('/expenses/receipts', { params: { userId } });

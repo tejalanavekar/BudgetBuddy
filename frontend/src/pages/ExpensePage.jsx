@@ -303,20 +303,21 @@ try {
     setReceipt(null);
     setPreview(null);
     setExtractedItems([]);
-
-} catch (err) {
-    // Check if expense actually saved despite the error
+    setIsSubmitting(false); // <-- Add this
+  } catch (err) {
     if (err.response?.data?.message === 'Expense added successfully') {
-        setMessage({ type: 'success', text: 'Expense added successfully!' });
-        setForm({ description: '', amount: '', category: 'Food', date: new Date().toISOString().split('T')[0] });
-        setReceipt(null);
-        setPreview(null);
-        setExtractedItems([]);
-        return;
+      setMessage({ type: 'success', text: 'Expense added successfully!' });
+      setForm({ description: '', amount: '', category: 'Food', date: new Date().toISOString().split('T')[0] });
+      setReceipt(null);
+      setPreview(null);
+      setExtractedItems([]);
+      setIsSubmitting(false); // <-- Add this
+      return;
     }
     const msg = err.response?.data?.message || 'Failed to add expense.';
     setMessage({ type: 'danger', text: msg });
-}
+    setIsSubmitting(false); // <-- Add this
+  }
   };
 
   const clearReceipt = () => {

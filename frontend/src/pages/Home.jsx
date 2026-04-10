@@ -42,17 +42,17 @@ const Home = () => {
             Expense
           </Link>
           <Link 
-            to="/home/receipts" 
-            className={`nav-item ${location.pathname.includes('receipts') ? 'active' : ''}`}
+            to="/home/budget" 
+            className={`nav-item ${location.pathname.includes('budget') ? 'active' : ''}`}
           >
-            Receipts
+            Budget
           </Link>
-          {/* <Link 
+          <Link 
             to="/home/subscriptions" 
             className={`nav-item ${location.pathname.includes('subscriptions') ? 'active' : ''}`}
           >
             Subscriptions
-          </Link> */}
+          </Link>
         </div>
 
         {/* Right: User Profile */}
@@ -68,7 +68,10 @@ const Home = () => {
         👤 Profile
       </button>
       <button className="dropdown-item" onClick={() => navigate('/home/past-expenses')}>
-        Past Expenses
+      🧾 Past Expenses
+      </button>
+      <button className="dropdown-item" onClick={() => navigate('/home/receipts')}>
+      🗄️ Receipt Vault
       </button>
       
       <hr className="dropdown-divider" />

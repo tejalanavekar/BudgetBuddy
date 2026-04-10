@@ -10,8 +10,16 @@ import ExpenseModal from "./components/ExpenseModal";
 import Profile from "./pages/Profile";
 import './styles/auth.css';
 import PastExpensesPage from './pages/PastExpensesPage';
+import ReceiptVaultPage from './pages/ReceiptVaultPage';
 // Simple Error Boundary
 
+const ComingSoon = ({ title }) => (
+  <div style={{ padding: '80px', textAlign: 'center', color: 'white' }}>
+    <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: '32px' }}>
+      {title} Coming Soon 🚧
+    </h2>
+  </div>
+);
 // 1. Protected Route Wrapper -> Bouncer that guards  the  entrance
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth(); //pulls from the Context
@@ -76,6 +84,9 @@ function App() {
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="expense" element={<ExpensePage />} />
               <Route path="past-expenses" element={<PastExpensesPage />} />
+              <Route path="receipts" element={<ReceiptVaultPage />} />
+              <Route path="budget" element={<ComingSoon title="Budget" />} />
+              <Route path="subscriptions" element={<ComingSoon title="Subscriptions" />} />
             </Route>
 
             <Route 
