@@ -80,12 +80,18 @@ const DashboardPage = () => {
   }, [location.search]);
 
   // ── Fetch Expenses ────────────────────────────────────────────────
-  useEffect(() => {
-    if (!user?.userId) return;
-    getExpenses(user.userId)
-    .then(res => setAllExpenses(res.data))
+useEffect(() => {
+  if (!user?.userId) return;
+  getExpenses(user.userId)
+    .then(res => {
+      console.log('Type:', typeof res.data);
+      console.log('Is array:', Array.isArray(res.data));
+      console.log('Data:', res.data);
+      const data = Array.isArray(res.data) ? res.data : [];
+      setAllExpenses(data);
+    })
     .catch(err => console.error('Error fetching expenses:', err));
-  }, [user]);
+}, [user]);
 
   // ── Filter + Summary ──────────────────────────────────────────────
   useEffect(() => {

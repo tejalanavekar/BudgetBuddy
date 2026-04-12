@@ -69,13 +69,16 @@ const PastExpensesPage = () => {
   const drillRef = useRef(null);
 
   useEffect(() => {
-    if (!user?.userId) return;
-    setLoading(true);
-    getExpenses(user.userId)
-      .then(res => setAllExpenses(res.data))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
-  }, [user]);
+  if (!user?.userId) return;
+  setLoading(true);
+  getExpenses(user.userId)
+    .then(res => {
+      const data = Array.isArray(res.data) ? res.data : [];
+      setAllExpenses(data);
+    })
+    .catch(err => console.error(err))
+    .finally(() => setLoading(false));
+}, [user]);
 
   const availableYears = useMemo(() => {
   const currentYear = new Date().getFullYear();

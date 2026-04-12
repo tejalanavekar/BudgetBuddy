@@ -43,12 +43,16 @@ const Profile = () => {
   }, [user]); // reruns if user changes
 
   // Fetch expenses, axios converts into query string for  that params.
-  useEffect(() => {
-    if (!user?.userId) return;
-    getExpenses(user.userId)
-    .then(res => { setExpenses(res.data); setExpensesLoading(false); })
-    .catch(() => setExpensesLoading(false));
-  }, [user]);
+ useEffect(() => {
+  if (!user?.userId) return;
+  getExpenses(user.userId)
+  .then(res => {
+    const data = Array.isArray(res.data) ? res.data : [];
+    setExpenses(data);
+    setExpensesLoading(false);
+  })
+  .catch(() => setExpensesLoading(false));
+}, [user]);
 
   //Compute the stats
   //parseFloat is used to ensure that the amount is treated as a number, and if it's missing or invalid, it defaults to 0.

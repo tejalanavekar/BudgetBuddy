@@ -7,7 +7,7 @@ import expenseRoutes from './routes/expenseRoutes.js'; // Your new Expense route
 
 // Initialize environment variables
 dotenv.config();
-
+import './config/redisClient.js';
 // Connect to MongoDB
 connectDB();
 

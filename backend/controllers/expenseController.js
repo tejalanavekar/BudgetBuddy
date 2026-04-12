@@ -2,6 +2,7 @@
 import Expense from '../models/Expense.js';
 import axios from 'axios';
 import fs from 'fs/promises';
+import { getCache, setCache, deleteCache } from '../utils/cache.js';
 
 
 
@@ -404,15 +405,16 @@ export const createExpense = async (req, res) => {
       try { parsedItems = JSON.parse(items); } catch { parsedItems = []; }
     }
 
-    const receiptPath = req.file ? req.file.filename : null;
 
     const expense = new Expense({
       userId, description, amount, category, date,
       items: parsedItems,
-      receiptPath
+      receiptPath : req.file ? req.file.filename : null
     });
 
     await expense.save();
+    await deleteCache(`expenses:${userId}`);
+    await deleteCache(`receipts:${userId}`);
     res.status(201).json({ message: 'Expense added successfully', expense });
 
   } catch (error) {
@@ -427,7 +429,22 @@ export const getExpenses = async (req, res) => {
     const { userId } = req.query;
     if (!userId) return res.status(400).json({ message: 'User ID required' });
 
+    const cacheKey = `expenses:${userId}`;
+    const cached = await getCache(cacheKey);
+    if (cached) {
+      console.log('Cache HIT:', cacheKey);
+      return res.status(200).json(cached);
+      const data = Array.isArray(cached) ? cached : Object.values(cached);
+      return res.status(200).json(data);
+    }
+
+    // 2. Cache miss — hit the database
+    console.log('Cache MISS:', cacheKey);
     const expenses = await Expense.find({ userId }).sort({ date: -1 });
+    const plainExpenses = expenses.map(e => e.toObject());
+    // 3. Store in cache for 5 minutes
+    await setCache(cacheKey, expenses);
+
     res.status(200).json(expenses);
 
   } catch (error) {
@@ -439,7 +456,6 @@ export const getExpenses = async (req, res) => {
 export const updateExpense = async (req, res) => {
   try {
     const expenseId = req.params.id;
-    // const userId = req.userId || (req.user && req.user._id); // support 
 
     // Find the expense and ensure it belongs to the user
     const expense = await Expense.findById(expenseId);
@@ -465,6 +481,8 @@ export const updateExpense = async (req, res) => {
     }
 
     await expense.save();
+    await deleteCache(`expenses:${expense.userId}`);
+await deleteCache(`receipts:${expense.userId}`);
     res.status(200).json({ message: 'Expense updated successfully', expense });
   } catch (error) {
     res.status(400).json({ message: 'Error updating expense', error: error.message });
@@ -480,8 +498,11 @@ export const deleteExpense = async (req, res) => {
     if (expense.userId.toString() !== req.userId) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
+    const userId = expense.userId;
 
     await Expense.findByIdAndDelete(req.params.id);
+    await deleteCache(`expenses:${userId}`);
+    await deleteCache(`receipts:${userId}`);
     res.status(200).json({ message: 'Expense deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting expense', error: error.message });
@@ -493,7 +514,18 @@ export const getAllReceipts = async (req, res) => {
   try {
     const { userId } = req.query;
     if (!userId) return res.status(400).json({ message: 'User ID required' });
+
+    const cacheKey = `receipts:${userId}`;
+    const cached = await getCache(cacheKey);
+    if (cached) {
+      console.log('Cache HIT:', cacheKey);
+      return res.status(200).json(cached);
+    }
+    console.log('Cache MISS:', cacheKey);
+
     const expenses = await Expense.find({ userId, receiptPath: { $exists: true, $ne: null } }).sort({ date: -1 });
+    const plainExpenses = expenses.map(e => e.toObject());
+    await setCache(cacheKey, expenses);
     res.status(200).json(expenses);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching receipts', error: error.message });

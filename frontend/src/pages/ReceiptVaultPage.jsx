@@ -44,13 +44,16 @@ const ReceiptVaultPage = () => {
   const [selectedMonth, setSelectedMonth] = useState('All');
 
   useEffect(() => {
-    if (!user?.userId) return;
-    setLoading(true);
-    getAllReceipts(user.userId)
-      .then(res => setReceipts(res.data))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
-  }, [user]);
+  if (!user?.userId) return;
+  setLoading(true);
+  getAllReceipts(user.userId)
+    .then(res => {
+      const data = Array.isArray(res.data) ? res.data : [];
+      setReceipts(data);
+    })
+    .catch(err => console.error(err))
+    .finally(() => setLoading(false));
+}, [user]);
 
   const folders = useMemo(() => {
     const map = {};
