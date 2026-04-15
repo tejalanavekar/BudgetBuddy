@@ -12,12 +12,15 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@langchain/core": "^0.3.80",
+    "@langchain/openai": "^0.6.17",
     "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.3",
+    "langchain": "^0.3.37",
     "mongoose": "^8.18.0",
     "multer": "^2.0.2",
     "redis": "^5.11.0"

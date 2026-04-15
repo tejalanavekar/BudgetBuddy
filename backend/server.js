@@ -4,6 +4,7 @@ import cors from 'cors';
 import connectDB from './config/db.js'; 
 import userRoutes from './routes/userRoutes.js'; // Your new User routes
 import expenseRoutes from './routes/expenseRoutes.js'; // Your new Expense routes
+import budgetRoutes from './routes/budgetRoutes.js'; // Budget routes with AI integration
 
 // Initialize environment variables
 dotenv.config();
@@ -39,6 +40,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/users', userRoutes);
 app.use('/api/expenses', expenseRoutes);
+app.use('/api/budgets', budgetRoutes);
  
 // Health Check / Debug Endpoint
 app.get('/api/health', (req, res) => {

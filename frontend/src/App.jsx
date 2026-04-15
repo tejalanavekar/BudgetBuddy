@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import React from 'react';
 import ExpensePage from "./pages/ExpensePage";  
 import DashboardPage from "./pages/DashboardPage";
+import BudgetPage from "./pages/BudgetPage";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
@@ -85,7 +86,7 @@ function App() {
               <Route path="expense" element={<ExpensePage />} />
               <Route path="past-expenses" element={<PastExpensesPage />} />
               <Route path="receipts" element={<ReceiptVaultPage />} />
-              <Route path="budget" element={<ComingSoon title="Budget" />} />
+              <Route path="budget" element={<BudgetPage />} />
               <Route path="subscriptions" element={<ComingSoon title="Subscriptions" />} />
             </Route>
 
