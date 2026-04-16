@@ -69,7 +69,7 @@ const BudgetPage = () => {
         {user?.userId && selectedMonth && (
           <>
             {/* Daily Spent Snapshot */}
-            <DailySpentSnapshot userId={user.userId} monthYear={selectedMonth} />
+            <DailySpentSnapshot userId={user.userId} monthYear={selectedMonth} refreshTrigger={budgetRefresh} />
 
             {/* Floating Budget AI Chatbot */}
             <FloatingChatbot userId={user.userId} monthYear={selectedMonth} />

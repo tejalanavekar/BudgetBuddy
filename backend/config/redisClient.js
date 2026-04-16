@@ -1,3 +1,4 @@
+//Creates and connects redis client using Upstash 
 import dotenv from 'dotenv';
 dotenv.config();
 

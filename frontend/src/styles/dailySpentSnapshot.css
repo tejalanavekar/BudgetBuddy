@@ -312,6 +312,122 @@
   text-align: right;
 }
 
+/* Category Budgets Section */
+.category-budgets-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 2px solid #e5e7eb;
+}
+
+.category-budgets-section h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.category-budgets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.category-budget-item {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.category-budget-item:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.category-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.category-name .emoji {
+  font-size: 18px;
+}
+
+.category-name .name {
+  font-size: 20px;
+  font-weight:bold;
+}
+
+.category-amounts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.budget-info,
+.spent-info,
+.remaining-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  align-items: center;
+}
+
+.budget-info .label,
+.spent-info .label,
+.remaining-info .label {
+  color: black;
+  font-size: 14px;
+}
+
+.budget-info .amount {
+  color: black;
+  font-size: 17px;
+  font-weight: normal;
+}
+
+.spent-info .amount {
+  color: black;
+  font-size: 17px;
+  font-weight: normal;
+}
+
+.remaining-info .amount {
+  color: black;
+  font-size:17px;
+  font-weight: normal;
+}
+
+.remaining-info .amount.over-budget {
+  color: black;
+}
+
+.no-budget {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.no-budget .amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+.no-budget .label {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .snapshot-grid {
@@ -327,6 +443,10 @@
   }
 
   .days-info {
+    grid-template-columns: 1fr;
+  }
+
+  .category-budgets-grid {
     grid-template-columns: 1fr;
   }
 }

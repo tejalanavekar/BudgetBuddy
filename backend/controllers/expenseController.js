@@ -6,7 +6,7 @@ import { getCache, setCache, deleteCache } from '../utils/cache.js';
 
 
 
-// ── Helper: Extract merchant name from receipt (smart extraction) ──
+// ── Helper: Extract merchant/store name from receipt (smart extraction) ──
 const extractMerchantName = (lines) => {
   // Strategy 1: Look near phone numbers (merchant usually before phone)
   for (let i = 0; i < lines.length - 1; i++) {

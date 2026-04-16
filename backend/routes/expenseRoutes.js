@@ -1,3 +1,4 @@
+//all routes are protected by auth middleware, so user must be logged in to access any of these routes
 import express from 'express';
 import { scanReceipt, createExpense, getExpenses, updateExpense, getAllReceipts, deleteExpense } from '../controllers/expenseController.js';
 import protect from '../middleware/authMiddleware.js';

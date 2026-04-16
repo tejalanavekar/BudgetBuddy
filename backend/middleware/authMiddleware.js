@@ -1,3 +1,4 @@
+//protects with JWT authorization for routes
 import jwt from 'jsonwebtoken';
 
 // Middleware to protect routes and verify JWT tokens

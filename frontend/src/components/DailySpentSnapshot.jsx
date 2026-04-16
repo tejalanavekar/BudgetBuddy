@@ -7,7 +7,7 @@ const CATEGORY_EMOJI = {
   Education: '📚', Shopping: '🛍️', Travel: '✈️', Savings: '💰', Other: '📦'
 };
 
-const DailySpentSnapshot = ({ userId, monthYear }) => {
+const DailySpentSnapshot = ({ userId, monthYear, refreshTrigger = 0 }) => {
   const [snapshot, setSnapshot] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,7 +30,7 @@ const DailySpentSnapshot = ({ userId, monthYear }) => {
     };
 
     fetchSnapshot();
-  }, [userId, monthYear]);
+  }, [userId, monthYear, refreshTrigger]);
 
   if (loading) {
     return (
@@ -155,6 +155,56 @@ const DailySpentSnapshot = ({ userId, monthYear }) => {
               <span className="budget">Budget: ${snapshot.totalBudget.toFixed(2)}</span>
             </div>
           </div>
+
+          {/* Category Budgets Section */}
+          {snapshot.categoryStatus && snapshot.categoryStatus.length > 0 && (
+            <div className="category-budgets-section">
+              <h4>Category Budgets</h4>
+              <div className="category-budgets-grid">
+                {snapshot.categoryStatus.map((categoryBudget) => {
+                  // Find if this category has any expenses
+                  const categoryExpense = snapshot.categoryBreakdown?.find(
+                    cb => cb.category === categoryBudget.category
+                  );
+                  const spentAmount = categoryExpense?.total || 0;
+                  // Check both 'budget' and 'budgeted' properties
+                  const budgeted = categoryBudget.budget || categoryBudget.budgeted || 0;
+                  
+                  return (
+                    <div key={categoryBudget.category} className="category-budget-item">
+                      <div className="category-name">
+                        <span className="emoji">{CATEGORY_EMOJI[categoryBudget.category] || '📦'}</span>
+                        <span className="name">{categoryBudget.category}</span>
+                      </div>
+                      {budgeted > 0 ? (
+                        <div className="category-amounts">
+                          <div className="budget-info">
+                            <span className="label">Spent:</span>
+                            <span className="amount">${spentAmount.toFixed(2)}</span>
+                          </div>
+                          <div className="spent-info">
+                            <span className="label">Total Category Budget:</span>
+                            <span className="amount">${budgeted.toFixed(2)}</span>
+                          </div>
+                          <div className="remaining-info">
+                            <span className="label">Remaining:</span>
+                            <span className={`amount ${budgeted - spentAmount < 0 ? 'over-budget' : ''}`}>
+                              ${(budgeted - spentAmount).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="no-budget">
+                          <span className="amount">${spentAmount.toFixed(2)}</span>
+                          <span className="label">(No budget set)</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Days Indicator */}
           <div className="days-info">
