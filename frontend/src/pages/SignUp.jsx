@@ -44,7 +44,15 @@ const SignUp = () => {
     <div className="auth-wrapper single-col">
       {/* Brand Header */}
       <div className="brand-header">
-        <h1 className="brand-logo">Budget Buddy</h1>
+        <h3 className="brand-logo">
+          <span className="brand-logo-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="5" width="16" height="14" rx="2.5" stroke="white" strokeWidth="2"/>
+              <line x1="4" y1="10" x2="20" y2="10" stroke="white" strokeWidth="2"/>
+            </svg>
+          </span>
+          Budget Buddy
+        </h3>
         <h2 className="brand-greeting">Hi there! Let's get you started.</h2>
         <p className="brand-subtext">Introduce Yourself!</p>
       </div>
@@ -89,7 +97,7 @@ const SignUp = () => {
           </button>
 
           <div className="auth-footer">
-            Already a member? <Link to="/signin">Log in</Link>
+            Already a member? <Link to="/signin" className="auth-footer-link">Log in</Link>
           </div>
         </form>
       </div>

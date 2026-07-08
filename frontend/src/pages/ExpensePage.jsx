@@ -194,13 +194,24 @@ const CATEGORY_EMOJI = {
   Food: '🍔', Transport: '🚗', Utilities: '💡', Entertainment: '🎬', Health: '💊',
   Education: '📚', Shopping: '🛍️', Travel: '✈️', Savings: '💰', Other: '📦'
 };
+
+// Local YYYY-MM-DD for today — toISOString() converts to UTC first, which can
+// show the wrong day for users behind/ahead of UTC.
+const getTodayLocal = () => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
 const ExpensePage = () => {
   const { user } = useAuth(); // Get the authenticated user from context
   const [form, setForm] = useState({
     description: '',
     amount: '',
     category: 'Food', // Default to first option
-    date: new Date().toISOString().split('T')[0] // Defaults to today's date
+    date: getTodayLocal() // Defaults to today's date (recomputed on every mount)
   });
 
   const [receipt, setReceipt] = useState(null); //stores the actual binary file of the image uploaded by the user.
@@ -340,22 +351,23 @@ try {
   return (
     <div className="add-expense-container">
       <div className="expense-main-content">
+        <div className="form-header mb-3">
+          <h3 className="display-8 fw-bold">Add New Expense</h3>
+          <p></p>
+          <p>Upload a receipt to auto-fill, or enter details manually</p>
+        </div>
         <div className="expense-form-wrapper">
-          <div className="form-header text-center mb-4">
-            <h2 className="display-6 fw-bold text-dark">Add New Expense</h2>
-            <p className="text-muted">Upload a receipt to auto-fill, or enter details manually</p>
-          </div>
           <Form onSubmit={handleSubmit} className="modern-form">
             <Row className="g-4">
               <Col lg={preview ? 7 : 12}>
                 {/* Upload Receipt — first so OCR fills fields below */}
-                <Form.Group className="mb-4">
-                  <Form.Label className="form-label-custom">
+                <Form.Group className="mb-3">
+                  <span className="form-label-custom d-block mb-1">
                     Upload Receipt
                     {isScanning && (
                       <span className="text-primary ms-2">— Scanning with Google Vision...</span>
                     )}
-                  </Form.Label>
+                  </span>
                   <label htmlFor="receiptUpload" className="upload-dropzone">
                     <input
                       id="receiptUpload"
@@ -377,7 +389,7 @@ try {
                   )}
                 </Form.Group>
                 {/* Description */}
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-2" controlId="expenseDescription">
                   <Form.Label className="form-label-custom">Description</Form.Label>
                   <Form.Control
                     className="input-custom"
@@ -389,7 +401,7 @@ try {
                 {/* Amount + Date */}
                 <Row>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-3" controlId="expenseAmount">
                       <Form.Label className="form-label-custom">Amount</Form.Label>
                       <Form.Control
                         className="input-custom"
@@ -399,8 +411,8 @@ try {
                     </Form.Group>
                   </Col>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label className="form-label-custom">Date</Form.Label>
+                    <Form.Group className="mb-3" controlId="expenseDate">
+                      <Form.Label className="form-label-custom ">Date</Form.Label>
                       <Form.Control
                         className="input-custom"
                         type="date" name="date"
@@ -411,7 +423,7 @@ try {
                 </Row>
                 {/* Category */}
                 <Form.Group className="mb-3">
-                  <Form.Label className="form-label-custom">Category</Form.Label>
+                  <span className="form-label-custom d-block mb-1">Category</span>
                   <div className="category-grid">
                     {CATEGORIES.map(cat => (
                       <button
@@ -429,9 +441,9 @@ try {
                 {/* Extracted Items — editable */}
                 {(extractedItems.length > 0 || isScanning === false) && extractedItems.length > 0 && (
                   <div className="items-preview mt-3">
-                    <Form.Label className="form-label-custom mb-2">
+                    <span className="form-label-custom d-block mb-2">
                         Edit if incorrect
-                    </Form.Label>
+                    </span>
                     {/* Header row */}
                     <div className="items-header">
                       <span style={{ flex: 2 }}>Item Name</span>

@@ -63,7 +63,15 @@ const SignIn = () => {
     <div className="auth-wrapper">
       <div className="auth-card">
         <div className="auth-left">
-          <div className="logo-placeholder">Budget Buddy</div>
+          <div className="logo-placeholder">
+            <span className="brand-logo-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4" y="5" width="16" height="14" rx="2.5" stroke="white" strokeWidth="2"/>
+                <line x1="4" y1="10" x2="20" y2="10" stroke="white" strokeWidth="2"/>
+              </svg>
+            </span>
+            Budget Buddy
+          </div>
           <p className="lead">Track your spending, stay on budget.</p>
         </div>
 
@@ -111,7 +119,7 @@ const SignIn = () => {
               {isSubmitting ? 'Authenticating...' : 'Sign In'}  
             </button>
             <div className="auth-footer">
-              <span>New user? </span><Link to="/signup">Create an account</Link>
+              <span>New user? </span><Link to="/signup" className="auth-footer-link">Create an account</Link>
             </div>
           </form>
         </div>

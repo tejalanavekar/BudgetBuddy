@@ -76,7 +76,7 @@ const CategoryChart = ({ expenses = [] }) => {
           },
           padding: 20,
           usePointStyle: true, // Makes the color box a circle
-          color: '#334155'
+          color: '#ffffff'
         }
       },
       tooltip: {

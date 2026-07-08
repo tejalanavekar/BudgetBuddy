@@ -1,22 +1,44 @@
-import React from 'react';
-import { Link, Outlet, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import '../styles/dashboard.css'; 
+import '../styles/dashboard.css';
 const Home = () => {
-  const { logout } = useAuth();
-  const auth = localStorage.getItem('bt_auth') === 'true' || sessionStorage.getItem('bt_auth') === 'true';
+  const { logout, user } = useAuth(); // ProtectedRoute already guarantees user is set before Home renders
   const location = useLocation();
-  
+
   const navigate = useNavigate();
 
-  // load user from localStorage if available
-  const raw = localStorage.getItem('bt_user');
-  const user = raw ? JSON.parse(raw) : null;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileRef = useRef(null);
+
   const initials = user && (user.firstName || user.lastName)
     ? `${(user.firstName || '').charAt(0)}${(user.lastName || '').charAt(0)}`.toUpperCase()
     : 'T';
 
-  if (!auth) return <Navigate to="/signin" replace />;
+  // Close menus on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setProfileMenuOpen(false);
+  }, [location.pathname]);
+
+  // Close profile dropdown on outside click (needed since it's now click-toggled, not hover-based)
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const navLinks = [
+    { to: '/home/dashboard', label: 'Dashboard', match: (p) => p === '/home' || p === '/home/dashboard' },
+    { to: '/home/expense', label: 'Expense', match: (p) => p.includes('expense') },
+    { to: '/home/budget', label: 'Budget', match: (p) => p.includes('budget') },
+    { to: '/home/subscriptions', label: 'Subscriptions', match: (p) => p.includes('subscriptions') },
+  ];
 
   return (
     <div className="app-root">
@@ -33,60 +55,59 @@ const Home = () => {
           <h1>BUDGET BUDDY</h1>
         </div>
 
-        {/* Center-Left: Navigation Links */}
-        <div className="nav-links">
-          <Link 
-            to="/home/dashboard"   
-            className={`nav-item ${location.pathname === '/home' || location.pathname === '/home/dashboard' ? 'active' : ''}`}
-          >
-            Dashboard
-          </Link>
-          <Link 
-            to="/home/expense" 
-            className={`nav-item ${location.pathname.includes('expense') ? 'active' : ''}`}
-          >
-            Expense
-          </Link>
-          <Link 
-            to="/home/budget" 
-            className={`nav-item ${location.pathname.includes('budget') ? 'active' : ''}`}
-          >
-            Budget
-          </Link>
-          <Link 
-            to="/home/subscriptions" 
-            className={`nav-item ${location.pathname.includes('subscriptions') ? 'active' : ''}`}
-          >
-            Subscriptions
-          </Link>
+        {/* Center-Left: Navigation Links (desktop) */}
+        <div className={`nav-links ${mobileMenuOpen ? 'open' : ''}`}>
+          {navLinks.map(link => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`nav-item ${link.match(location.pathname) ? 'active' : ''}`}
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
 
-        {/* Right: User Profile */}
-        <div className="nav-profile">
-  <div className="profile-dropdown-wrapper">
-    <div className="profile-circle" title="Account">
-      {initials}
-    </div>
-    <div className="profile-dropdown">
-    
-      <hr className="dropdown-divider" />
-      <button className="dropdown-item" style={{ justifyContent: 'center' }} onClick={() => navigate('/profile')}>
-        👤 Profile
-      </button>
-      <button className="dropdown-item" onClick={() => navigate('/home/past-expenses')}>
-      🧾 Past Expenses
-      </button>
-      <button className="dropdown-item" onClick={() => navigate('/home/receipts')}>
-      🗄️ Receipt Vault
-      </button>
-      
-      <hr className="dropdown-divider" />
-      <button className="dropdown-item danger" onClick={() => { logout(); navigate('/signin'); }}>
-        🚪 Sign Out
-      </button>
-    </div>
-  </div>
-</div>
+        {/* Right: Hamburger (mobile) + User Profile */}
+        <div className="nav-right">
+          <button
+            className="mobile-menu-toggle"
+            aria-label="Toggle navigation menu"
+            onClick={() => setMobileMenuOpen(open => !open)}
+          >
+            {mobileMenuOpen ? '✕' : '☰'}
+          </button>
+
+          <div className="nav-profile" ref={profileRef}>
+            <div className="profile-dropdown-wrapper">
+              <button
+                className="profile-circle"
+                title="Account"
+                onClick={() => setProfileMenuOpen(open => !open)}
+              >
+                {initials}
+              </button>
+              <div className={`profile-dropdown ${profileMenuOpen ? 'open' : ''}`}>
+
+                <hr className="dropdown-divider" />
+                <button className="dropdown-item" style={{ justifyContent: 'center' }} onClick={() => navigate('/profile')}>
+                  👤 Profile
+                </button>
+                <button className="dropdown-item" onClick={() => navigate('/home/past-expenses')}>
+                🧾 Past Expenses
+                </button>
+                <button className="dropdown-item" onClick={() => navigate('/home/receipts')}>
+                🗄️ Receipt Vault
+                </button>
+
+                <hr className="dropdown-divider" />
+                <button className="dropdown-item danger" onClick={() => { logout(); navigate('/signin'); }}>
+                  🚪 Sign Out
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </nav>
 
       {/* Main Content Area */}
