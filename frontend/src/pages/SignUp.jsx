@@ -17,6 +17,7 @@ const SignUp = () => {
   const { login } = useAuth(); //pulls the login function from the AuthContext
   const navigate = useNavigate();
 
+  // need to add token in this in login as we just sending data and not token.
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');

@@ -80,14 +80,14 @@
   right: 24px;
   width: 400px;
   height: 520px;
-  background: white;
+  background: var(--bg-container);
   border-radius: 12px;
   box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16);
   display: flex;
   flex-direction: column;
   z-index: 999;
   animation: slideUp 0.3s ease-out;
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
 @keyframes slideUp {

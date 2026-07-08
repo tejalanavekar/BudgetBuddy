@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getAllReceipts } from '../api/services/expenseService.js';
 import '../styles/receiptVault.css';
@@ -35,6 +36,7 @@ const formatDate = (dateStr) => {
 
 const ReceiptVaultPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [receipts, setReceipts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFolder, setActiveFolder] = useState(null);
@@ -131,23 +133,23 @@ const ReceiptVaultPage = () => {
         </div>
       </div>
 
-      {/* <div className="rv-stats">
-        <div className="rv-stat">
-          <span className="rv-stat-icon">🧾</span>
-          <div className="rv-stat-val">{receipts.length}</div>
-          <div className="rv-stat-lbl">Total Receipts</div>
+      <div className="rv-stats-bar">
+        <div className="rv-stats-group">
+          <div className="rv-stat-inline">
+            <span className="rv-stat-inline-lbl">Total Receipts</span>
+            <span className="rv-stat-inline-val">{receipts.length}</span>
+          </div>
+          <div className="rv-stat-inline">
+            <span className="rv-stat-inline-lbl">Total Recorded</span>
+            <span className="rv-stat-inline-val">${totalAmount.toFixed(2)}</span>
+          </div>
+          <div className="rv-stat-inline">
+            <span className="rv-stat-inline-lbl">Categories</span>
+            <span className="rv-stat-inline-val">{folders.length}</span>
+          </div>
         </div>
-        <div className="rv-stat">
-          <span className="rv-stat-icon">📁</span>
-          <div className="rv-stat-val">{folders.length}</div>
-          <div className="rv-stat-lbl">Categories</div>
-        </div>
-        <div className="rv-stat">
-          <span className="rv-stat-icon">💰</span>
-          <div className="rv-stat-val">${totalAmount.toFixed(2)}</div>
-          <div className="rv-stat-lbl">Total Documented</div>
-        </div> */}
-      {/* </div> */}
+        <button className="rv-upload-btn" onClick={() => navigate('/home/expense')}>+ Upload Receipt</button>
+      </div>
 
       {folders.length === 0 ? (
         <div className="rv-empty-full">

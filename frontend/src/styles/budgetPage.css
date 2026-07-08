@@ -14,14 +14,15 @@
   margin: 0 0 8px 0;
   font-size: 32px;
   font-weight: 700;
-  color: white;
+  color: var(--text-on-page);
   font-family: 'Clash Display', sans-serif;
   letter-spacing: -0.5px;
 }
 
 .header-title p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-on-page);
+  opacity: 0.7;
   font-size: 15px;
 }
 
@@ -52,8 +53,8 @@
 }
 
 .month-selector {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(24, 23, 23, 0.15);
+  background: var(--bg-container);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: white;
   padding: 10px 14px;
   border-radius: 8px;
@@ -62,15 +63,18 @@
   cursor: pointer;
   outline: none;
   font-family: 'Cabinet Grotesk', sans-serif;
-  transition: background 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.month-selector:hover {
-  background: rgba(255, 255, 255, 0.14);
+.month-selector:hover,
+.month-selector:focus {
+  background: var(--bg-container);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
 }
 
 .month-selector option {
-  background: #1a3a4a;
+  background: var(--bg-container);
   color: white;
 }
 
@@ -107,7 +111,7 @@
 }
 
 .budget-modal-box {
-  background: white;
+  background: var(--bg-container);
   border-radius: 12px;
   max-width: 600px;
   width: 100%;

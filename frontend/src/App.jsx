@@ -25,7 +25,11 @@ const ComingSoon = ({ title }) => (
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth(); //pulls from the Context
 
-  if (loading) return <div>Loading...</div>; // loading -> user Refresh or initial check then it should read the localstorage
+  if (loading) return (
+    <div style={{ minHeight: '100vh', width: '100vw', background: 'var(--bg-page)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-on-page)' }}>
+      Loading...
+    </div>
+  ); // loading -> user Refresh or initial check then it should read the localstorage
   
   if (!isAuthenticated) {
     return <Navigate to="/signin" replace />;

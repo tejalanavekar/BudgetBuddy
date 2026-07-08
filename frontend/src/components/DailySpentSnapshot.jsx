@@ -7,6 +7,12 @@ const CATEGORY_EMOJI = {
   Education: '📚', Shopping: '🛍️', Travel: '✈️', Savings: '💰', Other: '📦'
 };
 
+const CATEGORY_COLOR = {
+  Food: '#2dd4bf', Transport: '#3b82f6', Entertainment: '#f59e0b', Utilities: '#4bc0c0',
+  Health: '#ef4444', Education: '#6366f1', Shopping: '#ec4899', Travel: '#f97316',
+  Savings: '#10b981', Other: '#9966ff'
+};
+
 const DailySpentSnapshot = ({ userId, monthYear, refreshTrigger = 0 }) => {
   const [snapshot, setSnapshot] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -170,35 +176,26 @@ const DailySpentSnapshot = ({ userId, monthYear, refreshTrigger = 0 }) => {
                   // Check both 'budget' and 'budgeted' properties
                   const budgeted = categoryBudget.budget || categoryBudget.budgeted || 0;
                   
+                  const pct = budgeted > 0 ? Math.min(100, (spentAmount / budgeted) * 100) : 0;
+                  const barColor = CATEGORY_COLOR[categoryBudget.category] || '#2dd4bf';
+
                   return (
-                    <div key={categoryBudget.category} className="category-budget-item">
-                      <div className="category-name">
-                        <span className="emoji">{CATEGORY_EMOJI[categoryBudget.category] || '📦'}</span>
-                        <span className="name">{categoryBudget.category}</span>
+                    <div key={categoryBudget.category} className="category-budget-row">
+                      <span className="cbr-icon">{CATEGORY_EMOJI[categoryBudget.category] || '📦'}</span>
+                      <div className="cbr-main">
+                        <div className="cbr-top">
+                          <span className="cbr-name">{categoryBudget.category}</span>
+                          {budgeted > 0 ? (
+                            <span className="cbr-numbers">${spentAmount.toFixed(0)} / ${budgeted.toFixed(0)}</span>
+                          ) : (
+                            <span className="cbr-numbers">${spentAmount.toFixed(0)} <em>(no budget)</em></span>
+                          )}
+                        </div>
+                        <div className="cbr-bar-bg">
+                          <div className="cbr-bar-fill" style={{ width: `${pct}%`, background: barColor }} />
+                        </div>
                       </div>
-                      {budgeted > 0 ? (
-                        <div className="category-amounts">
-                          <div className="budget-info">
-                            <span className="label">Spent:</span>
-                            <span className="amount">${spentAmount.toFixed(2)}</span>
-                          </div>
-                          <div className="spent-info">
-                            <span className="label">Total Category Budget:</span>
-                            <span className="amount">${budgeted.toFixed(2)}</span>
-                          </div>
-                          <div className="remaining-info">
-                            <span className="label">Remaining:</span>
-                            <span className={`amount ${budgeted - spentAmount < 0 ? 'over-budget' : ''}`}>
-                              ${(budgeted - spentAmount).toFixed(2)}
-                            </span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="no-budget">
-                          <span className="amount">${spentAmount.toFixed(2)}</span>
-                          <span className="label">(No budget set)</span>
-                        </div>
-                      )}
+                      <span className="cbr-pct">{budgeted > 0 ? `${Math.round(pct)}%` : '—'}</span>
                     </div>
                   );
                 })}

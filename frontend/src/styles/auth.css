@@ -10,7 +10,7 @@ html, body {
   
   width: 100vw;
   min-height: 100vh;
-  background: linear-gradient(135deg, #384e81 0%, #1e3a5f 50%, #0d6efd 100%);
+  background: var(--bg-page);
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
@@ -35,7 +35,7 @@ html, body {
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   animation: modalSlideDown 0.3s ease-out;
   position: relative; /* This "anchors" the close button inside the box */
-  background: white !important;
+  background: var(--bg-container) !important;
   padding: 40px; /* Gives internal breathing room */
   border-radius: 28px;
 
@@ -48,9 +48,9 @@ html, body {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #f1f5f9; /* Light grey circle */
+  background: rgba(255,255,255,0.1);
   border: none;
-  color: #64748b;
+  color: rgba(255,255,255,0.8);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,15 +61,15 @@ html, body {
 }
 
 .modal-close-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: var(--hover-on-container);
+  color: #ffffff;
   transform: rotate(90deg); /* Subtle modern rotation effect */
 }
 .auth-card {
   width: 820px;
   max-width: 94%;
   display: flex;
-  background: #fff;
+  background: var(--bg-container);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0,0,0,0.15);
@@ -78,7 +78,7 @@ html, body {
 .auth-left {
   flex: 1 1 40%;
   padding: 36px 28px;
-  background: linear-gradient(180deg, #87b3cb 0%, #eef7ff 100%);
+  background: var(--bg-container);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -89,12 +89,13 @@ html, body {
   font-size: 43px;
   font-weight: 600;
   margin-bottom: 8px;
+  color: var(--text-on-container);
   font-family:'Times New Roman', Times, serif
 }
 
 .auth-left .lead {
   margin: 0;
-  color: #232c3a;
+  color: var(--text-on-container);
   font-size: 20px;
 }
 
@@ -106,6 +107,7 @@ html, body {
 .auth-title {
   margin: 0 0 8px 0;
   font-size: 28px;
+  color: var(--text-on-container);
 }
 
 .auth-error {
@@ -173,12 +175,12 @@ html, body {
   justify-content: flex-start;
   min-height: 100vh;
   /* width: 100%; */
-  background: linear-gradient(135deg, #384e81 0%, #1e3a5f 50%, #0d6efd 100%);
+  background: var(--bg-page);
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
   padding: 2vh 20px 40px 20px;
-  overflow-x: hidden; 
+  overflow-x: hidden;
   
   box-sizing: border-box;
 }
@@ -190,7 +192,7 @@ html, body {
 
 .brand-logo {
   font-size: 40px;
-  color: white;
+  color: var(--text-on-page);
   text-shadow: 0px 2px 4px rgba(0,0,0,0.05); /* Subtle depth */
   font-weight: 800;
   margin-bottom: 20px;
@@ -199,26 +201,26 @@ html, body {
 
 .brand-greeting {
   font-size: 25px;
-  color: white;
+  color: var(--text-on-page);
   margin-bottom: 5px;
 }
 
 .brand-subtext {
-  color: white;
+  color: var(--text-on-page);
   font-size: 25px;
   font-weight: 600;
 }
 
 /* The Single Detail Card */
 .auth-card-simple {
-  background: linear-gradient(180deg, #87b3cb 0%, #eef7ff 100%);
+  background: var(--bg-container);
   width: 100%;
   max-width: 500px;
   padding: 30px;
   margin-bottom: 20px;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(255,255,255,0.1);
   /* box-sizing: border-box; */
 }
 
@@ -226,7 +228,7 @@ html, body {
 .form-label {
   display: block;
   font-weight: 600;
-  color: #334155;
+  color: var(--text-on-container);
   margin-bottom: 8px;
   font-size: 1rem;
 }

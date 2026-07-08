@@ -9,9 +9,9 @@
 .daily-spent-snapshot.error {
   text-align: center;
   padding: 20px;
-  background: #f3f4f6;
+  background: var(--bg-container);
   border-radius: 12px;
-  color: #6b7280;
+  color: rgba(255,255,255,0.7);
 }
 
 .daily-spent-snapshot.error {
@@ -28,7 +28,7 @@
 }
 
 .snapshot-card {
-  background: white;
+  background: var(--bg-container);
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -68,7 +68,7 @@
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #6b7280;
+  color: rgba(255,255,255,0.6);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -101,13 +101,13 @@
 .amount {
   font-size: 32px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-on-container);
   margin: 12px 0;
 }
 
 .card-meta {
   font-size: 13px;
-  color: #9ca3af;
+  color: rgba(255,255,255,0.55);
   margin-bottom: 8px;
 }
 
@@ -151,8 +151,8 @@
   gap: 20px;
   margin: 24px 0;
   padding: 16px 0;
-  border-top: 1px solid #e5e7eb;
-  border-bottom: 1px solid #e5e7eb;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .metric {
@@ -162,13 +162,13 @@
 .metric-value {
   font-size: 28px;
   font-weight: 700;
-  color: #0284c7;
+  color: #38bdf8;
   margin-bottom: 6px;
 }
 
 .metric-label {
   font-size: 13px;
-  color: #6b7280;
+  color: rgba(255,255,255,0.6);
   font-weight: 500;
   margin-bottom: 6px;
 }
@@ -181,7 +181,7 @@
 
 .small-text {
   font-size: 12px;
-  color: #9ca3af;
+  color: rgba(255,255,255,0.55);
 }
 
 /* Progress Section */
@@ -199,19 +199,19 @@
 .progress-header .label {
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: rgba(255,255,255,0.8);
 }
 
 .progress-header .percentage {
   font-size: 16px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--text-on-container);
 }
 
 .progress-bar {
   width: 100%;
   height: 8px;
-  background: #e5e7eb;
+  background: rgba(255,255,255,0.15);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -227,7 +227,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #6b7280;
+  color: rgba(255,255,255,0.6);
   font-weight: 500;
 }
 
@@ -238,7 +238,7 @@
   gap: 16px;
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid rgba(255,255,255,0.1);
 }
 
 .day-stat {
@@ -249,14 +249,14 @@
   display: block;
   font-size: 24px;
   font-weight: 700;
-  color: #3b82f6;
+  color: #60a5fa;
   margin-bottom: 4px;
 }
 
 .day-label {
   display: block;
   font-size: 12px;
-  color: #6b7280;
+  color: rgba(255,255,255,0.6);
   font-weight: 500;
 }
 
@@ -271,41 +271,41 @@
   gap: 12px;
 }
 
-.expense-item {
+.expenses-list .expense-item {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: #f9fafb;
+  background: rgba(255,255,255,0.06);
   border-radius: 8px;
-  border-left: 3px solid #e5e7eb;
+  border-left: 3px solid rgba(255,255,255,0.15);
 }
 
-.expense-item:hover {
-  background: #f3f4f6;
+.expenses-list .expense-item:hover {
+  background: var(--hover-on-container);
 }
 
-.expense-icon {
+.expenses-list .expense-icon {
   font-size: 24px;
 }
 
-.expense-details {
+.expenses-list .expense-details {
   flex: 1;
 }
 
-.expense-category {
+.expenses-list .expense-category {
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-on-container);
 }
 
-.expense-desc {
+.expenses-list .expense-desc {
   font-size: 12px;
-  color: #9ca3af;
+  color: rgba(255,255,255,0.55);
   margin-top: 2px;
 }
 
-.expense-amount {
+.expenses-list .expense-amount {
   font-size: 14px;
   font-weight: 700;
   color: #ef4444;
@@ -316,116 +316,74 @@
 .category-budgets-section {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 2px solid #e5e7eb;
+  border-top: 2px solid rgba(255,255,255,0.1);
 }
 
 .category-budgets-section h4 {
   font-size: 14px;
   font-weight: 700;
-  color: #374151;
+  color: var(--text-on-container);
   margin-bottom: 16px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .category-budgets-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.category-budget-row {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-.category-budget-item {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+.cbr-icon {
+  width: 34px; height: 34px;
+  flex-shrink: 0;
   border-radius: 8px;
-  padding: 12px;
-  transition: all 0.2s ease;
-}
-
-.category-budget-item:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.category-name {
+  background: rgba(255,255,255,0.08);
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-  font-weight: 600;
-  color: #1f2937;
+  justify-content: center;
+  font-size: 17px;
 }
 
-.category-name .emoji {
-  font-size: 18px;
-}
+.cbr-main { flex: 1; min-width: 0; }
 
-.category-name .name {
-  font-size: 20px;
-  font-weight:bold;
-}
-
-.category-amounts {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.budget-info,
-.spent-info,
-.remaining-info {
+.cbr-top {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  align-items: center;
+  align-items: baseline;
+  margin-bottom: 6px;
 }
 
-.budget-info .label,
-.spent-info .label,
-.remaining-info .label {
-  color: black;
-  font-size: 14px;
+.cbr-name { font-weight: 700; color: var(--text-on-container); font-size: 14px; }
+.cbr-numbers { font-size: 13px; color: rgba(255,255,255,0.6); }
+.cbr-numbers em { font-style: normal; color: rgba(255,255,255,0.4); }
+
+.cbr-bar-bg {
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 999px;
+  overflow: hidden;
 }
 
-.budget-info .amount {
-  color: black;
-  font-size: 17px;
-  font-weight: normal;
+.cbr-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.5s ease;
 }
 
-.spent-info .amount {
-  color: black;
-  font-size: 17px;
-  font-weight: normal;
-}
-
-.remaining-info .amount {
-  color: black;
-  font-size:17px;
-  font-weight: normal;
-}
-
-.remaining-info .amount.over-budget {
-  color: black;
-}
-
-.no-budget {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  text-align: center;
-}
-
-.no-budget .amount {
-  font-size: 16px;
-  font-weight: 700;
-  color: #ef4444;
-}
-
-.no-budget .label {
-  font-size: 11px;
-  color: #9ca3af;
+.cbr-pct {
+  width: 40px;
+  flex-shrink: 0;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
 }
 
 /* Responsive */

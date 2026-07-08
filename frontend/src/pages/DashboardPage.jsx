@@ -269,7 +269,10 @@ const handleEditSubmit = async (e) => {
 
         {/* Left — Recent Expenses */}
         <div className="panel-card">
-          <h2 className="section-title">🧾 Recent Expenses</h2>
+          <div className="panel-header-row">
+            <h2 className="section-title">🧾 Recent Expenses</h2>
+            <button className="view-all-btn" onClick={() => navigate('/home/past-expenses')}>View all →</button>
+          </div>
           <div className="filters-row">
             <div className="filter-group">
               <span className="filter-label">Category</span>
@@ -331,7 +334,9 @@ const handleEditSubmit = async (e) => {
             ) : (
               <div className="empty-state">
                 <span className="empty-state-icon">🧾</span>
-                <p>No expenses found for this month.</p>
+                <p className="empty-state-title">No expenses found for this month.</p>
+                <p className="empty-state-sub">Add your first expense to see it here.</p>
+                <button className="empty-state-btn" onClick={() => navigate('/home/expense')}>+ Add Expense</button>
               </div>
             )}
           </div>

@@ -190,6 +190,10 @@ const extractItems = (text) => {
 };
 
 const CATEGORIES = ['Food','Transport','Utilities','Entertainment','Health','Education','Shopping','Travel','Savings','Other'];
+const CATEGORY_EMOJI = {
+  Food: '🍔', Transport: '🚗', Utilities: '💡', Entertainment: '🎬', Health: '💊',
+  Education: '📚', Shopping: '🛍️', Travel: '✈️', Savings: '💰', Other: '📦'
+};
 const ExpensePage = () => {
   const { user } = useAuth(); // Get the authenticated user from context
   const [form, setForm] = useState({
@@ -352,12 +356,20 @@ try {
                       <span className="text-primary ms-2">— Scanning with Google Vision...</span>
                     )}
                   </Form.Label>
-                  <Form.Control
-                    type="file" accept="image/*"
-                    onChange={handleFileChange}
-                    className="input-custom file-input"
-                    disabled={isScanning}
-                  />
+                  <label htmlFor="receiptUpload" className="upload-dropzone">
+                    <input
+                      id="receiptUpload"
+                      type="file" accept="image/*"
+                      onChange={handleFileChange}
+                      className="upload-dropzone-input"
+                      disabled={isScanning}
+                    />
+                    <span className="upload-dropzone-icon">📄</span>
+                    <span className="upload-dropzone-text">
+                      <span className="upload-dropzone-title">Choose file</span>
+                      <span className="upload-dropzone-sub">{receipt ? receipt.name : 'No file chosen — PNG, JPG, or PDF'}</span>
+                    </span>
+                  </label>
                   {isScanning && (
                   <div className="ocr-progress-bar mt-2">
                   <div className="ocr-progress-fill ocr-progress-pulse" />
@@ -400,9 +412,19 @@ try {
                 {/* Category */}
                 <Form.Group className="mb-3">
                   <Form.Label className="form-label-custom">Category</Form.Label>
-                  <Form.Select className="input-custom" name="category" value={form.category} onChange={handleChange}>
-                    {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                  </Form.Select>
+                  <div className="category-grid">
+                    {CATEGORIES.map(cat => (
+                      <button
+                        type="button"
+                        key={cat}
+                        className={`category-pill ${form.category === cat ? 'active' : ''}`}
+                        onClick={() => setForm({ ...form, category: cat })}
+                      >
+                        <span className="category-pill-emoji">{CATEGORY_EMOJI[cat] || '📦'}</span>
+                        <span className="category-pill-label">{cat}</span>
+                      </button>
+                    ))}
+                  </div>
                 </Form.Group>
                 {/* Extracted Items — editable */}
                 {(extractedItems.length > 0 || isScanning === false) && extractedItems.length > 0 && (

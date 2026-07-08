@@ -16,9 +16,11 @@ connectDB();
 const app = express();
 const port = process.env.PORT || 5000;
 
+const allowedOrigins = ['http://localhost:5173'];
+
 // Standard Middleware
 app.use(cors({
-    origin: 'http://localhost:5173', 
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
     credentials: true

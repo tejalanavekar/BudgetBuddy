@@ -1,7 +1,7 @@
 /* Budget Manager Styles */
 
 .budget-manager {
-  background: white;
+  background: var(--bg-container);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin: 20px 0;
@@ -21,13 +21,13 @@
 .manager-header h2 {
   margin: 0 0 8px 0;
   font-size: 24px;
-  color: #1f2937;
+  color: var(--text-on-container);
 }
 
 .month-display {
   margin: 0;
   font-size: 14px;
-  color: #6b7280;
+  color: rgba(255,255,255,0.6);
 }
 
 /* Messages */
@@ -82,13 +82,13 @@
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-on-container);
 }
 
 .form-section > small {
   margin: 0;
   font-size: 13px;
-  color: #6b7280;
+  color: rgba(255,255,255,0.6);
 }
 
 /* Input Groups */
@@ -101,7 +101,7 @@
 .input-group label {
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: rgba(255,255,255,0.8);
 }
 
 .input-wrapper {
@@ -138,7 +138,7 @@
   display: block;
   margin: 0;
   font-size: 12px;
-  color: #9ca3af;
+  color: rgba(255,255,255,0.5);
 }
 
 /* Category Toggle */
@@ -147,7 +147,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 16px;
-  background: #f3f4f6;
+  background: rgba(255,255,255,0.06);
   border-radius: 8px;
 }
 
@@ -157,7 +157,7 @@
   gap: 8px;
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: rgba(255,255,255,0.85);
   cursor: pointer;
   margin: 0;
 }
@@ -173,7 +173,7 @@
   display: block;
   margin: 0;
   font-size: 12px;
-  color: #6b7280;
+  color: rgba(255,255,255,0.55);
   margin-left: 26px;
 }
 
@@ -188,7 +188,7 @@
   margin: 0;
   font-size: 15px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-on-container);
 }
 
 .categories-grid {
@@ -199,21 +199,21 @@
 
 .category-card {
   padding: 12px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid rgba(255,255,255,0.12);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
-  background: white;
+  background: rgba(255,255,255,0.06);
 }
 
 .category-card:hover {
   border-color: #3b82f6;
-  background: #eff6ff;
+  background: rgba(59,130,246,0.15);
 }
 
 .category-card.selected {
   border-color: #3b82f6;
-  background: #eff6ff;
+  background: rgba(59,130,246,0.15);
 }
 
 .category-header {
@@ -231,7 +231,7 @@
   flex: 1;
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: rgba(255,255,255,0.85);
 }
 
 .checkbox {
@@ -259,7 +259,7 @@
 /* Category Summary */
 .category-summary {
   padding: 12px 16px;
-  background: #f9fafb;
+  background: rgba(255,255,255,0.06);
   border-radius: 8px;
   border-left: 3px solid #3b82f6;
 }
@@ -272,16 +272,16 @@
 }
 
 .summary-item:not(:last-child) {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .summary-item .label {
-  color: #6b7280;
+  color: rgba(255,255,255,0.6);
   font-weight: 500;
 }
 
 .summary-item .value {
-  color: #1f2937;
+  color: var(--text-on-container);
   font-weight: 600;
 }
 
@@ -323,13 +323,13 @@
 }
 
 .btn-secondary {
-  background: #e5e7eb;
-  color: #374151;
+  background: rgba(255,255,255,0.1);
+  color: var(--text-on-container);
   flex: 1;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #d1d5db;
+  background: var(--hover-on-container);
 }
 
 /* Tips Section */
