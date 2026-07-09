@@ -6,10 +6,10 @@ import connectDB from './config/db.js';
 import userRoutes from './routes/userRoutes.js'; // Your new User routes
 import expenseRoutes from './routes/expenseRoutes.js'; // Your new Expense routes
 import budgetRoutes from './routes/budgetRoutes.js'; // Budget routes with AI integration
+import subscriptionRoutes from './routes/subscriptionRoutes.js';
 
 // Initialize environment variables
 dotenv.config();
-import './config/redisClient.js';
 // Connect to MongoDB
 connectDB();
 
@@ -44,7 +44,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/users', userRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/budgets', budgetRoutes);
- 
+app.use('/api/subscriptions', subscriptionRoutes);
+
 // Health Check / Debug Endpoint
 app.get('/api/health', (req, res) => {
     res.json({ status: 'Server is running', node: process.version });

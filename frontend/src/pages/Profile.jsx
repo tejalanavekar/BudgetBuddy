@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth }  from '../context/AuthContext';
 import { getUserProfile , getExpenses , changePassword } from '../api/services';
+import { CATEGORY_EMOJI } from '../constants/categoryMeta';
 import '../styles/profile.css';
 
 const Profile = () => {
@@ -27,11 +28,6 @@ const Profile = () => {
     ? `${profile.firstName || ''} ${profile.lastName || ''}`.trim()
     : 'User';
 
-  const CATEGORY_EMOJI = {
-    Food: '🍔', Transport: '🚗', Utilities: '💡', Health: '💊',
-    Education: '📚', Shopping: '🛍️', Travel: '✈️', Savings: '💰', Other: '📦'
-  };
-  
   // Fetch full profile from backend -> instead of just name and  email
   //?. is used  to not  crashing if user is null
   //setProfile(res.data) -> save the entire profile to state and hide the  loading screen by setting it false or else  throw error

@@ -44,7 +44,7 @@ const SignIn = () => {
       login({
         userId: response.data.userId,
         firstName: response.data.firstName
-      }, response.data.token);
+      }, response.data.token, remember);
 
       // 3. Success! Move to home
       navigate('/home');

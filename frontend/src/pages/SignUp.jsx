@@ -17,14 +17,13 @@ const SignUp = () => {
   const { login } = useAuth(); //pulls the login function from the AuthContext
   const navigate = useNavigate();
 
-  // need to add token in this in login as we just sending data and not token.
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
       const res = await registerUser(formData);
-      login({ userId: res.data.userId, firstName: formData.firstName });
+      login({ userId: res.data.userId, firstName: res.data.firstName }, res.data.token);
       navigate('/home');
     } catch (err) {
       setError(err.response?.data?.message || 'Server error');

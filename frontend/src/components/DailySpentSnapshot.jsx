@@ -1,16 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { getDailySpentSnapshot } from '../api/services/budgetService';
+import { CATEGORY_EMOJI, CATEGORY_COLOR } from '../constants/categoryMeta';
 import '../styles/dailySpentSnapshot.css';
 
-const CATEGORY_EMOJI = {
-  Food: '🍔', Transport: '🚗', Utilities: '💡', Health: '💊',
-  Education: '📚', Shopping: '🛍️', Travel: '✈️', Savings: '💰', Other: '📦'
+// "2026-04" -> "APRIL 2026" / previous-month variants, so the snapshot cards
+// always reflect the actual selected month instead of a fixed placeholder.
+const formatMonthYearUpper = (monthYear) => {
+  const [year, month] = monthYear.split('-');
+  return new Date(parseInt(year), parseInt(month) - 1, 1)
+    .toLocaleString('default', { month: 'long', year: 'numeric' })
+    .toUpperCase();
 };
 
-const CATEGORY_COLOR = {
-  Food: '#2dd4bf', Transport: '#3b82f6', Entertainment: '#f59e0b', Utilities: '#4bc0c0',
-  Health: '#ef4444', Education: '#6366f1', Shopping: '#ec4899', Travel: '#f97316',
-  Savings: '#10b981', Other: '#9966ff'
+const getPreviousMonthYear = (monthYear) => {
+  const [year, month] = monthYear.split('-').map(Number);
+  const d = new Date(year, month - 2, 1); // month-1 is current month index, -1 more for previous
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+};
+
+const monthNameOnly = (monthYear) => {
+  const [year, month] = monthYear.split('-');
+  return new Date(parseInt(year), parseInt(month) - 1, 1)
+    .toLocaleString('default', { month: 'long' });
 };
 
 const DailySpentSnapshot = ({ userId, monthYear, refreshTrigger = 0 }) => {
@@ -67,26 +78,29 @@ const DailySpentSnapshot = ({ userId, monthYear, refreshTrigger = 0 }) => {
     ? ((comparisonDiff / snapshot.previousMonth.previousMonthSpending) * 100).toFixed(1)
     : 0;
 
+  const previousMonthYear = getPreviousMonthYear(monthYear);
+  const previousMonthName = monthNameOnly(previousMonthYear);
+
   return (
     <div className="daily-spent-snapshot">
       {/* Main Numbers Section */}
       <div className="snapshot-grid">
-        {/* April 2026 - Current Month */}
+        {/* Current Month */}
         <div className="snapshot-card primary-card">
           <div className="card-header">
-            <h3>APRIL 2026</h3>
+            <h3>{formatMonthYearUpper(monthYear)}</h3>
             <span className="badge current">Current Month</span>
           </div>
           <div className="amount">${snapshot.currentSpending.toFixed(2)}</div>
           <div className="card-meta">Current spending</div>
           <div className="comparison">
             <span className={comparisonDiff >= 0 ? 'negative' : 'positive'}>
-              {comparisonDiff >= 0 ? '+' : '-'}${Math.abs(comparisonDiff).toFixed(2)} vs March
+              {comparisonDiff >= 0 ? '+' : '-'}${Math.abs(comparisonDiff).toFixed(2)} vs {previousMonthName}
             </span>
             {comparisonDiff >= 0 ? (
-              <span className="trend negative">↑ {comparisonPercent}% than March</span>
+              <span className="trend negative">↑ {comparisonPercent}% than {previousMonthName}</span>
             ) : (
-              <span className="trend positive">↓ {Math.abs(comparisonPercent)}% than March</span>
+              <span className="trend positive">↓ {Math.abs(comparisonPercent)}% than {previousMonthName}</span>
             )}
           </div>
         </div>
@@ -94,12 +108,12 @@ const DailySpentSnapshot = ({ userId, monthYear, refreshTrigger = 0 }) => {
         {/* Previous Month */}
         <div className="snapshot-card secondary-card">
           <div className="card-header">
-            <h3>MARCH 2026</h3>
+            <h3>{formatMonthYearUpper(previousMonthYear)}</h3>
             <span className="badge previous">Previous Month</span>
           </div>
           <div className="amount">${snapshot.previousMonth?.previousMonthSpending || 0}</div>
           <div className="card-meta">Baseline</div>
-        </div>   
+        </div>
       </div>
 
       {/* Daily Spend Snapshot Section */}

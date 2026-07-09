@@ -1,17 +1,14 @@
 
 import express from 'express';
-import { registerUser, loginUser, getUsers, getUserProfile, changePassword } from '../controllers/userController.js';
+import { registerUser, loginUser, getUserProfile, changePassword } from '../controllers/userController.js';
 import protect from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 // Maps to POST /api/users
-router.post('/', registerUser); 
+router.post('/', registerUser);
 
 // Maps to POST /api/users/login
-router.post('/login', loginUser); 
-
-// Maps to GET /api/users (Debug/Admin only)
-router.get('/', getUsers); 
+router.post('/login', loginUser);
 
 router.get('/:userId', protect, getUserProfile);
 

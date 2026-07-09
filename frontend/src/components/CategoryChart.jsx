@@ -1,26 +1,11 @@
 import React, { useMemo } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { CATEGORY_COLOR as categoryColors } from '../constants/categoryMeta';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const CategoryChart = ({ expenses = [] }) => {
-  
-  // 1. Define your colors in one place mapped to category names
-  const categoryColors = {
-    Food: '#FF6384',          // Red/Pink
-    Transport: '#36A2EB',     // Blue
-    Entertainment: '#FFCE56', // Yellow
-    Utilities: '#4BC0C0',     // Teal
-    Other: '#9966FF',         // Purple
-    
-    // --- NEW CATEGORIES ---
-    Health: '#ef4444',        // Red
-    Education: '#6366f1',     // Indigo
-    Shopping: '#ec4899',      // Pink
-    Travel: '#f97316',        // Orange
-    Savings: '#10b981',       // Green
-  };
 
   const data = useMemo(() => {
     // initialize totals for ALL categories to 0

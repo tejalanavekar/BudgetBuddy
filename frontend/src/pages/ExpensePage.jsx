@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import {Form, Button, Container, Card, Alert, Row, Col} from 'react-bootstrap';
 import '../styles/expense.css';
 import { useAuth } from '../context/AuthContext.jsx';
+import { CATEGORIES, CATEGORY_EMOJI } from '../constants/categoryMeta';
 // ExpensePage component for adding new expenses and useState for form handling, so setForm is the action where in user inputs the data and the state is being changed from form to setForm
 //setForm to update the object when user inputs in the fields
 
@@ -187,12 +188,6 @@ const extractItems = (text) => {
     }
   }
   return items;
-};
-
-const CATEGORIES = ['Food','Transport','Utilities','Entertainment','Health','Education','Shopping','Travel','Savings','Other'];
-const CATEGORY_EMOJI = {
-  Food: '🍔', Transport: '🚗', Utilities: '💡', Entertainment: '🎬', Health: '💊',
-  Education: '📚', Shopping: '🛍️', Travel: '✈️', Savings: '💰', Other: '📦'
 };
 
 // Local YYYY-MM-DD for today — toISOString() converts to UTC first, which can

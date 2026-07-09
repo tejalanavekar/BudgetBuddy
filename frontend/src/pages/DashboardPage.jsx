@@ -3,14 +3,9 @@ import { useLocation } from 'react-router-dom';
 import CategoryChart from '../components/CategoryChart';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getExpenses , deleteExpense, updateExpense } from '../api/services/expenseService.js';
+import { CATEGORY_EMOJI } from '../constants/categoryMeta';
 import '../styles/dashboard.css';
 import { useNavigate } from 'react-router-dom';
-
-
-const CATEGORY_EMOJI = {
-  Food: '🍔', Transport: '🚗', Utilities: '💡', Health: '💊',
-  Education: '📚', Shopping: '🛍️', Travel: '✈️', Savings: '💰', Other: '📦'
-};
 
 const DashboardPage = () => {
   const navigate = useNavigate();

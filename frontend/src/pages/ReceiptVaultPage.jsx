@@ -2,14 +2,11 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getAllReceipts } from '../api/services/expenseService.js';
+import { CATEGORY_EMOJI } from '../constants/categoryMeta';
 import '../styles/receiptVault.css';
 
-const CATEGORY_EMOJI = {
-  Food: '🍔', Transport: '🚗', Utilities: '💡', Health: '💊',
-  Education: '📚', Shopping: '🛍️', Travel: '✈️', Savings: '💰',
-  Entertainment: '🎬', Other: '📦'
-};
-
+// This page needs a richer {bg, accent, text} shape per category (for folder card
+// styling) rather than the shared flat CATEGORY_COLOR — kept as its own map for that reason.
 const CATEGORY_COLORS = {
   Food:          { bg: '#fff1f2', accent: '#ff6384', text: '#be123c' },
   Transport:     { bg: '#eff6ff', accent: '#36A2EB', text: '#1d4ed8' },

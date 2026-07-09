@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { setBudget, getBudget } from '../api/services/budgetService';
+import { CATEGORY_EMOJI } from '../constants/categoryMeta';
 import '../styles/budgetManager.css';
 
 const CATEGORIES = [
@@ -13,11 +14,6 @@ const CATEGORIES = [
   'Savings',
   'Other'
 ];
-
-const CATEGORY_EMOJI = {
-  Food: '🍔', Transport: '🚗', Utilities: '💡', Health: '💊',
-  Education: '📚', Shopping: '🛍️', Travel: '✈️', Savings: '💰', Other: '📦'
-};
 
 const BudgetManager = ({ userId, monthYear, onBudgetSaved, onClose }) => {
   const [totalBudget, setTotalBudget] = useState('');

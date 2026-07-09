@@ -16,8 +16,8 @@ const API = axios.create({
 // --- REQUEST INTERCEPTOR --- -> runs before every request leaves the browser
 API.interceptors.request.use(
     (config) => {
-        // Get token from localStorage
-        const token = localStorage.getItem('bt_token');
+        // Token lives in localStorage (remembered session) or sessionStorage (this-tab-only session)
+        const token = localStorage.getItem('bt_token') || sessionStorage.getItem('bt_token');
 
         // Add Bearer token to every request if it exists
         if (token) {
@@ -47,7 +47,8 @@ API.interceptors.response.use(
         if (status === 401 && !url.includes('/login')) {
             // If backend returns 401 (Unauthorized), force logout
                 localStorage.clear();
-                window.location.href = '/signin';  // hard redirect 
+                sessionStorage.clear();
+                window.location.href = '/signin';  // hard redirect
                 
             }
             

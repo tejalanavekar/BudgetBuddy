@@ -7,23 +7,10 @@ import {
 } from 'chart.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getExpenses, deleteExpense, updateExpense } from '../api/services/expenseService.js';
+import { CATEGORIES, CATEGORY_EMOJI, CATEGORY_COLOR as CATEGORY_COLORS } from '../constants/categoryMeta';
 import '../styles/pastExpenses.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
-
-const CATEGORY_EMOJI = {
-  Food: '🍔', Transport: '🚗', Utilities: '💡', Health: '💊',
-  Education: '📚', Shopping: '🛍️', Travel: '✈️', Savings: '💰',
-  Entertainment: '🎬', Other: '📦'
-};
-
-const CATEGORY_COLORS = {
-  Food: '#FF6384', Transport: '#36A2EB', Entertainment: '#FFCE56',
-  Utilities: '#4BC0C0', Other: '#9966FF', Health: '#ef4444',
-  Education: '#6366f1', Shopping: '#ec4899', Travel: '#f97316', Savings: '#10b981',
-};
-
-const CATEGORIES = ['Food','Transport','Utilities','Entertainment','Health','Education','Shopping','Travel','Savings','Other'];
 
 const getYearMonth = (dateStr) => {
   if (!dateStr) return [null, null];
@@ -35,6 +22,13 @@ const formatMonthLabel = (iso) => {
   const [year, month] = iso.split('-');
   return new Date(parseInt(year), parseInt(month) - 1, 1)
     .toLocaleString('default', { month: 'short', year: 'numeric' });
+};
+
+// Month-only, no year — used for the chart's x-axis since the whole chart is already scoped to one selected year
+const formatMonthOnly = (iso) => {
+  const [year, month] = iso.split('-');
+  return new Date(parseInt(year), parseInt(month) - 1, 1)
+    .toLocaleString('default', { month: 'short' });
 };
 
 const formatMonthFull = (iso) => {
@@ -110,7 +104,7 @@ const PastExpensesPage = () => {
       });
       return {
         iso,
-        label: formatMonthLabel(iso),
+        label: formatMonthOnly(iso),
         total: expenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0),
         count: expenses.length,
       };

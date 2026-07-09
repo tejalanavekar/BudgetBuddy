@@ -31,8 +31,16 @@ export const registerUser = async (req, res) => {
 
         const user = new User({ firstName, lastName, phone, email, password: hashedPassword });
         await user.save();
-        
-        res.status(201).json({ message: 'User registered', userId: user._id });
+
+        // Issue a JWT on registration too, same as login — otherwise a freshly-registered
+        // user has no valid token and protected calls fail until they sign in separately.
+        const token = jwt.sign(
+            { userId: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        res.status(201).json({ message: 'User registered', userId: user._id, firstName: user.firstName, token });
     } catch (error) {
         res.status(500).json({ message: 'Error creating user', error: error.message });
     }
@@ -69,23 +77,15 @@ export const loginUser = async (req, res) =>{
     }
 };
 
-//GET/users
-//Handles  the  fetching of  the  users data
-export const getUsers = async (req, res)=>{
-    try{
-        const users = await User.find().select('-password -__v'); // select to exclude password and version fields
-        res.json(users);
-
-    }
-    catch(error){
-        res.status(500).json({ message: 'Error fetching users', error: error.message });
-    }
-};
-
 //Profile page
 export const getUserProfile = async (req, res) => {
     try {
         const { userId } = req.params;
+        // Authz check: the verified token owner (req.userId) must match the profile being requested,
+        // not just any authenticated user's own claim of which userId they're asking for.
+        if (userId !== req.userId) {
+            return res.status(403).json({ message: 'Unauthorized' });
+        }
         const user = await User.findById(userId).select('-password'); // exclude password
         if (!user) return res.status(404).json({ message: 'User not found' });
         res.status(200).json(user);
@@ -98,6 +98,11 @@ export const getUserProfile = async (req, res) => {
 //PUT /api/users/:userId/password — change password
 export const changePassword = async (req, res) => {
     try {
+        // Authz check: only the token owner can change their own password, regardless of what
+        // userId is in the URL.
+        if (req.params.userId !== req.userId) {
+            return res.status(403).json({ message: 'Unauthorized' });
+        }
         const { currentPassword, newPassword } = req.body;
         //Find user WITH password this time (we need it to compare)
         const user = await User.findById(req.params.userId);
