@@ -147,12 +147,12 @@
 .rv-thumb-placeholder {
   width: 72px; height: 88px;
   border-radius: 8px;
-  background: var(--folder-bg, #f8fafc);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 32px;
-  border: 2px dashed rgba(0,0,0,0.1);
+  border: 2px dashed rgba(255,255,255,0.15);
+  color: var(--text-on-container);
 }
 
 .rv-folder-cat-row {

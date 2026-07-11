@@ -250,8 +250,8 @@
 .pe-expense-item:last-child { border-bottom: none; }
 
 .pe-expense-emoji {
-  width: 40px; height: 40px; border-radius: 10px;
-  background: rgba(255,255,255,0.08); display: flex; align-items: center;
+  width: 40px; height: 40px;
+  display: flex; align-items: center;
   justify-content: center; font-size: 18px; flex-shrink: 0;
 }
 
@@ -279,6 +279,7 @@
 .pe-action-btn {
   background: none; border: none; font-size: 14px; cursor: pointer;
   padding: 2px 4px; border-radius: 6px; opacity: 0.5;
+  color: var(--text-on-container); display: inline-flex;
   transition: opacity 0.2s, transform 0.2s, background 0.2s;
 }
 .pe-action-btn:hover { opacity: 1; transform: scale(1.15); background: var(--hover-on-container); }

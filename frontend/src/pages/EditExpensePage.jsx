@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { Row, Col } from 'react-bootstrap';
 import '../styles/expense.css';
 import '../styles/editExpensePage.css';
+import { UploadIcon, CheckIcon, WarningIcon } from '../components/icons/Icon';
 
 const CATEGORIES = ['Food','Transport','Utilities','Entertainment','Health','Education','Shopping','Travel','Savings','Other'];
 
@@ -114,7 +115,7 @@ const EditExpensePage = () => {
                         style={{ display: 'none' }}
                       />
                       <span className="eem-file-btn">
-                        📤 {preview ? 'Replace Receipt' : 'Choose File'}
+                        <UploadIcon size={16} /> {preview ? 'Replace Receipt' : 'Choose File'}
                       </span>
                     </label>
                   </div>
@@ -222,7 +223,7 @@ const EditExpensePage = () => {
                   marginTop: '1rem'
                 }}
               >
-                {message.type === 'success' ? '✅' : '⚠️'} {message.text}
+                {message.type === 'success' ? <CheckIcon size={14} /> : <WarningIcon size={14} />} {message.text}
               </div>
             )}
 

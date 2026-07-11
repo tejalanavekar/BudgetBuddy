@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getSubscriptions, addSubscription, updateSubscription, deleteSubscription } from '../api/services/subscriptionService.js';
+import { SubscriptionCategoryIcon, RefreshIcon, EditIcon, FolderIcon, CalendarIcon } from '../components/icons/Icon';
 import '../styles/subscriptions.css';
 
 const CATEGORY_META = {
-  Software:   { emoji: '💻', color: '#6366f1' },
-  Streaming:  { emoji: '🎬', color: '#ec4899' },
-  Music:      { emoji: '🎵', color: '#2dd4bf' },
-  Health:     { emoji: '💪', color: '#10b981' },
-  Storage:    { emoji: '☁️', color: '#8b5cf6' },
-  News:       { emoji: '📰', color: '#f59e0b' },
-  Other:      { emoji: '📦', color: '#94a3b8' }
+  Software:   { color: '#6366f1' },
+  Streaming:  { color: '#ec4899' },
+  Music:      { color: '#2dd4bf' },
+  Health:     { color: '#10b981' },
+  Storage:    { color: '#8b5cf6' },
+  News:       { color: '#f59e0b' },
+  Other:      { color: '#94a3b8' }
 };
 const CATEGORIES = Object.keys(CATEGORY_META);
 const STATUS_TABS = ['All', 'Active', 'Paused', 'Cancelled'];
@@ -176,7 +177,7 @@ const SubscriptionsPage = () => {
       {/* Header */}
       <div className="subs-header">
         <div className="subs-header-left">
-          <span className="subs-header-icon">🔄</span>
+          <span className="subs-header-icon"><RefreshIcon /></span>
           <div>
             <h1 className="subs-title">Subscriptions</h1>
             <p className="subs-subtitle">Track and manage all your recurring payments</p>
@@ -268,7 +269,7 @@ const SubscriptionsPage = () => {
       <div className="subs-list">
         {filteredSubscriptions.length === 0 ? (
           <div className="subs-empty">
-            <span>🔄</span>
+            <span><RefreshIcon size={32} /></span>
             <p>No subscriptions found.</p>
             <button className="subs-add-btn" onClick={openAddModal}>+ Add Subscription</button>
           </div>
@@ -281,16 +282,16 @@ const SubscriptionsPage = () => {
                 key={sub._id}
                 style={{ '--subs-accent': meta.color }}
               >
-                <div className="subs-item-icon" style={{ background: `${meta.color}33` }}>{meta.emoji}</div>
+                <div className="subs-item-icon"><SubscriptionCategoryIcon category={sub.category} /></div>
                 <div className="subs-item-info">
                   <div className="subs-item-top">
                     <span className="subs-item-name">{sub.name}</span>
                     <span className={`subs-status-badge subs-status-${sub.status.toLowerCase()}`}>{sub.status}</span>
                   </div>
                   <div className="subs-item-meta">
-                    <span>📁 {sub.category}</span>
-                    <span>📆 {sub.billingCycle}</span>
-                    <span>🗓️ Next: {formatDate(sub.nextBillingDate)}</span>
+                    <span><FolderIcon size={13} /> {sub.category}</span>
+                    <span><CalendarIcon size={13} /> {sub.billingCycle}</span>
+                    <span><CalendarIcon size={13} /> Next: {formatDate(sub.nextBillingDate)}</span>
                   </div>
                 </div>
                 <div className="subs-item-right">
@@ -301,7 +302,7 @@ const SubscriptionsPage = () => {
                     </span>
                   </div>
                   <div className="subs-item-actions">
-                    <button className="subs-action-btn" title="Edit" onClick={() => openEditModal(sub)}>✎</button>
+                    <button className="subs-action-btn" title="Edit" onClick={() => openEditModal(sub)}><EditIcon size={14} /></button>
                     {sub.status !== 'Cancelled' ? (
                       <>
                         <button className="subs-action-btn" onClick={() => handleTogglePause(sub)}>

@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import {Form, Button, Container, Card, Alert, Row, Col} from 'react-bootstrap';
 import '../styles/expense.css';
 import { useAuth } from '../context/AuthContext.jsx';
-import { CATEGORIES, CATEGORY_EMOJI } from '../constants/categoryMeta';
+import { CATEGORIES } from '../constants/categoryMeta';
+import { CategoryIcon, DocumentIcon } from '../components/icons/Icon';
 // ExpensePage component for adding new expenses and useState for form handling, so setForm is the action where in user inputs the data and the state is being changed from form to setForm
 //setForm to update the object when user inputs in the fields
 
@@ -371,7 +372,7 @@ try {
                       className="upload-dropzone-input"
                       disabled={isScanning}
                     />
-                    <span className="upload-dropzone-icon">📄</span>
+                    <span className="upload-dropzone-icon"><DocumentIcon /></span>
                     <span className="upload-dropzone-text">
                       <span className="upload-dropzone-title">Choose file</span>
                       <span className="upload-dropzone-sub">{receipt ? receipt.name : 'No file chosen — PNG, JPG, or PDF'}</span>
@@ -427,7 +428,7 @@ try {
                         className={`category-pill ${form.category === cat ? 'active' : ''}`}
                         onClick={() => setForm({ ...form, category: cat })}
                       >
-                        <span className="category-pill-emoji">{CATEGORY_EMOJI[cat] || '📦'}</span>
+                        <span className="category-pill-emoji"><CategoryIcon category={cat} /></span>
                         <span className="category-pill-label">{cat}</span>
                       </button>
                     ))}

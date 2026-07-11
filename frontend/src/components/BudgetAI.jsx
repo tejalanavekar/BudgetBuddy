@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { chatWithBudgetAI, getBudgetSummary } from '../api/services/budgetService';
+import { WalletIcon, WarningIcon, UserIcon, CloseIcon, BotIcon, TrendingUpIcon, ChartIcon, ShoppingBagIcon } from '../components/icons/Icon';
 import '../styles/budgetAI.css';
 
 const BudgetAI = ({ userId, monthYear }) => {
@@ -118,14 +119,14 @@ const BudgetAI = ({ userId, monthYear }) => {
     <div className="budget-ai-container">
       <div className="budget-ai-header">
         <div className="header-content">
-          <h2>💰 Budget AI</h2>
+          <h2><WalletIcon /> Budget AI</h2>
           <span className="badge">Powered by LangChain</span>
         </div>
       </div>
 
       {error && (
         <div className="error-banner">
-          <span className="error-icon">⚠️</span>
+          <span className="error-icon"><WarningIcon size={16} /></span>
           <span>{error}</span>
           <button className="error-close" onClick={() => setError(null)}>×</button>
         </div>
@@ -135,7 +136,7 @@ const BudgetAI = ({ userId, monthYear }) => {
         {messages.map((message) => (
           <div key={message.id} className={`message message-${message.type}`}>
             <div className="message-avatar">
-              {message.type === 'user' ? '👤' : message.type === 'error' ? '❌' : '🤖'}
+              {message.type === 'user' ? <UserIcon size={18} /> : message.type === 'error' ? <CloseIcon size={18} /> : <BotIcon size={18} />}
             </div>
             <div className="message-content">
               <p className="message-text">
@@ -157,7 +158,7 @@ const BudgetAI = ({ userId, monthYear }) => {
         ))}
         {loading && (
           <div className="message message-loading">
-            <div className="message-avatar">🤖</div>
+            <div className="message-avatar"><BotIcon size={18} /></div>
             <div className="message-content">
               <div className="loading-dots">
                 <span></span>
@@ -179,30 +180,30 @@ const BudgetAI = ({ userId, monthYear }) => {
               setInputValue('How much more can I spend this month?');
             }}
           >
-            💰 Budget Check
+            <WalletIcon size={14} /> Budget Check
           </button>
-          <button 
+          <button
             className="suggestion-btn"
             onClick={() => {
               setInputValue('What are my spending trends?');
             }}
           >
-            📈 Trends
+            <TrendingUpIcon size={14} /> Trends
           </button>
-          <button 
+          <button
             className="suggestion-btn"
             onClick={handleGetSummary}
             disabled={loading}
           >
-            📊 Summary
+            <ChartIcon size={14} /> Summary
           </button>
-          <button 
+          <button
             className="suggestion-btn"
             onClick={() => {
               setInputValue('Can I afford to spend $X this shopping category?');
             }}
           >
-            🛍️ Check Budget
+            <ShoppingBagIcon size={14} /> Check Budget
           </button>
         </div>
       </div>

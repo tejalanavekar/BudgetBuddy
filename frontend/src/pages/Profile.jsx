@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth }  from '../context/AuthContext';
 import { getUserProfile , getExpenses , changePassword } from '../api/services';
-import { CATEGORY_EMOJI } from '../constants/categoryMeta';
+import { CategoryIcon, WalletIcon, ReceiptIcon, TrophyIcon, HourglassIcon, WarningIcon, ChartIcon, KeyIcon, PaperclipIcon, ClipboardIcon, LogoutIcon } from '../components/icons/Icon';
 import '../styles/profile.css';
 
 const Profile = () => {
@@ -95,7 +95,7 @@ const Profile = () => {
   if (profileLoading) return (
     <div className="profile-loading">
       <div className="profile-loading-inner">
-        <div className="profile-loading-icon">⏳</div>
+        <div className="profile-loading-icon"><HourglassIcon size={36} /></div>
         <p>Loading your profile...</p>
       </div>
     </div>
@@ -104,7 +104,7 @@ const Profile = () => {
   if (profileError) return (
     <div className="profile-loading">
       <div className="profile-loading-inner">
-        <div className="profile-loading-icon">⚠️</div>
+        <div className="profile-loading-icon"><WarningIcon size={36} /></div>
         <p className="profile-error-text">{profileError}</p>
         <button className="profile-error-btn" onClick={() => navigate('/home')}>Go Back</button>
       </div>
@@ -129,22 +129,22 @@ const Profile = () => {
     {/* Stats strip */}
     <div className="stats-strip">
         <div className="stat-card">
-          <span className="stat-icon">💸</span>
+          <span className="stat-icon"><WalletIcon /></span>
           <div className="stat-label">Total Spent</div>
           <div className="stat-value">${totalSpent.toFixed(0)}</div>
           <div className="stat-sub">across all time</div>
         </div>
         <div className="stat-card">
-          <span className="stat-icon">🧾</span>
+          <span className="stat-icon"><ReceiptIcon /></span>
           <div className="stat-label">Transactions</div>
           <div className="stat-value">{expenses.length}</div>
           <div className="stat-sub">total expenses logged</div>
         </div>
         <div className="stat-card">
-          <span className="stat-icon">🏆</span>
+          <span className="stat-icon"><TrophyIcon /></span>
           <div className="stat-label">Top Category</div>
           <div className="stat-value stat-value--sm">
-            {topCategory ? `${CATEGORY_EMOJI[topCategory[0]] || '📦'} ${topCategory[0]}` : '—'}
+            {topCategory ? (<><CategoryIcon category={topCategory[0]} /> {topCategory[0]}</>) : '—'}
           </div>
           <div className="stat-sub">{topCategory ? `$${topCategory[1].toFixed(0)} spent` : 'No data yet'}</div>
         </div>
@@ -185,21 +185,21 @@ const Profile = () => {
             <p className="sidebar-section-title">Navigation</p>
 
             {[
-              { id: 'overview', icon: '📊', label: 'Overview' },
-              { id: 'expenses', icon: '🧾', label: 'My Expenses' },
-              { id: 'password', icon: '🔑', label: 'Change Password' },
+              { id: 'overview', icon: ChartIcon, label: 'Overview' },
+              { id: 'expenses', icon: ReceiptIcon, label: 'My Expenses' },
+              { id: 'password', icon: KeyIcon, label: 'Change Password' },
             ].map(tab => (
               <button key={tab.id}
                 className={`sidebar-action ${activeTab === tab.id ? 'active' : ''}`}
                 onClick={() => setActiveTab(tab.id)}>
-                <span className="sidebar-action-icon">{tab.icon}</span>
+                <span className="sidebar-action-icon"><tab.icon /></span>
                 {tab.label}
               </button>
             ))}
 
             <div className="sidebar-divider" />
             <button className="sidebar-action danger" onClick={handleSignOut}>
-              <span className="sidebar-action-icon">🚪</span>Sign Out
+              <span className="sidebar-action-icon"><LogoutIcon /></span>Sign Out
             </button>
           </div>
         </div>
@@ -210,7 +210,7 @@ const Profile = () => {
           {/* Overview Tab */}
           {activeTab === 'overview' && (
             <>
-              <h2 className="panel-title">📊 Your Overview</h2>
+              <h2 className="panel-title"><ChartIcon /> Your Overview</h2>
               <div className="overview-grid">
                 <div className="overview-tile">
                   <div className="overview-tile-label">This Month</div>
@@ -240,15 +240,15 @@ const Profile = () => {
                 <>
                   <h3 className="latest-expense-title">Latest Expense</h3>
                   <div className="expense-item expense-item--highlight">
-                    <div className="expense-emoji">{CATEGORY_EMOJI[latestExpense.category] || '📦'}</div>
+                    <div className="expense-emoji"><CategoryIcon category={latestExpense.category} /></div>
                     <div className="expense-info">
                       <div className="expense-desc">{latestExpense.description}</div>
                       <div className="expense-meta">
                         {new Date(latestExpense.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                         <span className="expense-cat-badge">{latestExpense.category}</span>
-                        {latestExpense.receiptPath && <span className="receipt-tag">📎 Receipt</span>}
+                        {latestExpense.receiptPath && <span className="receipt-tag"><PaperclipIcon size={12} /> Receipt</span>}
                         {latestExpense.items?.length > 0 && (
-                          <span className="receipt-tag receipt-tag--green">📋 {latestExpense.items.length} items</span>
+                          <span className="receipt-tag receipt-tag--green"><ClipboardIcon size={12} /> {latestExpense.items.length} items</span>
                         )}
                       </div>
                     </div>
@@ -259,7 +259,7 @@ const Profile = () => {
 
               {!latestExpense && !expensesLoading && (
                 <div className="empty-expenses">
-                  <span className="empty-icon">🧾</span>
+                  <span className="empty-icon"><ReceiptIcon size={36} /></span>
                   <p>No expenses yet. Start tracking!</p>
                   <button className="empty-btn" onClick={() => navigate('/home/expense')}>
                     Add your first expense
@@ -272,12 +272,12 @@ const Profile = () => {
           {/* Expenses Tab */}
           {activeTab === 'expenses' && (
             <>
-              <h2 className="panel-title">🧾 My Expenses</h2>
+              <h2 className="panel-title"><ReceiptIcon /> My Expenses</h2>
               {expensesLoading ? (
                 <div className="tab-loading">Loading expenses...</div>
               ) : expenses.length === 0 ? (
                 <div className="empty-expenses">
-                  <span className="empty-icon">🧾</span>
+                  <span className="empty-icon"><ReceiptIcon size={36} /></span>
                   <p>No expenses logged yet.</p>
                   <button className="empty-btn" onClick={() => navigate('/home/expense')}>
                     Add your first expense
@@ -286,15 +286,15 @@ const Profile = () => {
               ) : (
                 expenses.slice(0, 10).map(e => (
                   <div className="expense-item" key={e._id}>
-                    <div className="expense-emoji">{CATEGORY_EMOJI[e.category] || '📦'}</div>
+                    <div className="expense-emoji"><CategoryIcon category={e.category} /></div>
                     <div className="expense-info">
                       <div className="expense-desc">{e.description}</div>
                       <div className="expense-meta">
                         {new Date(e.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                         <span className="expense-cat-badge">{e.category}</span>
-                        {e.receiptPath && <span className="receipt-tag">📎 Receipt</span>}
+                        {e.receiptPath && <span className="receipt-tag"><PaperclipIcon size={12} /> Receipt</span>}
                         {e.items?.length > 0 && (
-                          <span className="receipt-tag receipt-tag--green">📋 {e.items.length} items</span>
+                          <span className="receipt-tag receipt-tag--green"><ClipboardIcon size={12} /> {e.items.length} items</span>
                         )}
                       </div>
                     </div>
@@ -308,7 +308,7 @@ const Profile = () => {
           {/* Password Tab */}
           {activeTab === 'password' && (
             <>
-              <h2 className="panel-title">🔑 Change Password</h2>
+              <h2 className="panel-title"><KeyIcon /> Change Password</h2>
               {passwordMsg.text && (
                 <div className={`form-msg form-msg--${passwordMsg.type}`}>{passwordMsg.text}</div>
               )}

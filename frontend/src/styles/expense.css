@@ -138,8 +138,6 @@
 .upload-dropzone-icon {
   width: 40px; height: 40px;
   flex-shrink: 0;
-  border-radius: 10px;
-  background: #2dd4bf;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import DailySpentSnapshot from '../components/DailySpentSnapshot.jsx';
 import FloatingChatbot from '../components/FloatingChatbot.jsx';
 import BudgetManager from '../components/BudgetManager.jsx';
+import { WalletIcon } from '../components/icons/Icon';
 import '../styles/budgetPage.css';
 
 const BudgetPage = () => {
@@ -40,7 +41,7 @@ const BudgetPage = () => {
       {/* Header */}
       <div className="budget-page-header">
         <div className="header-title">
-          <h2>💰 Budget Management</h2>
+          <h2><WalletIcon /> Budget Management</h2>
           <p>Manage your monthly budget and track spending</p>
         </div>
         <div className="header-controls">

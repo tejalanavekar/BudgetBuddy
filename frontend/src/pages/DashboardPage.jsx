@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import CategoryChart from '../components/CategoryChart';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getExpenses , deleteExpense, updateExpense } from '../api/services/expenseService.js';
-import { CATEGORY_EMOJI } from '../constants/categoryMeta';
+import { CategoryIcon, WalletIcon, CalendarIcon, ReceiptIcon, EditIcon, TrashIcon, ChartIcon, UploadIcon, CheckIcon, WarningIcon, WaveIcon } from '../components/icons/Icon';
 import '../styles/dashboard.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -222,7 +222,7 @@ const handleEditSubmit = async (e) => {
     {/* Header */}
     <div className="dashboard-header-area">
       <div>
-        <h2>{greeting()}, {user?.firstName || 'there'} 👋</h2>
+        <h2>{greeting()}, {user?.firstName || 'there'} <WaveIcon size={32} /></h2>
         <p>Here's your spending overview</p>
       </div>
       <select
@@ -239,19 +239,19 @@ const handleEditSubmit = async (e) => {
     {/* Stats Strip */}
     <div className="stats-strip">
       <div className="stat-card">
-        <span className="stat-icon">💸</span>
+        <span className="stat-icon"><WalletIcon /></span>
         <div className="stat-label">{formatMonthLabel(selectedDate)}</div>
         <div className="stat-value">${(summary.thisMonth || 0).toFixed(2)}</div>
         <div className="stat-sub">current month spending</div>
       </div>
       <div className="stat-card">
-        <span className="stat-icon">📅</span>
+        <span className="stat-icon"><CalendarIcon /></span>
         <div className="stat-label">{formatMonthLabel(getPreviousMonthISO(selectedDate))}</div>
         <div className="stat-value">${(summary.lastMonth || 0).toFixed(2)}</div>
         <div className="stat-sub">previous month spending</div>
       </div>
       <div className="stat-card">
-        <span className="stat-icon">🧾</span>
+        <span className="stat-icon"><ReceiptIcon /></span>
         <div className="stat-label">Transactions</div>
         <div className="stat-value">{summary.count}</div>
         <div className="stat-sub">expenses this month</div>
@@ -265,7 +265,7 @@ const handleEditSubmit = async (e) => {
         {/* Left — Recent Expenses */}
         <div className="panel-card">
           <div className="panel-header-row">
-            <h2 className="section-title">🧾 Recent Expenses</h2>
+            <h2 className="section-title"><ReceiptIcon /> Recent Expenses</h2>
             <button className="view-all-btn" onClick={() => navigate('/home/past-expenses')}>View all →</button>
           </div>
           <div className="filters-row">
@@ -290,7 +290,7 @@ const handleEditSubmit = async (e) => {
             {filteredExpenses.length > 0 ? (
               getDisplayedRecent().map(e => (
                 <div className="expense-item" key={e._id}>
-                  <div className="expense-emoji">{CATEGORY_EMOJI[e.category] || '📦'}</div>
+                  <div className="expense-emoji"><CategoryIcon category={e.category} /></div>
                   <div className="expense-info">
                     <div className="expense-desc">{e.description}</div>
                     <div className="expense-meta">
@@ -308,19 +308,19 @@ const handleEditSubmit = async (e) => {
                   <div className="expense-amount">-${parseFloat(e.amount).toFixed(2)}</div>
                   {/* 2. Added Action Buttons here */}
             <div className="expense-actions">
-              <button 
-                className="action-btn edit-btn" 
+              <button
+                className="action-btn edit-btn"
                 onClick={() => handleEdit(e) }
                 title="Edit"
               >
-                ✏️
+                <EditIcon size={16} />
               </button>
-              <button 
-                className="action-btn delete-btn" 
+              <button
+                className="action-btn delete-btn"
                 onClick={(event) => { event.stopPropagation(); handleDelete(e._id); }}
                 title="Delete"
               >
-                🗑️
+                <TrashIcon size={16} />
               </button>
             </div>
           </div>
@@ -328,7 +328,7 @@ const handleEditSubmit = async (e) => {
               ))
             ) : (
               <div className="empty-state">
-                <span className="empty-state-icon">🧾</span>
+                <span className="empty-state-icon"><ReceiptIcon size={40} /></span>
                 <p className="empty-state-title">No expenses found for this month.</p>
                 <p className="empty-state-sub">Add your first expense to see it here.</p>
                 <button className="empty-state-btn" onClick={() => navigate('/home/expense')}>+ Add Expense</button>
@@ -339,12 +339,12 @@ const handleEditSubmit = async (e) => {
 
         {/* Right — Chart */}
         <div className="chart-panel">
-          <h2 className="section-title">📊 Spend by Category</h2>
+          <h2 className="section-title"><ChartIcon /> Spend by Category</h2>
           {filteredExpenses.length > 0 ? (
             <CategoryChart expenses={filteredExpenses} />
           ) : (
             <div className="empty-state">
-              <span className="empty-state-icon">📊</span>
+              <span className="empty-state-icon"><ChartIcon size={40} /></span>
               <p>No data to display</p>
             </div>
           )}
@@ -397,10 +397,10 @@ const handleEditSubmit = async (e) => {
               style={{ display: 'none' }} />
             <span style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-              background: '#f0f4ff', border: '1.5px dashed #93acd3', borderRadius: '10px',
-              padding: '10px', fontSize: '13px', fontWeight: 600, color: '#1a3a5c', cursor: 'pointer'
+              background: 'transparent', border: '1.5px dashed currentColor', borderRadius: '10px',
+              padding: '10px', fontSize: '13px', fontWeight: 600, cursor: 'pointer'
             }}>
-              📤 {editPreview ? 'Replace Receipt' : 'Choose File'}
+              <UploadIcon size={16} /> {editPreview ? 'Replace Receipt' : 'Choose File'}
             </span>
           </label>
         </div>
@@ -484,7 +484,7 @@ const handleEditSubmit = async (e) => {
             color: editMessage.type === 'success' ? '#1a7a4a' : '#c62828',
             background: editMessage.type === 'success' ? '#e6f9f0' : '#fdecea',
           }}>
-            {editMessage.type === 'success' ? '✅' : '⚠️'} {editMessage.text}
+            {editMessage.type === 'success' ? <CheckIcon size={14} /> : <WarningIcon size={14} />} {editMessage.text}
           </div>
         )}
       </form>

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import { UserIcon, ReceiptIcon, ArchiveIcon, LogoutIcon } from '../components/icons/Icon';
 import '../styles/dashboard.css';
 const Home = () => {
   const { logout, user } = useAuth(); // ProtectedRoute already guarantees user is set before Home renders
@@ -91,18 +92,18 @@ const Home = () => {
 
                 <hr className="dropdown-divider" />
                 <button className="dropdown-item" style={{ justifyContent: 'center' }} onClick={() => navigate('/profile')}>
-                  👤 Profile
+                  <UserIcon size={16} /> Profile
                 </button>
                 <button className="dropdown-item" onClick={() => navigate('/home/past-expenses')}>
-                🧾 Past Expenses
+                <ReceiptIcon size={16} /> Past Expenses
                 </button>
                 <button className="dropdown-item" onClick={() => navigate('/home/receipts')}>
-                🗄️ Receipt Vault
+                <ArchiveIcon size={16} /> Receipt Vault
                 </button>
 
                 <hr className="dropdown-divider" />
                 <button className="dropdown-item danger" onClick={() => { logout(); navigate('/signin'); }}>
-                  🚪 Sign Out
+                  <LogoutIcon size={16} /> Sign Out
                 </button>
               </div>
             </div>

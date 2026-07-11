@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getDailySpentSnapshot } from '../api/services/budgetService';
-import { CATEGORY_EMOJI, CATEGORY_COLOR } from '../constants/categoryMeta';
+import { CATEGORY_COLOR } from '../constants/categoryMeta';
+import { CategoryIcon } from './icons/Icon';
 import '../styles/dailySpentSnapshot.css';
 
 // "2026-04" -> "APRIL 2026" / previous-month variants, so the snapshot cards
@@ -195,7 +196,7 @@ const DailySpentSnapshot = ({ userId, monthYear, refreshTrigger = 0 }) => {
 
                   return (
                     <div key={categoryBudget.category} className="category-budget-row">
-                      <span className="cbr-icon">{CATEGORY_EMOJI[categoryBudget.category] || '📦'}</span>
+                      <span className="cbr-icon"><CategoryIcon category={categoryBudget.category} /></span>
                       <div className="cbr-main">
                         <div className="cbr-top">
                           <span className="cbr-name">{categoryBudget.category}</span>

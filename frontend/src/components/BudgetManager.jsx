@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { setBudget, getBudget } from '../api/services/budgetService';
-import { CATEGORY_EMOJI } from '../constants/categoryMeta';
+import { CategoryIcon, WalletIcon, WarningIcon, CheckIcon, LightbulbIcon } from './icons/Icon';
 import '../styles/budgetManager.css';
 
 const CATEGORIES = [
@@ -117,20 +117,20 @@ const BudgetManager = ({ userId, monthYear, onBudgetSaved, onClose }) => {
   return (
     <div className="budget-manager">
       <div className="manager-header">
-        <h2>💰 Budget Manager</h2>
+        <h2><WalletIcon /> Budget Manager</h2>
         <p className="month-display">Setting budget for {monthYear}</p>
       </div>
 
       {error && (
         <div className="error-message">
-          <span>⚠️</span>
+          <span><WarningIcon size={18} /></span>
           <p>{error}</p>
         </div>
       )}
 
       {saved && (
         <div className="success-message">
-          <span>✅</span>
+          <span><CheckIcon size={18} /></span>
           <p>Budget saved successfully!</p>
         </div>
       )}
@@ -196,7 +196,7 @@ const BudgetManager = ({ userId, monthYear, onBudgetSaved, onClose }) => {
                       onClick={() => toggleCategory(category)}
                     >
                       <div className="category-header">
-                        <span className="emoji">{CATEGORY_EMOJI[category]}</span>
+                        <span className="emoji"><CategoryIcon category={category} /></span>
                         <span className="category-name">{category}</span>
                         <input
                           type="checkbox"
@@ -266,7 +266,7 @@ const BudgetManager = ({ userId, monthYear, onBudgetSaved, onClose }) => {
 
         {/* Tips */}
         <div className="tips-section">
-          <h4>💡 Tips for Better Budget Management:</h4>
+          <h4><LightbulbIcon size={16} /> Tips for Better Budget Management:</h4>
           <ul>
             <li>Start with your total monthly income and allocate 80-90% for spending</li>
             <li>Reserve 10-20% for savings or emergency fund</li>

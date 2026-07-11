@@ -7,23 +7,23 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
+  background: var(--bg-container);
+  border: 1.5px solid rgba(255,255,255,0.15);
   color: white;
   font-size: 28px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 999;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, border-color 0.3s ease;
   position: fixed;
 }
 
 .floating-chat-button:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  border-color: rgba(255,255,255,0.35);
 }
 
 .floating-chat-button:active {
@@ -31,8 +31,7 @@
 }
 
 .floating-chat-button.open {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+  border-color: rgba(255,255,255,0.4);
 }
 
 .chat-icon {

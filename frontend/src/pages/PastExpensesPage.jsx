@@ -7,7 +7,8 @@ import {
 } from 'chart.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getExpenses, deleteExpense, updateExpense } from '../api/services/expenseService.js';
-import { CATEGORIES, CATEGORY_EMOJI, CATEGORY_COLOR as CATEGORY_COLORS } from '../constants/categoryMeta';
+import { CATEGORIES, CATEGORY_COLOR as CATEGORY_COLORS } from '../constants/categoryMeta';
+import { CategoryIcon, CalendarIcon, WalletIcon, ChartIcon, FireIcon, ReceiptIcon, TrendingUpIcon, SearchIcon, EditIcon, TrashIcon, InboxEmptyIcon, UploadIcon, CheckIcon, WarningIcon } from '../components/icons/Icon';
 import '../styles/pastExpenses.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
@@ -296,7 +297,7 @@ const PastExpensesPage = () => {
       {/* Header */}
       <div className="pe-header">
         <div>
-          <h1 className="pe-title">📅 Past Expenses</h1>
+          <h1 className="pe-title"><CalendarIcon /> Past Expenses</h1>
           <p className="pe-subtitle">Your complete spending history, visualized</p>
         </div>
         <select
@@ -313,13 +314,13 @@ const PastExpensesPage = () => {
       {/* Summary Strip */}
       <div className="pe-summary-strip">
         <div className="pe-summary-card">
-          <span className="pe-summary-icon">💰</span>
+          <span className="pe-summary-icon"><WalletIcon /></span>
           <div className="pe-summary-label">{selectedYear} Total</div>
           <div className="pe-summary-value">${yearTotal.toFixed(2)}</div>
           <div className="pe-summary-sub">annual spending</div>
         </div>
         <div className="pe-summary-card">
-          <span className="pe-summary-icon">📊</span>
+          <span className="pe-summary-icon"><ChartIcon /></span>
           <div className="pe-summary-label">Monthly Avg</div>
           <div className="pe-summary-value">
             ${(yearTotal / Math.max(monthlyData.filter(m => m.total > 0).length, 1)).toFixed(2)}
@@ -327,7 +328,7 @@ const PastExpensesPage = () => {
           <div className="pe-summary-sub">per active month</div>
         </div>
         <div className="pe-summary-card">
-          <span className="pe-summary-icon">🔥</span>
+          <span className="pe-summary-icon"><FireIcon /></span>
           <div className="pe-summary-label">Biggest Month</div>
           <div className="pe-summary-value">
             {monthlyData.reduce((best, m) => m.total > best.total ? m : best, monthlyData[0])?.label || '—'}
@@ -335,7 +336,7 @@ const PastExpensesPage = () => {
           <div className="pe-summary-sub">highest spend</div>
         </div>
         <div className="pe-summary-card">
-          <span className="pe-summary-icon">🧾</span>
+          <span className="pe-summary-icon"><ReceiptIcon /></span>
           <div className="pe-summary-label">Transactions</div>
           <div className="pe-summary-value">{monthlyData.reduce((s, m) => s + m.count, 0)}</div>
           <div className="pe-summary-sub">total this year</div>
@@ -345,7 +346,7 @@ const PastExpensesPage = () => {
       {/* Bar Chart */}
       <div className="pe-chart-section">
         <div className="pe-chart-header">
-          <h2 className="pe-section-title">📈 Monthly Spending — {selectedYear}</h2>
+          <h2 className="pe-section-title"><TrendingUpIcon /> Monthly Spending — {selectedYear}</h2>
           <p className="pe-chart-hint">Click a bar to explore that month</p>
         </div>
         <div className="pe-bar-wrapper">
@@ -374,14 +375,14 @@ const PastExpensesPage = () => {
         <div className="pe-drill" ref={drillRef}>
           <div className="pe-drill-header">
             <div>
-              <h2 className="pe-section-title">🔍 {formatMonthFull(selectedMonth)}</h2>
+              <h2 className="pe-section-title"><SearchIcon /> {formatMonthFull(selectedMonth)}</h2>
               <p className="pe-drill-sub">{drillExpenses.length} transactions · ${drillTotal.toFixed(2)} total</p>
             </div>
             <button className="pe-close-drill" onClick={() => setSelectedMonth(null)}>✕ Close</button>
           </div>
 
           {drillExpenses.length === 0 ? (
-            <div className="pe-empty"><span>🧾</span><p>No expenses recorded for this month.</p></div>
+            <div className="pe-empty"><span><ReceiptIcon size={28} /></span><p>No expenses recorded for this month.</p></div>
           ) : (
             <div className="pe-drill-grid">
               {/* Left */}
@@ -429,10 +430,10 @@ const PastExpensesPage = () => {
 
                 <div className="pe-expense-list">
                   {drillFiltered.length === 0 ? (
-                    <div className="pe-empty"><span>🔍</span><p>No expenses match this filter.</p></div>
+                    <div className="pe-empty"><span><SearchIcon size={28} /></span><p>No expenses match this filter.</p></div>
                   ) : drillFiltered.map(e => (
                     <div className="pe-expense-item" key={e._id}>
-                      <div className="pe-expense-emoji">{CATEGORY_EMOJI[e.category] || '📦'}</div>
+                      <div className="pe-expense-emoji"><CategoryIcon category={e.category} /></div>
                       <div className="pe-expense-info">
                         <div className="pe-expense-desc">{e.description}</div>
                         <div className="pe-expense-meta">
@@ -443,8 +444,8 @@ const PastExpensesPage = () => {
                       <div className="pe-expense-right">
                         <div className="pe-expense-amount">-${parseFloat(e.amount).toFixed(2)}</div>
                         <div className="pe-expense-actions">
-                          <button className="pe-action-btn" onClick={() => handleEdit(e)} title="Edit">✏️</button>
-                          <button className="pe-action-btn pe-delete-btn" onClick={() => handleDelete(e._id)} title="Delete">🗑️</button>
+                          <button className="pe-action-btn" onClick={() => handleEdit(e)} title="Edit"><EditIcon size={14} /></button>
+                          <button className="pe-action-btn pe-delete-btn" onClick={() => handleDelete(e._id)} title="Delete"><TrashIcon size={14} /></button>
                         </div>
                       </div>
                     </div>
@@ -465,7 +466,7 @@ const PastExpensesPage = () => {
                       className={`pe-cat-row ${selectedCategory === cat ? 'active' : ''}`}
                       onClick={() => setSelectedCategory(prev => prev === cat ? 'All' : cat)}
                     >
-                      <span className="pe-cat-emoji">{CATEGORY_EMOJI[cat] || '📦'}</span>
+                      <span className="pe-cat-emoji"><CategoryIcon category={cat} /></span>
                       <div className="pe-cat-info">
                         <div className="pe-cat-name">{cat}</div>
                         <div className="pe-cat-bar-bg">
@@ -490,7 +491,7 @@ const PastExpensesPage = () => {
 
       {allExpenses.length === 0 && !loading && (
         <div className="pe-empty-full">
-          <span>📭</span>
+          <span><InboxEmptyIcon size={40} /></span>
           <h3>No expenses yet</h3>
           <p>Start adding expenses and they'll appear here.</p>
         </div>
@@ -514,7 +515,7 @@ const PastExpensesPage = () => {
                   <input type="file" accept="image/*"
                     onChange={e => { setEditReceipt(e.target.files[0]); setEditPreview(URL.createObjectURL(e.target.files[0])); }}
                     style={{ display: 'none' }} />
-                  <span className="eem-file-btn">📤 {editPreview ? 'Replace Receipt' : 'Choose File'}</span>
+                  <span className="eem-file-btn"><UploadIcon size={16} /> {editPreview ? 'Replace Receipt' : 'Choose File'}</span>
                 </label>
               </div>
               {editPreview && (
@@ -560,7 +561,7 @@ const PastExpensesPage = () => {
                   background: editMessage.type === 'success' ? '#e6f9f0' : '#fdecea',
                   borderRadius: '10px', marginTop: '1rem'
                 }}>
-                  {editMessage.type === 'success' ? '✅' : '⚠️'} {editMessage.text}
+                  {editMessage.type === 'success' ? <CheckIcon size={14} /> : <WarningIcon size={14} />} {editMessage.text}
                 </div>
               )}
             </form>

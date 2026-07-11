@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getAllReceipts } from '../api/services/expenseService.js';
-import { CATEGORY_EMOJI } from '../constants/categoryMeta';
+import { CategoryIcon, ArchiveIcon, InboxEmptyIcon, SearchIcon, ReceiptIcon } from '../components/icons/Icon';
 import '../styles/receiptVault.css';
 
 // This page needs a richer {bg, accent, text} shape per category (for folder card
@@ -125,7 +125,7 @@ const ReceiptVaultPage = () => {
     <div className="rv-root">
       <div className="rv-header">
         <div>
-          <h1 className="rv-title">🗄️ Receipt Vault</h1>
+          <h1 className="rv-title"><ArchiveIcon /> Receipt Vault</h1>
           <p className="rv-subtitle">All your receipts, organized automatically</p>
         </div>
       </div>
@@ -150,7 +150,7 @@ const ReceiptVaultPage = () => {
 
       {folders.length === 0 ? (
         <div className="rv-empty-full">
-          <span>📭</span>
+          <span><InboxEmptyIcon size={40} /></span>
           <h3>No receipts yet</h3>
           <p>Upload receipts when adding expenses and they'll appear here.</p>
         </div>
@@ -184,14 +184,14 @@ const ReceiptVaultPage = () => {
                   ))}
                   {folder.items.length === 0 && (
                     <div className="rv-thumb-placeholder">
-                      <span>{CATEGORY_EMOJI[folder.category] || '📦'}</span>
+                      <span><CategoryIcon category={folder.category} /></span>
                     </div>
                   )}
                 </div>
 
                 <div className="rv-folder-info">
                   <div className="rv-folder-cat-row">
-                    <span className="rv-folder-emoji">{CATEGORY_EMOJI[folder.category] || '📦'}</span>
+                    <span className="rv-folder-emoji"><CategoryIcon category={folder.category} /></span>
                     <span className="rv-folder-name" style={{ color: colors.text }}>
                       {folder.category}
                     </span>
@@ -231,7 +231,7 @@ const ReceiptVaultPage = () => {
             ← Back to Vault
           </button>
           <div className="rv-folder-title-row">
-            <span className="rv-folder-title-emoji">{CATEGORY_EMOJI[activeFolder] || '📦'}</span>
+            <span className="rv-folder-title-emoji"><CategoryIcon category={activeFolder} /></span>
             <h1 className="rv-folder-title">{activeFolder}</h1>
             <span className="rv-folder-badge" style={{ background: colors.accent }}>
               {folder?.items.length} receipts
@@ -242,7 +242,7 @@ const ReceiptVaultPage = () => {
 
         <div className="rv-filters">
           <div className="rv-search-wrap">
-            <span className="rv-search-icon">🔍</span>
+            <span className="rv-search-icon"><SearchIcon size={16} /></span>
             <input
               className="rv-search"
               placeholder="Search receipts..."
@@ -267,7 +267,7 @@ const ReceiptVaultPage = () => {
 
         {folderItems.length === 0 ? (
           <div className="rv-empty-full">
-            <span>🔍</span>
+            <span><SearchIcon size={40} /></span>
             <h3>No receipts found</h3>
             <p>Try adjusting your search or filters.</p>
           </div>
@@ -286,10 +286,10 @@ const ReceiptVaultPage = () => {
                     }}
                   />
                   <div className="rv-receipt-img-fallback" style={{ display: 'none' }}>
-                    <span>🧾</span>
+                    <span><ReceiptIcon size={32} /></span>
                   </div>
                   <div className="rv-receipt-overlay">
-                    <span className="rv-view-btn">🔍 View</span>
+                    <span className="rv-view-btn"><SearchIcon size={14} /> View</span>
                   </div>
                 </div>
                 <div className="rv-receipt-info">
@@ -330,7 +330,7 @@ const ReceiptVaultPage = () => {
                   padding: '2px 10px', borderRadius: '999px',
                   fontSize: '12px', fontWeight: 600
                 }}>
-                  {CATEGORY_EMOJI[lightbox.category]} {lightbox.category}
+                  <CategoryIcon category={lightbox.category} /> {lightbox.category}
                 </span>
                 <span className="rv-lightbox-date">{formatDate(lightbox.date)}</span>
                 <span className="rv-lightbox-amt" style={{ color: colors.accent }}>

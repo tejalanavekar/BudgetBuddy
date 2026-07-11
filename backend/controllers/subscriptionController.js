@@ -31,12 +31,17 @@ const computeNextBillingDate = (purchaseDate, billingCycle) => {
 // each Active subscription's nextBillingDate is refreshed from its purchaseDate the moment it's
 // read — self-healing on read instead of needing real cron infra.
 const refreshNextBillingDate = async (sub) => {
-  if (sub.status !== 'Active') return sub;
+  if (sub.status !== 'Active' || !sub.purchaseDate) return sub;
 
   const correct = computeNextBillingDate(sub.purchaseDate, sub.billingCycle);
   if (sub.nextBillingDate !== correct) {
     sub.nextBillingDate = correct;
-    await sub.save();
+    try {
+      await sub.save();
+    } catch (error) {
+      // One legacy/malformed record shouldn't take down the whole list fetch — return it as-is.
+      console.error(`Failed to refresh nextBillingDate for subscription ${sub._id}:`, error.message);
+    }
   }
   return sub;
 };

@@ -134,18 +134,17 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: #f0f4ff;
-  border: 1.5px dashed #93acd3;
+  background: transparent;
+  border: 1.5px dashed rgba(255,255,255,0.3);
   border-radius: 10px;
   padding: 0.55rem 1rem;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #1a3a5c;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
   width: 100%;
 }
-.eem-file-btn:hover { background: #e0e9ff; border-color: #1a6b7c; }
+.eem-file-btn:hover { background: var(--hover-on-container); border-color: #2dd4bf; }
 
 .eem-actions {
   display: flex;
