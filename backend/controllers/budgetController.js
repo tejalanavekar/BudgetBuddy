@@ -6,7 +6,7 @@ import {
   compareWithPreviousMonth,
   getCategoryBudgetStatus 
 } from '../utils/budgetAnalytics.js';
-import { budgetAIChat, generateBudgetSummary } from '../utils/langchainService.js';
+import { generateBudgetSummary } from '../utils/langchainService.js';
 
 // ── Helper: Get current YYYY-MM ──
 const getCurrentMonthYear = () => {
@@ -151,66 +151,6 @@ export const getDailySpentSnapshot = async (req, res) => {
   } catch (error) {
     console.error('Error getting daily snapshot:', error);
     res.status(500).json({ error: 'Failed to generate snapshot' });
-  }
-};
-
-// ── POST /api/budgets/:userId/ai-chat - Chat with Budget AI ──
-export const chatWithBudgetAI = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { question, monthYear } = req.body;
-
-    if (!question || !question.trim()) {
-      return res.status(400).json({ error: 'Question cannot be empty' });
-    }
-
-    const userIdObj = new mongoose.Types.ObjectId(userId);
-    const targetMonthYear = monthYear || getCurrentMonthYear();
-
-    // Get budget
-    const budget = await Budget.findOne({ userId: userIdObj, monthYear: targetMonthYear });
-    if (!budget) {
-      return res.status(404).json({ 
-        error: 'Budget not set for this month. Please set a budget first.' 
-      });
-    }
-
-    // Get expense stats
-    const stats = await calculateDailySpentStats(userIdObj, targetMonthYear);
-
-    // Get safe daily budget
-    const safeDailyBudget = calculateSafeDailyBudget(
-      budget.totalMonthlyBudget,
-      stats.currentSpending,
-      stats.daysRemaining
-    );
-
-    // Prepare data for LangChain
-    const budgetData = {
-      totalMonthlyBudget: budget.totalMonthlyBudget,
-      categoryBudgets: budget.categoryBudgets
-    };
-
-    const expenseStats = {
-      ...stats,
-      remainingBudget: budget.totalMonthlyBudget - stats.currentSpending,
-      safeDailyBudget
-    };
-
-    // Call LangChain
-    const response = await budgetAIChat(userIdObj, question, budgetData, expenseStats);
-
-    res.json({
-      success: response.success,
-      message: response.message,
-      timestamp: response.timestamp
-    });
-  } catch (error) {
-    console.error('Error in AI chat:', error);
-    res.status(500).json({ 
-      error: 'Failed to process your question', 
-      details: error.message 
-    });
   }
 };
 

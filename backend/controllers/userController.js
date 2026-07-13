@@ -94,6 +94,30 @@ export const getUserProfile = async (req, res) => {
     }
 };
 
+//Settings > Account tab — update name/phone
+//PUT /api/users/:userId
+export const updateUserProfile = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        if (userId !== req.userId) {
+            return res.status(403).json({ message: 'Unauthorized' });
+        }
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const { firstName, lastName, phone } = req.body;
+        if (firstName !== undefined) user.firstName = firstName;
+        if (lastName !== undefined) user.lastName = lastName;
+        if (phone !== undefined) user.phone = phone;
+
+        await user.save();
+        const { password, ...safeUser } = user.toObject();
+        res.status(200).json(safeUser);
+    } catch (error) {
+        res.status(400).json({ message: 'Failed to update profile', error: error.message });
+    }
+};
+
 //Change password
 //PUT /api/users/:userId/password — change password
 export const changePassword = async (req, res) => {

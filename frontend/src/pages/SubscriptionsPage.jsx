@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getSubscriptions, addSubscription, updateSubscription, deleteSubscription } from '../api/services/subscriptionService.js';
 import { SubscriptionCategoryIcon, RefreshIcon, EditIcon, FolderIcon, CalendarIcon } from '../components/icons/Icon';
+import { SUBSCRIPTIONS_CHANGED } from '../utils/dataEvents';
 import '../styles/subscriptions.css';
 
 const CATEGORY_META = {
@@ -56,6 +57,15 @@ const SubscriptionsPage = () => {
       .then(setSubscriptions)
       .catch(() => setSubscriptions([]))
       .finally(() => setLoading(false));
+  }, [user]);
+
+  // The AI assistant can pause/cancel a subscription from anywhere in the app — refetch
+  // here if that happens while this page is open, so it doesn't look stale.
+  useEffect(() => {
+    if (!user?.userId) return;
+    const handler = () => getSubscriptions(user.userId).then(setSubscriptions).catch(() => {});
+    window.addEventListener(SUBSCRIPTIONS_CHANGED, handler);
+    return () => window.removeEventListener(SUBSCRIPTIONS_CHANGED, handler);
   }, [user]);
 
   const activeSubs = useMemo(() => subscriptions.filter(s => s.status === 'Active'), [subscriptions]);

@@ -34,15 +34,12 @@ body, html {
 
 /* ── Navbar ── */
 .top-navbar {
-  background: var(--bg-container);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: transparent;
   height: 70px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 40px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -60,14 +57,14 @@ body, html {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--text-on-page);
 }
 
 .nav-brand h1 {
   margin: 0;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
-  color: white;
+  color: var(--text-on-page);
   letter-spacing: -0.5px;
   text-transform: uppercase;
   font-family: 'Clash Display', sans-serif;
@@ -75,35 +72,32 @@ body, html {
 
 .nav-links {
   display: flex;
-  gap: 8px;
+  gap: 2px;
   align-items: center;
+  background: #0a1416;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 999px;
+  padding: 5px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
 }
 
 .nav-item {
   text-decoration: none;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.45);
   font-weight: 600;
-  font-size: 15px;
-  padding: 8px 16px;
-  transition: color 0.2s;
-  position: relative;
+  font-size: 14px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  transition: color 0.2s, background 0.2s;
   font-family: 'Cabinet Grotesk', sans-serif;
 }
 
-.nav-item:hover { color: rgba(255,255,255,0.3); }
+.nav-item:hover { color: rgba(255,255,255,0.75); }
 
 .nav-item.active {
   color: #2dd4bf;
-}
-
-.nav-item.active::after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 16px; right: 16px;
-  height: 3px;
-  background: #2dd4bf;
-  border-radius: 3px 3px 0 0;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
 .nav-right {
@@ -116,7 +110,7 @@ body, html {
   display: none;
   background: none;
   border: none;
-  color: white;
+  color: var(--text-on-page);
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
@@ -124,8 +118,8 @@ body, html {
 }
 
 .profile-circle {
-  width: 42px; height: 42px;
-  background: linear-gradient(135deg, #14b8a6, #0891b2);
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
   color: white;
   border-radius: 50%;
   border: none;
@@ -134,9 +128,9 @@ body, html {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
-  box-shadow: 0 2px 12px rgba(20,184,166,0.4);
+  box-shadow: 0 2px 12px rgba(124,58,237,0.4);
   font-family: 'Clash Display', sans-serif;
 }
 
@@ -367,8 +361,8 @@ body, html {
   font-size: 0.9rem;
   padding: 2px;
   cursor: pointer;
-  opacity: 0.6;
-  color: var(--text-on-container);
+  opacity: 0.85;
+  color: #ffffff;
   display: inline-flex;
   transition: opacity 0.2s, transform 0.2s;
 }
@@ -575,18 +569,17 @@ body, html {
   .nav-links {
     display: none;
     position: absolute;
-    top: 70px; left: 0; right: 0;
+    top: 70px; left: 16px; right: 16px;
     flex-direction: column;
     align-items: stretch;
     gap: 2px;
-    background: var(--bg-container);
-    padding: 8px 20px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: #0a1416;
+    border-radius: 16px;
+    padding: 8px 12px 12px;
     box-shadow: 0 12px 24px rgba(0,0,0,0.25);
   }
   .nav-links.open { display: flex; }
-  .nav-item { text-align: left; }
-  .nav-item.active::after { display: none; }
+  .nav-item { text-align: left; padding: 10px 14px; }
 }
 
 @media (max-width: 480px) {

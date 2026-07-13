@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { chatWithBudgetAI, getBudgetSummary } from '../api/services/budgetService';
-import { WalletIcon, WarningIcon, UserIcon, CloseIcon, BotIcon, TrendingUpIcon, ChartIcon, ShoppingBagIcon } from '../components/icons/Icon';
+import { chatWithAssistant } from '../api/services/aiService';
+import { getBudgetSummary, setBudget } from '../api/services/budgetService';
+import { updateSubscription } from '../api/services/subscriptionService';
+import { WalletIcon, WarningIcon, UserIcon, CloseIcon, BotIcon, TrendingUpIcon, ChartIcon, ShoppingBagIcon, RefreshIcon, CheckIcon } from '../components/icons/Icon';
+import { SUBSCRIPTIONS_CHANGED, BUDGET_CHANGED, emitDataChanged } from '../utils/dataEvents';
 import '../styles/budgetAI.css';
 
-const BudgetAI = ({ userId, monthYear }) => {
-  const [messages, setMessages] = useState([]);
+const BudgetAI = ({ userId, monthYear, firstName, page, messages, setMessages }) => {
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -21,17 +23,20 @@ const BudgetAI = ({ userId, monthYear }) => {
     scrollToBottom();
   }, [messages]);
 
-  // Initialize with welcome message
+  // Seed the welcome message only the first time this session — messages live in the
+  // parent (FloatingChatbot) now, so reopening the chat keeps whatever conversation was there.
   useEffect(() => {
-    setMessages([
-      {
-        id: 'welcome',
-        type: 'ai',
-        text: 'Hello! 👋 I\'m Budget Buddy AI. I can help you analyze your spending, answer questions about your budget, and provide personalized recommendations. Ask me anything like "How much more can I spend?" or "What\'s my spending trend?"',
-        timestamp: new Date()
-      }
-    ]);
-  }, [userId]);
+    if (messages.length === 0) {
+      setMessages([
+        {
+          id: 'welcome',
+          type: 'ai',
+          text: `Hi ${firstName || 'there'}, want a quick breakdown on your budget, or ask me anything?`,
+          timestamp: new Date()
+        }
+      ]);
+    }
+  }, [userId, firstName]);
 
   // Handle sending message
   const handleSendMessage = async () => {
@@ -50,15 +55,23 @@ const BudgetAI = ({ userId, monthYear }) => {
     setLoading(true);
     setError(null);
 
+    // Last few turns, for follow-up context ("what about last month?")
+    const history = messages
+      .filter(m => m.type === 'user' || m.type === 'ai')
+      .slice(-6)
+      .map(m => ({ role: m.type === 'user' ? 'user' : 'assistant', content: m.text }));
+
     try {
-      const response = await chatWithBudgetAI(userId, inputValue, monthYear);
+      const response = await chatWithAssistant(userId, userMessage.text, history, page);
 
       if (response.success) {
         const aiMessage = {
           id: Date.now() + 1,
           type: 'ai',
-          text: response.message || response.summary || 'I understood your question, but I need a budget set for this month to provide detailed analysis.',
-          timestamp: response.timestamp || new Date()
+          text: response.message,
+          timestamp: response.timestamp ? new Date(response.timestamp) : new Date(),
+          proposedAction: response.proposedAction || null,
+          actionResolved: false
         };
         setMessages(prev => [...prev, aiMessage]);
       } else {
@@ -69,7 +82,7 @@ const BudgetAI = ({ userId, monthYear }) => {
       const errorMessage = {
         id: Date.now() + 1,
         type: 'error',
-        text: `Sorry, I encountered an error: ${err.message}. Make sure you have set a budget for this month.`,
+        text: `Sorry, I encountered an error: ${err.message}`,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -107,6 +120,44 @@ const BudgetAI = ({ userId, monthYear }) => {
     }
   };
 
+  // The only place a subscription or budget actually gets changed — a real click, going
+  // straight to the existing update endpoints. The AI never gets to trigger this itself.
+  const handleConfirmAction = async (messageId, action) => {
+    setMessages(prev => prev.map(m => m.id === messageId ? { ...m, actionResolved: true } : m));
+    try {
+      if (action.type === 'budget_update') {
+        await setBudget(userId, action.monthYear, action.totalMonthlyBudget, action.categoryBudgets);
+        emitDataChanged(BUDGET_CHANGED);
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          type: 'ai',
+          text: `Done — your budget for ${action.monthYear} is now set to $${action.totalMonthlyBudget}.`,
+          timestamp: new Date()
+        }]);
+      } else {
+        await updateSubscription(action.subscriptionId, { status: action.proposedStatus });
+        emitDataChanged(SUBSCRIPTIONS_CHANGED);
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          type: 'ai',
+          text: `Done — ${action.name} is now ${action.proposedStatus}.`,
+          timestamp: new Date()
+        }]);
+      }
+    } catch (err) {
+      setMessages(prev => [...prev, {
+        id: Date.now(),
+        type: 'error',
+        text: `Couldn't make that change: ${err.message}`,
+        timestamp: new Date()
+      }]);
+    }
+  };
+
+  const handleDismissAction = (messageId) => {
+    setMessages(prev => prev.map(m => m.id === messageId ? { ...m, actionResolved: true } : m));
+  };
+
   // Handle Enter key
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -140,19 +191,51 @@ const BudgetAI = ({ userId, monthYear }) => {
             </div>
             <div className="message-content">
               <p className="message-text">
-                {message.text.includes('**') 
-                  ? message.text.split('\n').map((line, idx) => (
-                      <span key={idx}>
-                        {line.replace(/\*\*/g, '')}
-                        {idx < message.text.split('\n').length - 1 && <br />}
-                      </span>
-                    ))
-                  : message.text
-                }
+                {message.text.split('\n').map((line, idx, lines) => (
+                  <span key={idx}>
+                    {line.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1')}
+                    {idx < lines.length - 1 && <br />}
+                  </span>
+                ))}
               </p>
               <span className="message-time">
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
+              {message.proposedAction && !message.actionResolved && (
+                <div className="action-confirm-row">
+                  {message.proposedAction.type === 'budget_update' ? (
+                    <>
+                      <span className="action-confirm-label">
+                        {message.proposedAction.monthYear} budget: {message.proposedAction.isUpdate ? `$${message.proposedAction.previousTotal} → ` : ''}${message.proposedAction.totalMonthlyBudget}
+                      </span>
+                      {message.proposedAction.categoryBudgets?.length > 0 && (
+                        <span className="action-confirm-note" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                          {message.proposedAction.categoryBudgets.map(c => `${c.category}: $${c.amount}`).join(' · ')}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <span className="action-confirm-label">
+                        {message.proposedAction.name}: {message.proposedAction.currentStatus} → {message.proposedAction.proposedStatus}
+                      </span>
+                      {message.proposedAction.proposedStatus !== 'Active' && (
+                        <span className="action-confirm-note">
+                          This only updates your tracking in Budget Buddy — it won't cancel or pause anything with {message.proposedAction.name} itself. Be sure to also cancel directly on their site/app if you don't want to keep being charged.
+                        </span>
+                      )}
+                    </>
+                  )}
+                  <div className="action-confirm-buttons">
+                    <button className="action-confirm-btn" onClick={() => handleConfirmAction(message.id, message.proposedAction)}>
+                      <CheckIcon size={13} /> Confirm
+                    </button>
+                    <button className="action-cancel-btn" onClick={() => handleDismissAction(message.id)}>
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -205,6 +288,14 @@ const BudgetAI = ({ userId, monthYear }) => {
           >
             <ShoppingBagIcon size={14} /> Check Budget
           </button>
+          <button
+            className="suggestion-btn"
+            onClick={() => {
+              setInputValue('What subscriptions do I have, and which should I consider cancelling?');
+            }}
+          >
+            <RefreshIcon size={14} /> Subscriptions
+          </button>
         </div>
       </div>
 
@@ -216,7 +307,7 @@ const BudgetAI = ({ userId, monthYear }) => {
           onKeyPress={handleKeyPress}
           placeholder="Ask about your budget, spending, or get recommendations... (Shift+Enter for new line)"
           maxLength={500}
-          rows="3"
+          rows="2"
         />
         <div className="input-footer">
           <span className="char-count">{inputValue.length}/500</span>

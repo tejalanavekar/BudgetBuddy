@@ -116,7 +116,9 @@ const Profile = () => {
 
       {/* Hero */}
       <div className="profile-hero">
-        <button className="hero-back" onClick={() => navigate(-1)}>← Back</button>
+        <div className="hero-back-wrap">
+          <button className="hero-back" onClick={() => navigate('/home')}>← Back</button>
+        </div>
         <div className="hero-identity">
           <div className="hero-avatar">{initials}</div>
           <div className="hero-text">

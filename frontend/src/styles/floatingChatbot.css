@@ -77,8 +77,8 @@
   position: fixed;
   bottom: 96px;
   right: 24px;
-  width: 400px;
-  height: 520px;
+  width: 440px;
+  height: min(680px, calc(100vh - 120px));
   background: var(--bg-container);
   border-radius: 12px;
   box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16);
@@ -101,8 +101,8 @@
 }
 
 .chat-window-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #d8ebe9 0%, #bdd9d7 50%, #8fbfbb 100%);
+  color: var(--text-on-page);
   padding: 16px;
   border-radius: 12px 12px 0 0;
   display: flex;
@@ -118,9 +118,9 @@
 }
 
 .close-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
+  background: rgba(3, 54, 61, 0.12);
+  border: 1px solid rgba(3, 54, 61, 0.2);
+  color: var(--text-on-page);
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -133,8 +133,8 @@
 }
 
 .close-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(3, 54, 61, 0.2);
+  border-color: rgba(3, 54, 61, 0.35);
 }
 
 .chat-window-body {
@@ -181,8 +181,8 @@
     bottom: 80px;
     right: 16px;
     width: calc(100vw - 32px);
-    max-width: 380px;
-    height: 500px;
+    max-width: 400px;
+    height: min(600px, calc(100vh - 110px));
   }
 }
 

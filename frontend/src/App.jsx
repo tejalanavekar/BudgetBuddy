@@ -9,6 +9,7 @@ import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
 import ExpenseModal from "./components/ExpenseModal";
 import Profile from "./pages/Profile";
+import SettingsPage from "./pages/SettingsPage";
 import './styles/auth.css';
 import PastExpensesPage from './pages/PastExpensesPage';
 import ReceiptVaultPage from './pages/ReceiptVaultPage';
@@ -85,16 +86,9 @@ function App() {
               <Route path="receipts" element={<ReceiptVaultPage />} />
               <Route path="budget" element={<BudgetPage />} />
               <Route path="subscriptions" element={<SubscriptionsPage />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="settings" element={<SettingsPage />} />
             </Route>
-
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } 
-            />
 
             {/* <Route
               path="/edit-expense/:id"

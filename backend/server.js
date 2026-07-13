@@ -7,6 +7,7 @@ import userRoutes from './routes/userRoutes.js'; // Your new User routes
 import expenseRoutes from './routes/expenseRoutes.js'; // Your new Expense routes
 import budgetRoutes from './routes/budgetRoutes.js'; // Budget routes with AI integration
 import subscriptionRoutes from './routes/subscriptionRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 
 // Initialize environment variables
 dotenv.config();
@@ -45,6 +46,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health Check / Debug Endpoint
 app.get('/api/health', (req, res) => {

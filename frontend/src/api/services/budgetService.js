@@ -78,22 +78,6 @@ export const getDailySpentSnapshot = async (userId, monthYear) => {
 // ── AI Routes ──
 
 /**
- * Chat with Budget AI
- */
-export const chatWithBudgetAI = async (userId, question, monthYear = null) => {
-  try {
-    const response = await axiosInstance.post(`${BUDGET_API}/${userId}/chat`, {
-      question,
-      monthYear
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error in budget AI chat:', error);
-    throw error;
-  }
-};
-
-/**
  * Get AI-generated budget summary
  */
 export const getBudgetSummary = async (userId, monthYear = null) => {

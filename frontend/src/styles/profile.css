@@ -2,7 +2,7 @@
 
 /* ── Loading & Error Screens ── */
 .profile-loading {
-  min-height: 100vh;
+  min-height: 60vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -28,25 +28,27 @@
 
 /* ── Page ── */
 .profile-page {
-  min-height: 100vh;
   background: var(--bg-page);
   font-family: 'Cabinet Grotesk', sans-serif;
   padding-bottom: 60px;
-  width: 100vw;
+  width: 100%;
   overflow-x: hidden;
-  position: absolute;
-  top: 0; left: 0;
 }
 
 /* ── Hero ── */
 .profile-hero {
   background: var(--bg-page);
-  padding: 60px 40px 100px;
+  padding: 20px 40px 100px;
   position: relative;
   overflow: hidden;
   width: 100%;
 }
 
+.hero-back-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-left: 25px;
+}
 
 .hero-back {
   background: var(--bg-container);
@@ -60,7 +62,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   transition: background 0.2s;
   font-family: 'Cabinet Grotesk', sans-serif;
 }

@@ -1,6 +1,6 @@
 
 import express from 'express';
-import { registerUser, loginUser, getUserProfile, changePassword } from '../controllers/userController.js';
+import { registerUser, loginUser, getUserProfile, updateUserProfile, changePassword } from '../controllers/userController.js';
 import protect from '../middleware/authMiddleware.js';
 const router = express.Router();
 
@@ -11,6 +11,7 @@ router.post('/', registerUser);
 router.post('/login', loginUser);
 
 router.get('/:userId', protect, getUserProfile);
+router.put('/:userId', protect, updateUserProfile);
 
 //Update the user password 
 router.put('/:userId/password',protect,  changePassword);

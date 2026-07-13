@@ -31,6 +31,16 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
     };
 
+    // Merge a patch (e.g. new firstName) into the stored user without requiring a re-login
+    const updateUser = (patch) => {
+        setUser(prev => {
+            const updated = { ...prev, ...patch };
+            const store = localStorage.getItem('bt_user') ? localStorage : sessionStorage;
+            store.setItem('bt_user', JSON.stringify(updated));
+            return updated;
+        });
+    };
+
     const logout = () => {
         localStorage.removeItem('bt_user');
         localStorage.removeItem('bt_auth');
@@ -42,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, updateUser, loading }}>
             {!loading && children}
 
         </AuthContext.Provider>

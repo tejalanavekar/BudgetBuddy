@@ -52,10 +52,17 @@ export const UploadIcon = (p) => (
 
 export const WaveIcon = (p) => (
   <Svg {...p}>
-    <path d="M8 13V7a1.5 1.5 0 0 1 3 0v5" />
-    <path d="M11 12V5a1.5 1.5 0 0 1 3 0v7" />
-    <path d="M14 12V7a1.5 1.5 0 0 1 3 0v5" />
-    <path d="M17 13v-2a1.5 1.5 0 0 1 3 0v4c0 3-2 6-5.5 6-3 0-4.3-1.2-5.7-3.5L7 15c-.6-1 .2-2 1.2-2 .6 0 1.1.3 1.5 1l1 1.5" />
+    <g transform="rotate(-16 12 12)">
+      <path d="M8.5 14V10.5a1 1 0 0 1 2 0V13" />
+      <path d="M10.5 13V8a1 1 0 0 1 2 0v5" />
+      <path d="M12.5 13V6.5a1 1 0 0 1 2 0V13" />
+      <path d="M14.5 13V8.5a1 1 0 0 1 2 0V12" />
+      <path d="M16.5 12v-1.5a1 1 0 0 1 2 0V13c0 3.3-2 5.5-5 5.5h-1.5c-2 0-3-1-4-2.8L6.5 13.3c-.5-.8.1-1.5 1-1.5.5 0 1 .3 1.4.9l1 1.6" />
+    </g>
+    <path d="M4.5 9.5c-.9.9-1.3 1.8-1.3 3s.4 2.1 1.3 3" />
+    <path d="M2.7 8c-1.3 1.3-1.9 2.8-1.9 4.5s.6 3.2 1.9 4.5" />
+    <path d="M19.5 9.5c.9.9 1.3 1.8 1.3 3s-.4 2.1-1.3 3" />
+    <path d="M21.3 8c1.3 1.3 1.9 2.8 1.9 4.5s-.6 3.2-1.9 4.5" />
   </Svg>
 );
 
@@ -189,6 +196,33 @@ export const FolderIcon = (p) => (
 
 export const BoxIcon = (p) => (
   <Svg {...p}><path d="M3 8l9-5 9 5-9 5-9-5z" /><path d="M3 8v9l9 5 9-5V8" /><line x1="12" y1="13" x2="12" y2="22" /></Svg>
+);
+
+export const GridIcon = (p) => (
+  <Svg {...p}><rect x="3" y="3" width="8" height="8" rx="1.5" /><rect x="13" y="3" width="8" height="8" rx="1.5" /><rect x="3" y="13" width="8" height="8" rx="1.5" /><rect x="13" y="13" width="8" height="8" rx="1.5" /></Svg>
+);
+
+export const BellIcon = (p) => (
+  <Svg {...p}><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10z" /><path d="M10 19a2 2 0 0 0 4 0" /></Svg>
+);
+
+export const LockIcon = (p) => (
+  <Svg {...p}><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></Svg>
+);
+
+export const PhoneIcon = (p) => (
+  <Svg {...p}><rect x="7" y="2" width="10" height="20" rx="2" /><line x1="11" y1="18" x2="13" y2="18" /></Svg>
+);
+
+export const DownloadIcon = (p) => (
+  <Svg {...p}><path d="M12 3v12" /><path d="M7 10l5 5 5-5" /><path d="M4 19h16" /></Svg>
+);
+
+export const SettingsIcon = (p) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.16.3.25.62.28.96" />
+  </Svg>
 );
 
 // Expense category -> icon, so call sites can do <CategoryIcon category={cat} /> instead of

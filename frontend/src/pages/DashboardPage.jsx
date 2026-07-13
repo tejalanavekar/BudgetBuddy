@@ -222,7 +222,7 @@ const handleEditSubmit = async (e) => {
     {/* Header */}
     <div className="dashboard-header-area">
       <div>
-        <h2>{greeting()}, {user?.firstName || 'there'} <WaveIcon size={32} /></h2>
+        <h2>{greeting()}, {user?.firstName || 'there'} <WaveIcon size={44} /></h2>
         <p>Here's your spending overview</p>
       </div>
       <select
@@ -313,14 +313,14 @@ const handleEditSubmit = async (e) => {
                 onClick={() => handleEdit(e) }
                 title="Edit"
               >
-                <EditIcon size={16} />
+                <EditIcon size={20} />
               </button>
               <button
                 className="action-btn delete-btn"
                 onClick={(event) => { event.stopPropagation(); handleDelete(e._id); }}
                 title="Delete"
               >
-                <TrashIcon size={16} />
+                <TrashIcon size={20} />
               </button>
             </div>
           </div>
@@ -361,7 +361,7 @@ const handleEditSubmit = async (e) => {
 
       {/* Header */}
       <div style={{
-        background: 'linear-gradient(135deg, #1a3a5c 0%, #1a6b7c 60%, #2bbfbf 100%)',
+        background: 'var(--bg-container)',
         padding: '20px 24px',
         borderRadius: '16px 16px 0 0',
         display: 'flex',
@@ -384,7 +384,7 @@ const handleEditSubmit = async (e) => {
       </div>
 
       {/* Form Body */}
-      <form onSubmit={handleEditSubmit} style={{ padding: '24px', background: 'white', borderRadius: '0 0 16px 16px' }}>
+      <form onSubmit={handleEditSubmit} style={{ padding: '24px', background: 'var(--bg-page)', borderRadius: '0 0 16px 16px' }}>
 
         {/* Upload Receipt */}
         <div style={{ marginBottom: '16px' }}>

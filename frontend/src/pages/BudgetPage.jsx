@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { getBudget } from '../api/services/budgetService.js';
 import DailySpentSnapshot from '../components/DailySpentSnapshot.jsx';
-import FloatingChatbot from '../components/FloatingChatbot.jsx';
 import BudgetManager from '../components/BudgetManager.jsx';
-import { WalletIcon } from '../components/icons/Icon';
+import { WalletIcon, EditIcon } from '../components/icons/Icon';
+import { BUDGET_CHANGED } from '../utils/dataEvents';
 import '../styles/budgetPage.css';
 
 const BudgetPage = () => {
@@ -14,6 +15,25 @@ const BudgetPage = () => {
   });
   const [showBudgetManager, setShowBudgetManager] = useState(false);
   const [budgetRefresh, setBudgetRefresh] = useState(0);
+  // Lets the header button say "Edit Budget" instead of "+ Set Budget" once one
+  // already exists for the selected month — BudgetManager already supports editing
+  // (it preloads existing values), it just wasn't obvious that option existed.
+  const [hasBudget, setHasBudget] = useState(false);
+
+  useEffect(() => {
+    if (!user?.userId || !selectedMonth) return;
+    getBudget(user.userId, selectedMonth)
+      .then(data => setHasBudget(!!data.budget))
+      .catch(() => setHasBudget(false));
+  }, [user, selectedMonth, budgetRefresh]);
+
+  // The AI assistant can update the budget from anywhere in the app — refetch here
+  // (both the snapshot via budgetRefresh, and the hasBudget check above) if that happens.
+  useEffect(() => {
+    const handler = () => setBudgetRefresh(prev => prev + 1);
+    window.addEventListener(BUDGET_CHANGED, handler);
+    return () => window.removeEventListener(BUDGET_CHANGED, handler);
+  }, []);
 
   const getCurrentMonthISO = () => {
     const now = new Date();
@@ -49,7 +69,7 @@ const BudgetPage = () => {
             className="set-budget-btn"
             onClick={() => setShowBudgetManager(true)}
           >
-            + Set Budget
+            {hasBudget ? <><EditIcon size={14} /> Edit Budget</> : '+ Set Budget'}
           </button>
           <select
             className="month-selector"
@@ -68,13 +88,7 @@ const BudgetPage = () => {
       {/* Main Content */}
       <div className="budget-page-content">
         {user?.userId && selectedMonth && (
-          <>
-            {/* Daily Spent Snapshot */}
-            <DailySpentSnapshot userId={user.userId} monthYear={selectedMonth} refreshTrigger={budgetRefresh} />
-
-            {/* Floating Budget AI Chatbot */}
-            <FloatingChatbot userId={user.userId} monthYear={selectedMonth} />
-          </>
+          <DailySpentSnapshot userId={user.userId} monthYear={selectedMonth} refreshTrigger={budgetRefresh} />
         )}
       </div>
 

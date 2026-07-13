@@ -4,7 +4,6 @@ import {
   getBudget,
   getUserBudgets,
   getDailySpentSnapshot,
-  chatWithBudgetAI,
   getBudgetSummary,
   deleteBudget
 } from '../controllers/budgetController.js';
@@ -18,9 +17,6 @@ const router = express.Router();
 router.get('/:userId/snapshot/:monthYear', getDailySpentSnapshot);
 
 // ── AI Routes ──
-// POST /api/budgets/:userId/chat - Chat with AI about budget
-router.post('/:userId/chat', chatWithBudgetAI);
-
 // POST /api/budgets/:userId/summary - Get AI-generated summary
 router.post('/:userId/summary', getBudgetSummary);
 

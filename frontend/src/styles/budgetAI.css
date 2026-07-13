@@ -180,6 +180,64 @@
   text-align: right;
 }
 
+/* Action confirm/cancel — the only path that actually triggers a data change */
+.action-confirm-row {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-confirm-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-on-container);
+}
+
+.action-confirm-note {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #fbbf24;
+}
+
+.action-confirm-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.action-confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  background: #2dd4bf;
+  color: #03363D;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.action-confirm-btn:hover { filter: brightness(1.08); }
+
+.action-cancel-btn {
+  padding: 6px 14px;
+  background: rgba(255,255,255,0.08);
+  color: var(--text-on-container);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.action-cancel-btn:hover { background: var(--hover-on-container); }
+
 /* Loading State */
 .message-loading .message-content {
   max-width: 100%;
@@ -267,6 +325,7 @@
 /* Input Area */
 .budget-ai-input-area {
   padding: 16px 20px;
+  margin-top: 8px;
   border-top: 1px solid rgba(255,255,255,0.1);
   background: var(--bg-container);
   border-radius: 0 0 12px 12px;
@@ -305,19 +364,19 @@
 
 .send-button {
   padding: 8px 16px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  background: linear-gradient(135deg, #d8ebe9 0%, #bdd9d7 50%, #8fbfbb 100%);
+  color: #03363D;
   border: none;
   border-radius: 6px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .send-button:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 6px rgba(141,191,187,0.4);
 }
 
 .send-button:disabled {
@@ -364,19 +423,58 @@
   }
 }
 
-/* In floating window - hide suggestions for more space */
+/* In floating window - keep suggestions to one scrollable row so messages get most of the space */
 .floating-chat-window .budget-ai-suggestions {
-  max-height: 60px;
-  overflow: hidden;
+  flex-shrink: 0;
+  padding: 8px 16px;
+}
+
+.floating-chat-window .suggestions-label {
+  display: none;
 }
 
 .floating-chat-window .suggestion-buttons {
-  gap: 4px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 6px;
+  padding-bottom: 8px;
+  scrollbar-width: none; /* hidden by default (Firefox) */
+}
+
+.floating-chat-window .suggestion-buttons::-webkit-scrollbar {
+  height: 0; /* hidden by default (Chrome/Safari) */
+}
+
+.floating-chat-window .suggestion-buttons:hover {
+  scrollbar-width: thin; /* visible on hover (Firefox) */
+}
+
+.floating-chat-window .suggestion-buttons:hover::-webkit-scrollbar {
+  height: 6px; /* visible on hover (Chrome/Safari) */
+}
+
+.floating-chat-window .suggestion-buttons::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.25);
+  border-radius: 3px;
+}
+
+.floating-chat-window .suggestion-buttons::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .floating-chat-window .suggestion-btn {
-  padding: 4px 8px;
+  padding: 5px 10px;
   font-size: 11px;
+  flex-shrink: 0;
+}
+
+.floating-chat-window .budget-ai-input-area {
+  padding: 10px 16px;
+  margin-top: 4px;
+}
+
+.floating-chat-window .budget-ai-input {
+  padding: 8px 10px;
 }
 
 @media (max-width: 480px) {
