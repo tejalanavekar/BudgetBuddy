@@ -1,12 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth }  from '../context/AuthContext';
-import { getUserProfile , getExpenses , changePassword } from '../api/services';
-import { CategoryIcon, WalletIcon, ReceiptIcon, TrophyIcon, HourglassIcon, WarningIcon, ChartIcon, KeyIcon, PaperclipIcon, ClipboardIcon, LogoutIcon } from '../components/icons/Icon';
+import { getUserProfile , getExpenses } from '../api/services';
+import { CategoryIcon, WalletIcon, ReceiptIcon, TrophyIcon, HourglassIcon, WarningIcon, ChartIcon, LogoutIcon } from '../components/icons/Icon';
 import '../styles/profile.css';
 
 const Profile = () => {
-  
+
   const {user , logout} = useAuth();
   const navigate = useNavigate();
 
@@ -14,11 +14,6 @@ const Profile = () => {
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError]     = useState('');
   const [expenses, setExpenses]             = useState([]);
-  const [expensesLoading, setExpensesLoading] = useState(true);
-  const [activeTab, setActiveTab]           = useState('overview');
-  const [passwordForm, setPasswordForm]     = useState({ current: '', newPass: '', confirm: '' });
-  const [passwordMsg, setPasswordMsg]       = useState({ type: '', text: '' });
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   //Taking the first letter from the firstname and first from the lastname
   const initials = profile
@@ -45,15 +40,13 @@ const Profile = () => {
   .then(res => {
     const data = Array.isArray(res.data) ? res.data : [];
     setExpenses(data);
-    setExpensesLoading(false);
   })
-  .catch(() => setExpensesLoading(false));
+  .catch(() => {});
 }, [user]);
 
   //Compute the stats
   //parseFloat is used to ensure that the amount is treated as a number, and if it's missing or invalid, it defaults to 0.
   const totalSpent = expenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0); //reduce is used to calculate the total amount spent by iterating through each expense and summing up the amounts. 
-  const latestExpense = expenses[0]; //expenses sorted by date desc
   const categoryTotals = expenses.reduce((acc, e) => {
     acc[e.category] = (acc[e.category] || 0) + parseFloat(e.amount || 0); //gets the  existing total or assigns 0 if not seen that category
     return acc;
@@ -66,31 +59,7 @@ const Profile = () => {
     })
     .reduce((sum, e) => sum + parseFloat(e.amount || 0), 0); //filter keeps for current month and  year, reduce sums them all
 
-  // Password change
-  const handlePasswordChange = async (e) => {
-    e.preventDefault(); //stops form from refreshing the  page
-    if (passwordForm.newPass !== passwordForm.confirm) {
-      setPasswordMsg({ type: 'error', text: 'New passwords do not match.' }); return;
-    }
-    if (passwordForm.newPass.length < 6) {
-      setPasswordMsg({ type: 'error', text: 'Password must be at least 6 characters.' }); return;
-    }
-    setIsChangingPassword(true);
-    try {
-      await changePassword(user.userId, {
-      currentPassword: passwordForm.current,
-      newPassword: passwordForm.newPass
-      });
-      setPasswordMsg({ type: 'success', text: '✅ Password updated successfully!' });
-      setPasswordForm({ current: '', newPass: '', confirm: '' }); //clear form
-    } catch (err) {
-      setPasswordMsg({ type: 'error', text: err.response?.data?.message || 'Failed to update password.' });
-    } finally {
-      setIsChangingPassword(false);
-    }
-  };
-
-  const handleSignOut = () => { logout(); navigate('/signin'); };// signout and  show the  sign in page again 
+  const handleSignOut = () => { logout(); navigate('/signin'); };// signout and  show the  sign in page again
 
   if (profileLoading) return (
     <div className="profile-loading">
@@ -184,22 +153,6 @@ const Profile = () => {
             </div>
 
             <div className="sidebar-divider" />
-            <p className="sidebar-section-title">Navigation</p>
-
-            {[
-              { id: 'overview', icon: ChartIcon, label: 'Overview' },
-              { id: 'expenses', icon: ReceiptIcon, label: 'My Expenses' },
-              { id: 'password', icon: KeyIcon, label: 'Change Password' },
-            ].map(tab => (
-              <button key={tab.id}
-                className={`sidebar-action ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}>
-                <span className="sidebar-action-icon"><tab.icon /></span>
-                {tab.label}
-              </button>
-            ))}
-
-            <div className="sidebar-divider" />
             <button className="sidebar-action danger" onClick={handleSignOut}>
               <span className="sidebar-action-icon"><LogoutIcon /></span>Sign Out
             </button>
@@ -208,11 +161,7 @@ const Profile = () => {
 
         {/* Right Panel */}
         <div className="panel-card">
-
-          {/* Overview Tab */}
-          {activeTab === 'overview' && (
-            <>
-              <h2 className="panel-title"><ChartIcon /> Your Overview</h2>
+          <h2 className="panel-title"><ChartIcon /> Your Overview</h2>
               <div className="overview-grid">
                 <div className="overview-tile">
                   <div className="overview-tile-label">This Month</div>
@@ -237,108 +186,6 @@ const Profile = () => {
                   <div className="overview-tile-sub">unique categories</div>
                 </div>
               </div>
-
-              {latestExpense && (
-                <>
-                  <h3 className="latest-expense-title">Latest Expense</h3>
-                  <div className="expense-item expense-item--highlight">
-                    <div className="expense-emoji"><CategoryIcon category={latestExpense.category} /></div>
-                    <div className="expense-info">
-                      <div className="expense-desc">{latestExpense.description}</div>
-                      <div className="expense-meta">
-                        {new Date(latestExpense.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        <span className="expense-cat-badge">{latestExpense.category}</span>
-                        {latestExpense.receiptPath && <span className="receipt-tag"><PaperclipIcon size={12} /> Receipt</span>}
-                        {latestExpense.items?.length > 0 && (
-                          <span className="receipt-tag receipt-tag--green"><ClipboardIcon size={12} /> {latestExpense.items.length} items</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="expense-amount">${parseFloat(latestExpense.amount).toFixed(2)}</div>
-                  </div>
-                </>
-              )}
-
-              {!latestExpense && !expensesLoading && (
-                <div className="empty-expenses">
-                  <span className="empty-icon"><ReceiptIcon size={36} /></span>
-                  <p>No expenses yet. Start tracking!</p>
-                  <button className="empty-btn" onClick={() => navigate('/home/expense')}>
-                    Add your first expense
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* Expenses Tab */}
-          {activeTab === 'expenses' && (
-            <>
-              <h2 className="panel-title"><ReceiptIcon /> My Expenses</h2>
-              {expensesLoading ? (
-                <div className="tab-loading">Loading expenses...</div>
-              ) : expenses.length === 0 ? (
-                <div className="empty-expenses">
-                  <span className="empty-icon"><ReceiptIcon size={36} /></span>
-                  <p>No expenses logged yet.</p>
-                  <button className="empty-btn" onClick={() => navigate('/home/expense')}>
-                    Add your first expense
-                  </button>
-                </div>
-              ) : (
-                expenses.slice(0, 10).map(e => (
-                  <div className="expense-item" key={e._id}>
-                    <div className="expense-emoji"><CategoryIcon category={e.category} /></div>
-                    <div className="expense-info">
-                      <div className="expense-desc">{e.description}</div>
-                      <div className="expense-meta">
-                        {new Date(e.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        <span className="expense-cat-badge">{e.category}</span>
-                        {e.receiptPath && <span className="receipt-tag"><PaperclipIcon size={12} /> Receipt</span>}
-                        {e.items?.length > 0 && (
-                          <span className="receipt-tag receipt-tag--green"><ClipboardIcon size={12} /> {e.items.length} items</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="expense-amount">₹{parseFloat(e.amount).toFixed(2)}</div>
-                  </div>
-                ))
-              )}
-            </>
-          )}
-
-          {/* Password Tab */}
-          {activeTab === 'password' && (
-            <>
-              <h2 className="panel-title"><KeyIcon /> Change Password</h2>
-              {passwordMsg.text && (
-                <div className={`form-msg form-msg--${passwordMsg.type}`}>{passwordMsg.text}</div>
-              )}
-              <form onSubmit={handlePasswordChange}>
-                <div className="password-field">
-                  <label className="password-label">Current Password</label>
-                  <input className="password-input" type="password" placeholder="Enter current password"
-                    value={passwordForm.current}
-                    onChange={e => setPasswordForm({ ...passwordForm, current: e.target.value })} required />
-                </div>
-                <div className="password-field">
-                  <label className="password-label">New Password</label>
-                  <input className="password-input" type="password" placeholder="Min 6 characters"
-                    value={passwordForm.newPass}
-                    onChange={e => setPasswordForm({ ...passwordForm, newPass: e.target.value })} required />
-                </div>
-                <div className="password-field">
-                  <label className="password-label">Confirm New Password</label>
-                  <input className="password-input" type="password" placeholder="Re-enter new password"
-                    value={passwordForm.confirm}
-                    onChange={e => setPasswordForm({ ...passwordForm, confirm: e.target.value })} required />
-                </div>
-                <button type="submit" className="password-submit" disabled={isChangingPassword}>
-                  {isChangingPassword ? 'Updating...' : 'Update Password'}
-                </button>
-              </form>
-            </>
-          )}
 
         </div>
       </div>

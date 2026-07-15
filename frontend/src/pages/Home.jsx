@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { UserIcon, ReceiptIcon, ArchiveIcon, SettingsIcon, LogoutIcon } from '../components/icons/Icon';
 import FloatingChatbot from '../components/FloatingChatbot.jsx';
+import { getUserProfile } from '../api/services';
 import '../styles/dashboard.css';
 const Home = () => {
   const { logout, user } = useAuth(); // ProtectedRoute already guarantees user is set before Home renders
@@ -13,6 +14,15 @@ const Home = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileRef = useRef(null);
+
+  // Apply the saved Compact Mode preference globally (not just while on the Settings
+  // page) — fetched once per app load since AuthContext's user object doesn't carry it.
+  useEffect(() => {
+    if (!user?.userId) return;
+    getUserProfile(user.userId)
+      .then(res => document.body.classList.toggle('compact-mode', !!res.data?.preferences?.compactMode))
+      .catch(() => {});
+  }, [user?.userId]);
 
   const initials = user && (user.firstName || user.lastName)
     ? `${(user.firstName || '').charAt(0)}${(user.lastName || '').charAt(0)}`.toUpperCase()

@@ -61,7 +61,7 @@ const BudgetPage = () => {
       {/* Header */}
       <div className="budget-page-header">
         <div className="header-title">
-          <h2><WalletIcon /> Budget Management</h2>
+          <h2>Budget Management</h2>
           <p>Manage your monthly budget and track spending</p>
         </div>
         <div className="header-controls">

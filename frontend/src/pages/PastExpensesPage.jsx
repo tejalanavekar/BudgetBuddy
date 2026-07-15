@@ -9,15 +9,10 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { getExpenses, deleteExpense, updateExpense } from '../api/services/expenseService.js';
 import { CATEGORIES, CATEGORY_COLOR as CATEGORY_COLORS } from '../constants/categoryMeta';
 import { CategoryIcon, CalendarIcon, WalletIcon, ChartIcon, FireIcon, ReceiptIcon, TrendingUpIcon, SearchIcon, EditIcon, TrashIcon, InboxEmptyIcon, UploadIcon, CheckIcon, WarningIcon } from '../components/icons/Icon';
+import { getYearMonth } from '../utils/dateUtils';
 import '../styles/pastExpenses.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
-
-const getYearMonth = (dateStr) => {
-  if (!dateStr) return [null, null];
-  const parts = dateStr.split('T')[0].split('-');
-  return [parseInt(parts[0]), parseInt(parts[1])];
-};
 
 const formatMonthLabel = (iso) => {
   const [year, month] = iso.split('-');

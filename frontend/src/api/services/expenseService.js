@@ -1,4 +1,5 @@
 import API from '../axiosInstance';
+import { downloadBlob } from '../../utils/downloadBlob';
 
 //GET /expenses?userId=abc123
 export const getExpenses = (userId) =>
@@ -41,3 +42,19 @@ export const deleteExpense = (id) =>
 //Getting all the exppenses
 export const getAllReceipts = (userId) =>
   API.get('/expenses/receipts', { params: { userId } });
+
+//Settings > Data & Privacy — download all expenses as a CSV file
+export const exportExpensesCSV = async (userId) => {
+  const response = await API.get('/expenses/export/csv', { params: { userId }, responseType: 'blob' });
+  downloadBlob(response.data, 'budget-buddy-expenses.csv');
+};
+
+//Settings > Data & Privacy — download every uploaded receipt image as a ZIP
+export const exportReceiptsZip = async (userId) => {
+  const response = await API.get('/expenses/export/receipts-zip', { params: { userId }, responseType: 'blob' });
+  downloadBlob(response.data, 'budget-buddy-receipts.zip');
+};
+
+//Settings > Data & Privacy — permanently delete all expenses for the current month
+export const clearMonthExpenses = (userId) =>
+  API.delete('/expenses/clear-month', { params: { userId } });

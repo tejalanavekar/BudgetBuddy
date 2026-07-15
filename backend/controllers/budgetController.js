@@ -98,6 +98,21 @@ export const getUserBudgets = async (req, res) => {
   }
 };
 
+// Settings > Data & Privacy — download all budget records as a JSON file
+export const exportBudgetsJSON = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const userIdObj = new mongoose.Types.ObjectId(userId);
+    const budgets = await Budget.find({ userId: userIdObj }).sort({ monthYear: -1 });
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename="budget-buddy-budgets.json"');
+    res.status(200).send(JSON.stringify(budgets, null, 2));
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to export budgets' });
+  }
+};
+
 // ── GET /api/budgets/:userId/snapshot/:monthYear - Get Daily Snapshot ──
 export const getDailySpentSnapshot = async (req, res) => {
   try {

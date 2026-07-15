@@ -5,7 +5,8 @@ import {
   getUserBudgets,
   getDailySpentSnapshot,
   getBudgetSummary,
-  deleteBudget
+  deleteBudget,
+  exportBudgetsJSON
 } from '../controllers/budgetController.js';
 
 const router = express.Router();
@@ -22,6 +23,9 @@ router.post('/:userId/summary', getBudgetSummary);
 
 // GET /api/budgets/:userId/all - Get all budgets for user
 router.get('/:userId/all', getUserBudgets);
+
+// GET /api/budgets/:userId/export/json - Download all budgets as JSON
+router.get('/:userId/export/json', exportBudgetsJSON);
 
 // ── Generic Routes (Less Specific) ──
 // POST /api/budgets/:userId - Create or update budget

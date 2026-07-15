@@ -2,6 +2,14 @@
 import Expense from '../models/Expense.js';
 import axios from 'axios';
 import fs from 'fs/promises';
+import fssync from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import archiver from 'archiver';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const UPLOADS_DIR = path.join(__dirname, '../uploads');
 
 
 
@@ -500,5 +508,81 @@ export const getAllReceipts = async (req, res) => {
     res.status(200).json(expenses);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching receipts', error: error.message });
+  }
+};
+
+// Settings > Data & Privacy — download all expenses as a CSV file
+export const exportExpensesCSV = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    if (!userId) return res.status(400).json({ message: 'User ID required' });
+
+    const expenses = await Expense.find({ userId }).sort({ date: -1 });
+
+    const escapeCsv = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+    const header = ['Date', 'Description', 'Category', 'Amount', 'Has Receipt'];
+    const rows = expenses.map(e => [
+      e.date, e.description, e.category, e.amount, e.receiptPath ? 'Yes' : 'No'
+    ].map(escapeCsv).join(','));
+    const csv = [header.join(','), ...rows].join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="budget-buddy-expenses.csv"');
+    res.status(200).send(csv);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to export expenses', error: error.message });
+  }
+};
+
+// Settings > Data & Privacy — download every uploaded receipt image as a ZIP
+export const exportReceiptsZip = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    if (!userId) return res.status(400).json({ message: 'User ID required' });
+
+    const expenses = await Expense.find({ userId, receiptPath: { $exists: true, $ne: null } });
+
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename="budget-buddy-receipts.zip"');
+
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    // Fires asynchronously — a try/catch around this function can't catch it, so
+    // handle it here directly instead of throwing (which would just crash uncaught).
+    archive.on('error', (err) => {
+      console.error('Archiver error:', err);
+      if (!res.headersSent) res.status(500).json({ message: 'Failed to export receipts', error: err.message });
+      else res.end();
+    });
+    archive.pipe(res);
+
+    for (const e of expenses) {
+      const filePath = path.join(UPLOADS_DIR, e.receiptPath);
+      if (fssync.existsSync(filePath)) {
+        archive.file(filePath, { name: `${e.date}_${e.description.replace(/[^a-z0-9]/gi, '_')}${path.extname(e.receiptPath)}` });
+      }
+    }
+
+    await archive.finalize();
+  } catch (error) {
+    console.error('Export receipts zip error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ message: 'Failed to export receipts', error: error.message });
+    }
+  }
+};
+
+// Settings > Data & Privacy — permanently delete all expenses for the current calendar month
+export const clearMonthExpenses = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    if (!userId) return res.status(400).json({ message: 'User ID required' });
+
+    const now = new Date();
+    const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    const result = await Expense.deleteMany({ userId, date: { $regex: `^${monthYear}` } });
+    res.status(200).json({ message: 'Cleared', deletedCount: result.deletedCount });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to clear expenses', error: error.message });
   }
 };

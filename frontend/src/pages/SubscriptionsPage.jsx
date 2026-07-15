@@ -187,7 +187,7 @@ const SubscriptionsPage = () => {
       {/* Header */}
       <div className="subs-header">
         <div className="subs-header-left">
-          <span className="subs-header-icon"><RefreshIcon /></span>
+          
           <div>
             <h1 className="subs-title">Subscriptions</h1>
             <p className="subs-subtitle">Track and manage all your recurring payments</p>

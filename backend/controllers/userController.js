@@ -1,4 +1,8 @@
 import User from '../models/User.js';
+import Expense from '../models/Expense.js';
+import Budget from '../models/Budget.js';
+import Subscription from '../models/Subscription.js';
+import ChatMessage from '../models/ChatMessage.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -105,16 +109,65 @@ export const updateUserProfile = async (req, res) => {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        const { firstName, lastName, phone } = req.body;
+        const { firstName, lastName, phone, preferences, notificationPrefs } = req.body;
         if (firstName !== undefined) user.firstName = firstName;
         if (lastName !== undefined) user.lastName = lastName;
         if (phone !== undefined) user.phone = phone;
+        // Merge rather than replace, so updating one preference doesn't wipe the others
+        if (preferences !== undefined) user.preferences = { ...(user.preferences?.toObject?.() || {}), ...preferences };
+        if (notificationPrefs !== undefined) user.notificationPrefs = { ...(user.notificationPrefs?.toObject?.() || {}), ...notificationPrefs };
 
         await user.save();
         const { password, ...safeUser } = user.toObject();
         res.status(200).json(safeUser);
     } catch (error) {
         res.status(400).json({ message: 'Failed to update profile', error: error.message });
+    }
+};
+
+//Settings > Account tab — upload a profile photo
+//PUT /api/users/:userId/photo (multipart, field name "photo")
+export const uploadProfilePhoto = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        if (userId !== req.userId) {
+            return res.status(403).json({ message: 'Unauthorized' });
+        }
+        if (!req.file) {
+            return res.status(400).json({ message: 'No image uploaded' });
+        }
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        user.photoUrl = req.file.filename;
+        await user.save();
+        const { password, ...safeUser } = user.toObject();
+        res.status(200).json(safeUser);
+    } catch (error) {
+        res.status(400).json({ message: 'Failed to upload photo', error: error.message });
+    }
+};
+
+//Settings > Data & Privacy — permanently delete the account and all associated data
+//DELETE /api/users/:userId
+export const deleteAccount = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        if (userId !== req.userId) {
+            return res.status(403).json({ message: 'Unauthorized' });
+        }
+
+        await Promise.all([
+            Expense.deleteMany({ userId }),
+            Budget.deleteMany({ userId }),
+            Subscription.deleteMany({ userId }),
+            ChatMessage.deleteMany({ userId }),
+            User.findByIdAndDelete(userId)
+        ]);
+
+        res.status(200).json({ message: 'Account deleted' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete account', error: error.message });
     }
 };
 

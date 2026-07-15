@@ -4,6 +4,7 @@ import CategoryChart from '../components/CategoryChart';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getExpenses , deleteExpense, updateExpense } from '../api/services/expenseService.js';
 import { CategoryIcon, WalletIcon, CalendarIcon, ReceiptIcon, EditIcon, TrashIcon, ChartIcon, UploadIcon, CheckIcon, WarningIcon, WaveIcon } from '../components/icons/Icon';
+import { getYearMonth } from '../utils/dateUtils';
 import '../styles/dashboard.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -99,14 +100,6 @@ useEffect(() => {
     const [selYear, selMonth] = selectedDate.split('-').map(Number);
     const prevIso = getPreviousMonthISO(selectedDate);
     const [prevYear, prevMonth] = prevIso.split('-').map(Number);
-
-    // Helper to extract year and month from YYYY-MM-DD string
-    const getYearMonth = (dateStr) => {
-      if (!dateStr || typeof dateStr !== 'string') return [null, null];
-      const parts = dateStr.split('-');
-      if (parts.length < 2) return [null, null];
-      return [parseInt(parts[0]), parseInt(parts[1])];
-    };
 
     const current = allExpenses.filter(e => {
       const [y, m] = getYearMonth(e.date);

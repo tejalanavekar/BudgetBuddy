@@ -72,3 +72,41 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Settings > Preferences > Compact Mode — tightens spacing on the main card/row
+   containers used across the app, applied globally via a body class so it works
+   regardless of which page-specific stylesheet is loaded. */
+body.compact-mode .panel-card,
+body.compact-mode .sidebar-card,
+body.compact-mode .snapshot-card,
+body.compact-mode .stat-card,
+body.compact-mode .subs-total-card,
+body.compact-mode .subs-category-card,
+body.compact-mode .subs-upcoming-card,
+body.compact-mode .rv-folder-card,
+body.compact-mode .rv-stats-bar {
+  padding: 16px !important;
+}
+body.compact-mode .settings-row,
+body.compact-mode .settings-field,
+body.compact-mode .settings-form-grid {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+body.compact-mode .stats-strip,
+body.compact-mode .dashboard-grid,
+body.compact-mode .snapshot-grid {
+  gap: 10px !important;
+}
+body.compact-mode .expense-item,
+body.compact-mode .subs-item,
+body.compact-mode .pe-expense-row {
+  padding: 8px 12px !important;
+}
+body.compact-mode .dashboard-header-area,
+body.compact-mode .budget-page-header,
+body.compact-mode .subs-root,
+body.compact-mode .rv-root {
+  padding-top: 20px !important;
+  padding-bottom: 20px !important;
+}

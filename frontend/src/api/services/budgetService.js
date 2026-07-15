@@ -1,6 +1,13 @@
 import axiosInstance from '../axiosInstance';
+import { downloadBlob } from '../../utils/downloadBlob';
 
 const BUDGET_API = '/budgets';
+
+//Settings > Data & Privacy — download all budget records as a JSON file
+export const exportBudgetsJSON = async (userId) => {
+  const response = await axiosInstance.get(`${BUDGET_API}/${userId}/export/json`, { responseType: 'blob' });
+  downloadBlob(response.data, 'budget-buddy-budgets.json');
+};
 
 // ── Budget CRUD Operations ──
 

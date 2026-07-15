@@ -111,6 +111,13 @@
 /* ── Buttons ── */
 .settings-photo-actions { display: flex; align-items: center; gap: 12px; }
 
+.settings-avatar-img {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
 .settings-avatar {
   width: 44px; height: 44px;
   border-radius: 50%;
@@ -235,6 +242,7 @@
   transition: transform 0.2s;
 }
 .settings-toggle.on .settings-toggle-knob { transform: translateX(18px); }
+.settings-toggle:disabled { cursor: not-allowed; opacity: 0.5; }
 
 /* ── Sessions ── */
 .settings-session-row {
@@ -267,6 +275,22 @@
   border-radius: 999px;
   margin-left: 4px;
 }
+
+.settings-tag--muted {
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.6);
+}
+
+/* Notifications — Email Digest sub-options, nested under the parent toggle */
+.settings-notif-suboptions {
+  padding-left: 20px;
+  border-left: 2px solid rgba(255,255,255,0.08);
+  margin-left: 4px;
+  transition: opacity 0.2s;
+}
+.settings-notif-suboptions.disabled { opacity: 0.45; }
+.settings-row--sub h4 { font-size: 13px; }
+.settings-row--sub p { font-size: 11px; }
 
 .settings-btn-revoke {
   background: rgba(239,68,68,0.15);
