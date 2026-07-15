@@ -215,7 +215,7 @@ const handleEditSubmit = async (e) => {
     {/* Header */}
     <div className="dashboard-header-area">
       <div>
-        <h2>{greeting()}, {user?.firstName || 'there'} <WaveIcon size={44} /></h2>
+        <h2>{greeting()}, {user?.firstName || 'there'} !</h2>
         <p>Here's your spending overview</p>
       </div>
       <select

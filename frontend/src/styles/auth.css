@@ -98,11 +98,9 @@ html, body {
 }
 
 .brand-logo-icon {
-  width: 1em; height: 1em;
+  width: 1.8em; height: 1.8em;
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  object-fit: contain;
 }
 
 .auth-left .lead {

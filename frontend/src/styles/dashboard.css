@@ -54,10 +54,7 @@ body, html {
 .nav-logo-icon {
   width: 32px; height: 32px;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-on-page);
+  object-fit: contain;
 }
 
 .nav-brand h1 {
