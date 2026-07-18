@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import {registerUser} from '../api/services';
-import { useAuth  } from '../context/AuthContext.jsx'; 
+import { registerUser, googleLogin } from '../api/services';
+import { useAuth  } from '../context/AuthContext.jsx';
 import { useNavigate , Link } from 'react-router-dom';
+import GoogleAuthButton from '../components/GoogleAuthButton.jsx';
 import '../styles/auth.css';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    phone: '',
     email: '',
     password: ''
   });
@@ -29,6 +29,19 @@ const SignUp = () => {
       setError(err.response?.data?.message || 'Server error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Same endpoint as SignIn's Google button — a brand-new email creates the account
+  // right here, so this one call is genuinely the "sign up" path when the email is new.
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('');
+    try {
+      const res = await googleLogin(credentialResponse.credential);
+      login({ userId: res.data.userId, firstName: res.data.firstName }, res.data.token);
+      navigate('/home');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
     }
   };
 
@@ -54,7 +67,15 @@ const SignUp = () => {
       {/* Main Detail Card */}
       <div className="auth-card-simple">
         {error && <div className="auth-error">{error}</div>}
-        
+
+        <GoogleAuthButton
+          text="signup_with"
+          onSuccess={handleGoogleSuccess}
+          onError={() => setError('Google sign-in failed. Please try again.')}
+        />
+
+        <div className="auth-divider"><span>or</span></div>
+
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label className="form-label">My name is</label>
@@ -70,24 +91,12 @@ const SignUp = () => {
           </div>
 
           <div className="form-group">
-            <label className="form-label">And here's my phone:</label>
-            <input name="phone" className="form-input" onChange={handleChange} required />
-          </div>
-
-          <div className="form-group">
             <label className="form-label">And here's my password:</label>
             <input name="password" type="password" className="form-input" onChange={handleChange} required />
           </div>
 
           <button type="submit" className="auth-submit-alt" disabled={loading}>
             {loading ? 'Verifying...' : 'Sign me up!'}
-          </button>
-
-          <div className="divider"><span>or</span></div>
-
-          <button type="button" className="google-btn">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Reference_Logo.svg" alt="G" />
-            Sign up with Google
           </button>
 
           <div className="auth-footer">

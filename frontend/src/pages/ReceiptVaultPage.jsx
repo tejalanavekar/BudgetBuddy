@@ -150,7 +150,6 @@ const ReceiptVaultPage = () => {
 
       {folders.length === 0 ? (
         <div className="rv-empty-full">
-          <span><InboxEmptyIcon size={40} /></span>
           <h3>No receipts yet</h3>
           <p>Upload receipts when adding expenses and they'll appear here.</p>
         </div>

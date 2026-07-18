@@ -6,6 +6,7 @@ import DashboardPage from "./pages/DashboardPage";
 import BudgetPage from "./pages/BudgetPage";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import Home from "./pages/Home";
 import ExpenseModal from "./components/ExpenseModal";
 import Profile from "./pages/Profile";
@@ -68,6 +69,7 @@ function App() {
           
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
             
             <Route

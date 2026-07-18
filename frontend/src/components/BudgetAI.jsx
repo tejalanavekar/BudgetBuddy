@@ -38,15 +38,17 @@ const BudgetAI = ({ userId, monthYear, firstName, page, messages, setMessages })
     }
   }, [userId, firstName]);
 
-  // Handle sending message
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+  // Handle sending message — accepts an optional override so a suggestion chip can
+  // fire the send itself (skipping the input box) instead of just prefilling it.
+  const handleSendMessage = async (textOverride) => {
+    const textToSend = textOverride ?? inputValue;
+    if (!textToSend.trim()) return;
 
     // Add user message to chat
     const userMessage = {
       id: Date.now(),
       type: 'user',
-      text: inputValue,
+      text: textToSend,
       timestamp: new Date()
     };
 
@@ -257,19 +259,17 @@ const BudgetAI = ({ userId, monthYear, firstName, page, messages, setMessages })
       <div className="budget-ai-suggestions">
         <div className="suggestions-label">Quick Suggestions:</div>
         <div className="suggestion-buttons">
-          <button 
+          <button
             className="suggestion-btn"
-            onClick={() => {
-              setInputValue('How much more can I spend this month?');
-            }}
+            onClick={() => handleSendMessage('How much more can I spend this month?')}
+            disabled={loading}
           >
             <WalletIcon size={14} /> Budget Check
           </button>
           <button
             className="suggestion-btn"
-            onClick={() => {
-              setInputValue('What are my spending trends?');
-            }}
+            onClick={() => handleSendMessage('What are my spending trends?')}
+            disabled={loading}
           >
             <TrendingUpIcon size={14} /> Trends
           </button>
@@ -282,17 +282,15 @@ const BudgetAI = ({ userId, monthYear, firstName, page, messages, setMessages })
           </button>
           <button
             className="suggestion-btn"
-            onClick={() => {
-              setInputValue('Can I afford to spend $X this shopping category?');
-            }}
+            onClick={() => handleSendMessage('How am I doing against my category budgets — any I should watch?')}
+            disabled={loading}
           >
             <ShoppingBagIcon size={14} /> Check Budget
           </button>
           <button
             className="suggestion-btn"
-            onClick={() => {
-              setInputValue('What subscriptions do I have, and which should I consider cancelling?');
-            }}
+            onClick={() => handleSendMessage('What subscriptions do I have, and which should I consider cancelling?')}
+            disabled={loading}
           >
             <RefreshIcon size={14} /> Subscriptions
           </button>
@@ -311,9 +309,9 @@ const BudgetAI = ({ userId, monthYear, firstName, page, messages, setMessages })
         />
         <div className="input-footer">
           <span className="char-count">{inputValue.length}/500</span>
-          <button 
+          <button
             className="send-button"
-            onClick={handleSendMessage}
+            onClick={() => handleSendMessage()}
             disabled={loading || !inputValue.trim()}
           >
             {loading ? 'Sending...' : 'Send'}

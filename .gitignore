@@ -1,0 +1,5 @@
+# Environment files — contain real secrets (DB credentials, API keys, JWT secret).
+# Matches .env in any directory (backend/.env, frontend/.env, etc.)
+.env
+.env.*
+!.env.example

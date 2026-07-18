@@ -368,10 +368,11 @@
 }
 .rv-empty-full span { font-size: 52px; }
 .rv-empty-full h3 {
-  color: rgba(255,255,255,0.65); font-family: 'Clash Display', sans-serif;
+  color: rgba(24, 23, 23, 0.65); font-family: 'Clash Display', sans-serif;
   margin: 8px 0 4px; font-size: 22px;
 }
-.rv-empty-full p { font-size: 14px; margin: 0; }
+.rv-empty-full p { color: rgba(24, 23, 23, 0.65);font-size: 14px; margin: 0; }
+
 
 @media (max-width: 768px) {
   .rv-stats-bar { flex-direction: column; align-items: flex-start; }
