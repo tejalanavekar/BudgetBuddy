@@ -8,8 +8,22 @@ import {
   deleteBudget,
   exportBudgetsJSON
 } from '../controllers/budgetController.js';
+import protect from '../middleware/authMiddleware.js';
+import validate from '../middleware/validate.js';
+import { budgetSchema } from '../validation/schemas.js';
 
 const router = express.Router();
+
+router.use(protect);
+
+// Every route below starts with :userId — check ownership once here instead of
+// repeating it in each controller function.
+router.param('userId', (req, res, next, userId) => {
+  if (userId !== req.userId) {
+    return res.status(403).json({ message: 'Unauthorized' });
+  }
+  next();
+});
 
 // ── Specific Routes First (More Specific Before Generic) ──
 
@@ -29,7 +43,7 @@ router.get('/:userId/export/json', exportBudgetsJSON);
 
 // ── Generic Routes (Less Specific) ──
 // POST /api/budgets/:userId - Create or update budget
-router.post('/:userId', createOrUpdateBudget);
+router.post('/:userId', validate(budgetSchema), createOrUpdateBudget);
 
 // GET /api/budgets/:userId/:monthYear - Get specific month budget
 router.get('/:userId/:monthYear', getBudget);

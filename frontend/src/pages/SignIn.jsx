@@ -23,9 +23,6 @@ const SignIn = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('email:', email);      // add this
-    console.log('password:', password);
-    console.log('loginUser is:', loginUser);
     setError('');
     setIsSubmitting(true);
     // Simple front-end check (replace with real auth later)
@@ -36,12 +33,8 @@ const SignIn = () => {
     }
 
     try {
-      console.log('Attempting login with:', { email, password });
       // 1. Call your actual backend: POST /api/users/login
       const response = await loginUser({ email, password });
-      console.log('LoginUser promise resolved:', response);
-      console.log('Full response data:', response.data);
-      console.log('Token from response:', response.data.token);
 
       // 2. The backend returns: { userId, firstName, message }
       // We save this into our global AuthContext
@@ -55,7 +48,6 @@ const SignIn = () => {
       // 3. Success! Move to home
       navigate('/home');
     } catch (err) {
-      console.log('LoginUser promise rejected:', err);
       const message = err.response?.data?.message || 'Something went wrong. Please try again.';
       setError(message);
     } finally {
@@ -81,6 +73,12 @@ const SignIn = () => {
 
   // Backend always responds the same way whether or not the email is registered
   // (prevents using this as a way to probe which emails exist), so we just show its message.
+  const closeForgotPasswordModal = () => {
+    setShowForgotPassword(false);
+    setResetMsg({ type: '', text: '' });
+    setResetEmail('');
+  };
+
   const handleForgotPasswordSubmit = async () => {
     if (!resetEmail.trim()) return;
     setIsSendingReset(true);
@@ -88,6 +86,7 @@ const SignIn = () => {
     try {
       const res = await forgotPassword(resetEmail);
       setResetMsg({ type: 'success', text: res.data.message });
+      setResetEmail('');
     } catch (err) {
       setResetMsg({ type: 'error', text: err.response?.data?.message || 'Something went wrong. Please try again.' });
     } finally {
@@ -151,8 +150,11 @@ const SignIn = () => {
                 type="button"
                 className="link-btn"
                 onClick={() => {
-                  setShowForgotPassword(open => !open);
-                  setResetMsg({ type: '', text: '' });
+                  if (showForgotPassword) {
+                    closeForgotPasswordModal();
+                  } else {
+                    setShowForgotPassword(true);
+                  }
                 }}
               >
                 Forgot password?
@@ -171,10 +173,10 @@ const SignIn = () => {
       </div>
 
       {showForgotPassword && (
-        <div className="forgot-password-overlay" onClick={() => setShowForgotPassword(false)}>
+        <div className="forgot-password-overlay" onClick={closeForgotPasswordModal}>
           <div className="forgot-password-modal" onClick={(e) => e.stopPropagation()}>
             <h3 className="forgot-password-modal-title">Reset your password</h3>
-            <p className="auth-subtitle">Enter your email to get a reset link</p>
+            <p className="auth-subtitle">Enter the email you signed up with if it's registered, we'll send a reset link</p>
 
             <input
               className="form-input"
@@ -198,7 +200,7 @@ const SignIn = () => {
               >
                 {isSendingReset ? 'Sending...' : 'Send Reset Link'}
               </button>
-              <button type="button" className="link-btn" onClick={() => setShowForgotPassword(false)}>
+              <button type="button" className="link-btn" onClick={closeForgotPasswordModal}>
                 Cancel
               </button>
             </div>
