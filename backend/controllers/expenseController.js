@@ -6,6 +6,7 @@ import fssync from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import archiver from 'archiver';
+import logger from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -382,17 +383,12 @@ export const scanReceipt = async (req, res) => {
 
     const parsed = parseReceiptText(fullText);
     
-    console.log('Parsed data:', {
-      description: parsed.description,
-      category: parsed.category,
-      amount: parsed.amount,
-      date: parsed.date
-    });
+    logger.info({ parsed }, 'Parsed receipt data');
     
     res.status(200).json({ text: fullText, parsed });
 
   } catch (error) {
-    console.error('Google Vision error:', error.response?.data || error.message);
+    logger.error('Google Vision error:', error.response?.data || error.message);
     res.status(500).json({ message: 'Receipt scan failed', error: error.message });
   }
 };
@@ -549,7 +545,7 @@ export const exportReceiptsZip = async (req, res) => {
     // Fires asynchronously — a try/catch around this function can't catch it, so
     // handle it here directly instead of throwing (which would just crash uncaught).
     archive.on('error', (err) => {
-      console.error('Archiver error:', err);
+      logger.error('Archiver error:', err);
       if (!res.headersSent) res.status(500).json({ message: 'Failed to export receipts', error: err.message });
       else res.end();
     });
@@ -564,7 +560,7 @@ export const exportReceiptsZip = async (req, res) => {
 
     await archive.finalize();
   } catch (error) {
-    console.error('Export receipts zip error:', error);
+    logger.error('Export receipts zip error:', error);
     if (!res.headersSent) {
       res.status(500).json({ message: 'Failed to export receipts', error: error.message });
     }

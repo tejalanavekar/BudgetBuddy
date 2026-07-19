@@ -1,60 +1,38 @@
 //Main backend entry point and starting the server
-import express from 'express';
 import dotenv from 'dotenv';
-import cors from 'cors';
-import helmet from 'helmet';
 import connectDB from './config/db.js';
-import userRoutes from './routes/userRoutes.js'; // Your new User routes
-import expenseRoutes from './routes/expenseRoutes.js'; // Your new Expense routes
-import budgetRoutes from './routes/budgetRoutes.js'; // Budget routes with AI integration
-import subscriptionRoutes from './routes/subscriptionRoutes.js';
-import aiRoutes from './routes/aiRoutes.js';
+import logger from './utils/logger.js';
 
 // Initialize environment variables
 dotenv.config();
+
+// Fail fast with a clear message if a required secret/config value is missing,
+// rather than starting "successfully" and only breaking later when some request
+// happens to hit the code path that needed it.
+const REQUIRED_ENV_VARS = [
+    'ATLAS_URI', 'JWT_SECRET', 'GOOGLE_CLIENT_ID',
+    'EMAIL_USER', 'EMAIL_APP_PASSWORD', 'FRONTEND_URL',
+    'GOOGLE_VISION_API_KEY', 'GROQ_API_KEY'
+];
+const missingEnvVars = REQUIRED_ENV_VARS.filter((key) => !process.env[key]);
+if (missingEnvVars.length > 0) {
+    logger.error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+    process.exit(1);
+}
+
 // Connect to MongoDB
 connectDB();
 
-const app = express();
+const app = (await import('./app.js')).default;
 const port = process.env.PORT || 5000;
-
-const allowedOrigins = [process.env.FRONTEND_URL || 'http://localhost:5173'];
-
-// Standard Middleware
-app.use(helmet());
-app.use(cors({
-    origin: allowedOrigins,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
-    credentials: true
-}));
-app.use(express.json());
 
 // Startup Sanity Checks (Keep these for debugging in dev)
 if (process.env.NODE_ENV !== 'production') {
-    console.log('Startup checks:');
-    console.log('- ATLAS_URI present:', !!process.env.ATLAS_URI);
-    console.log('- process.cwd():', process.cwd());
+    logger.info('Startup checks:');
+    logger.info(`- ATLAS_URI present: ${!!process.env.ATLAS_URI}`);
+    logger.info(`- process.cwd(): ${process.cwd()}`);
 }
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-// Serve uploads directory statically
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-app.use('/api/users', userRoutes);
-app.use('/api/expenses', expenseRoutes);
-app.use('/api/budgets', budgetRoutes);
-app.use('/api/subscriptions', subscriptionRoutes);
-app.use('/api/ai', aiRoutes);
-
-// Health Check / Debug Endpoint
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'Server is running', node: process.version });
-});
 
 app.listen(port, () => {
-    console.log(`Server is running on port: ${port}`);
+    logger.info(`Server is running on port: ${port}`);
 });

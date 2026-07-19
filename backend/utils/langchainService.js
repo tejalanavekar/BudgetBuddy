@@ -11,6 +11,7 @@ import Budget from '../models/Budget.js';
 import Subscription from '../models/Subscription.js';
 import Expense from '../models/Expense.js';
 import { calculateDailySpentStats, calculateSafeDailyBudget, getCategoryBudgetStatus } from './budgetAnalytics.js';
+import logger from './logger.js';
 
 dotenv.config();
 
@@ -330,7 +331,7 @@ export const runAssistant = async ({ userId, question, history = [], page = 'app
     );
 
     const result = await executor.invoke({ input: question, chat_history: chatHistory, page });
-    console.log(`[assistant] "${question.slice(0, 60)}" took ${Date.now() - startedAt}ms, ${(result.intermediateSteps || []).length} tool call(s)`);
+    logger.info(`[assistant] "${question.slice(0, 60)}" took ${Date.now() - startedAt}ms, ${(result.intermediateSteps || []).length} tool call(s)`);
 
     const toolsUsed = (result.intermediateSteps || [])
       .map(step => step.action?.tool)
@@ -359,7 +360,7 @@ export const runAssistant = async ({ userId, question, history = [], page = 'app
 
     return { success: true, message: sanitizeOutput(result.output), toolsUsed, proposedAction };
   } catch (error) {
-    console.error(`[assistant] failed after ${Date.now() - startedAt}ms:`, error);
+    logger.error(`[assistant] failed after ${Date.now() - startedAt}ms:`, error);
     return { success: false, message: `I ran into an issue: ${error.message}`, toolsUsed: [] };
   }
 };
@@ -407,7 +408,7 @@ export const generateBudgetSummary = async (userId, budgetData, expenseStats) =>
       summary: response.content || response.text || response
     };
   } catch (error) {
-    console.error('Summary Generation Error:', error);
+    logger.error('Summary Generation Error:', error);
     return {
       success: false,
       summary: 'Unable to generate summary at this time.'

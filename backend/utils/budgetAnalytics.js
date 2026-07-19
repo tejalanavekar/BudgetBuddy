@@ -1,4 +1,5 @@
 import Expense from '../models/Expense.js';
+import logger from './logger.js';
 
 /**
  * Calculate stats for Daily Spent Snapshot
@@ -65,7 +66,7 @@ export const calculateDailySpentStats = async (userId, monthYear) => {
       }))
     };
   } catch (error) {
-    console.error('Error calculating daily stats:', error);
+    logger.error('Error calculating daily stats:', error);
     throw error;
   }
 };
@@ -114,7 +115,7 @@ export const compareWithPreviousMonth = async (userId, monthYear) => {
       previousMonthTotal: prevExpenses.length
     };
   } catch (error) {
-    console.error('Error comparing months:', error);
+    logger.error('Error comparing months:', error);
     return {
       currentMonthYear: monthYear,
       previousMonthSpending: 0,

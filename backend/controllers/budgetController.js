@@ -7,6 +7,7 @@ import {
   getCategoryBudgetStatus 
 } from '../utils/budgetAnalytics.js';
 import { generateBudgetSummary } from '../utils/langchainService.js';
+import logger from '../utils/logger.js';
 
 // ── Helper: Get current YYYY-MM ──
 const getCurrentMonthYear = () => {
@@ -58,7 +59,7 @@ export const createOrUpdateBudget = async (req, res) => {
       budget 
     });
   } catch (error) {
-    console.error('Error saving budget:', error);
+    logger.error('Error saving budget:', error);
     res.status(500).json({ error: 'Failed to save budget' });
   }
 };
@@ -78,7 +79,7 @@ export const getBudget = async (req, res) => {
 
     res.json({ budget });
   } catch (error) {
-    console.error('Error fetching budget:', error);
+    logger.error('Error fetching budget:', error);
     res.status(500).json({ error: 'Failed to fetch budget' });
   }
 };
@@ -93,7 +94,7 @@ export const getUserBudgets = async (req, res) => {
 
     res.json({ budgets });
   } catch (error) {
-    console.error('Error fetching budgets:', error);
+    logger.error('Error fetching budgets:', error);
     res.status(500).json({ error: 'Failed to fetch budgets' });
   }
 };
@@ -164,7 +165,7 @@ export const getDailySpentSnapshot = async (req, res) => {
       previousMonth: comparison
     });
   } catch (error) {
-    console.error('Error getting daily snapshot:', error);
+    logger.error('Error getting daily snapshot:', error);
     res.status(500).json({ error: 'Failed to generate snapshot' });
   }
 };
@@ -211,7 +212,7 @@ export const getBudgetSummary = async (req, res) => {
       summary: response.summary
     });
   } catch (error) {
-    console.error('Error generating summary:', error);
+    logger.error('Error generating summary:', error);
     res.status(500).json({ error: 'Failed to generate summary' });
   }
 };
@@ -230,7 +231,7 @@ export const deleteBudget = async (req, res) => {
 
     res.json({ success: true, message: 'Budget deleted' });
   } catch (error) {
-    console.error('Error deleting budget:', error);
+    logger.error('Error deleting budget:', error);
     res.status(500).json({ error: 'Failed to delete budget' });
   }
 };

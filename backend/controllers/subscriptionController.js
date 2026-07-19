@@ -1,4 +1,5 @@
 import Subscription from '../models/Subscription.js';
+import logger from '../utils/logger.js';
 
 // Local YYYY-MM-DD from a Date object — NOT toISOString(), which converts to UTC first and can
 // shift the date by one day for timezones behind/ahead of UTC (the same bug ExpensePage's
@@ -40,7 +41,7 @@ const refreshNextBillingDate = async (sub) => {
       await sub.save();
     } catch (error) {
       // One legacy/malformed record shouldn't take down the whole list fetch — return it as-is.
-      console.error(`Failed to refresh nextBillingDate for subscription ${sub._id}:`, error.message);
+      logger.error(`Failed to refresh nextBillingDate for subscription ${sub._id}:`, error.message);
     }
   }
   return sub;
