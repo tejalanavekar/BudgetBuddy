@@ -3,3 +3,10 @@
 .env
 .env.*
 !.env.example
+
+# Dependencies — installed via package.json, never committed.
+node_modules/
+
+# User-uploaded content — real user files, not source code.
+backend/uploads/*
+!backend/uploads/.gitkeep
