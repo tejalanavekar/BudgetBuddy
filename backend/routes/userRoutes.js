@@ -3,6 +3,7 @@ import express from 'express';
 import { registerUser, loginUser, googleLogin, getUserProfile, updateUserProfile, uploadProfilePhoto, deleteAccount, changePassword, forgotPassword, resetPassword } from '../controllers/userController.js';
 import protect from '../middleware/authMiddleware.js';
 import upload from '../middleware/uploadMiddleware.js';
+import validateImageSignature from '../middleware/validateImageSignature.js';
 import validate from '../middleware/validate.js';
 import { loginLimiter, passwordResetLimiter } from '../middleware/rateLimiters.js';
 import { registerSchema, loginSchema, googleLoginSchema, forgotPasswordSchema, resetPasswordSchema, changePasswordSchema } from '../validation/schemas.js';
@@ -23,7 +24,7 @@ router.post('/reset-password', passwordResetLimiter, validate(resetPasswordSchem
 
 router.get('/:userId', protect, getUserProfile);
 router.put('/:userId', protect, updateUserProfile);
-router.put('/:userId/photo', protect, upload.single('photo'), uploadProfilePhoto);
+router.put('/:userId/photo', protect, upload.single('photo'), validateImageSignature, uploadProfilePhoto);
 router.delete('/:userId', protect, deleteAccount);
 
 //Update the user password

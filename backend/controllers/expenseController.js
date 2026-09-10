@@ -12,6 +12,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const UPLOADS_DIR = path.join(__dirname, '../uploads');
 
+// Best-effort cleanup — a receipt file that's already gone (e.g. deleted manually, or a
+// stale/duplicate record) shouldn't block the actual delete/update the user asked for.
+const deleteReceiptFile = async (filename) => {
+  try {
+    await fs.unlink(path.join(UPLOADS_DIR, filename));
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      logger.error(`Failed to delete receipt file ${filename}:`, error);
+    }
+  }
+};
+
 
 
 // ── Helper: Extract merchant/store name from receipt (smart extraction) ──
@@ -466,12 +478,19 @@ export const updateExpense = async (req, res) => {
         expense.items = [];
       }
     }
-    // Handle new receipt upload
+    // Handle new receipt upload — the old file (if any) is replaced, not kept around,
+    // so it doesn't just sit orphaned on disk with nothing left pointing to it.
+    const oldReceiptPath = expense.receiptPath;
     if (req.file) {
       expense.receiptPath = req.file.filename;
     }
 
     await expense.save();
+
+    if (req.file && oldReceiptPath) {
+      await deleteReceiptFile(oldReceiptPath);
+    }
+
     res.status(200).json({ message: 'Expense updated successfully', expense });
   } catch (error) {
     res.status(400).json({ message: 'Error updating expense', error: error.message });
@@ -488,6 +507,11 @@ export const deleteExpense = async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized' });
     }
     await Expense.findByIdAndDelete(req.params.id);
+
+    if (expense.receiptPath) {
+      await deleteReceiptFile(expense.receiptPath);
+    }
+
     res.status(200).json({ message: 'Expense deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting expense', error: error.message });

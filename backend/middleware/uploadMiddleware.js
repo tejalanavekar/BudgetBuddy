@@ -20,5 +20,14 @@ const fileFilter = (req, file, cb) => {
   else cb(new Error('Only image files are allowed!'), false);
 };
 
-const upload = multer({ storage, fileFilter });
+// Generous cap for a phone-camera receipt photo, but not unbounded — without this,
+// multer will happily buffer/write a file of any size, letting one request fill the
+// disk (or eat memory) with no limit at all.
+const MAX_RECEIPT_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: MAX_RECEIPT_SIZE_BYTES }
+});
 export default upload;
