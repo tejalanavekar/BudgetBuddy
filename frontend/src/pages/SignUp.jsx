@@ -21,7 +21,7 @@ const SignUp = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    try {
+    try {    
       const res = await registerUser(formData);
       login({ userId: res.data.userId, firstName: res.data.firstName }, res.data.token);
       navigate('/home');

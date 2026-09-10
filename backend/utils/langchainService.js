@@ -40,7 +40,7 @@ const sanitizeOutput = (text) => {
 };
 
 const model = new ChatGroq({
-  model: 'llama-3.3-70b-versatile',
+  model: 'openai/gpt-oss-120b',
   temperature: 0.4,
   apiKey: process.env.GROQ_API_KEY,
   maxRetries: 2, // default (6) silently retries with backoff on rate limits/network
@@ -314,23 +314,56 @@ const prompt = ChatPromptTemplate.fromMessages([
   new MessagesPlaceholder('agent_scratchpad')
 ]);
 
+// Groq's 429 body looks like: 429 {"error":{"message":"Rate limit reached... on tokens
+// per minute (TPM)... Please try again in 682.5ms.","type":"tokens",...}} — surfaced as
+// a plain string on error.message, not a structured field, so we pattern-match it.
+const isRateLimitError = (error) => {
+  const msg = String(error?.message || '');
+  return error?.status === 429 || /rate limit/i.test(msg) || / 429 /.test(` ${msg} `);
+};
+
+// Groq tells us exactly how long to wait — parse it so a near-instant retry doesn't
+// just re-trigger the same limit. Falls back to a safe default if the shape changes.
+const parseRetryDelayMs = (error) => {
+  const msg = String(error?.message || '');
+  const match = msg.match(/try again in ([\d.]+)(ms|s)/i);
+  if (!match) return 1500;
+  const value = Number(match[1]);
+  return match[2].toLowerCase() === 's' ? value * 1000 : value;
+};
+
 // ── Main entry point ───────────────────────────────────────────────
 // history: array of { role: 'user' | 'assistant', content: string } — the last few
 // turns from the frontend, so follow-up questions ("what about last month?") work.
 export const runAssistant = async ({ userId, question, history = [], page = 'app' }) => {
   const startedAt = Date.now();
-  try {
-    const userIdObj = new mongoose.Types.ObjectId(userId);
-    const tools = buildTools(userIdObj);
 
+  const userIdObj = new mongoose.Types.ObjectId(userId);
+  const tools = buildTools(userIdObj);
+  const chatHistory = history.slice(-8).map(m =>
+    m.role === 'user' ? new HumanMessage(m.content) : new AIMessage(m.content)
+  );
+
+  const invokeOnce = async () => {
     const agent = await createToolCallingAgent({ llm: model, tools, prompt });
     const executor = new AgentExecutor({ agent, tools, returnIntermediateSteps: true });
+    return executor.invoke({ input: question, chat_history: chatHistory, page });
+  };
 
-    const chatHistory = history.slice(-8).map(m =>
-      m.role === 'user' ? new HumanMessage(m.content) : new AIMessage(m.content)
-    );
+  try {
+    let result;
+    try {
+      result = await invokeOnce();
+    } catch (error) {
+      // Groq's free-tier TPM limit resets in well under a second — one short,
+      // targeted retry clears the vast majority of these without bothering the user.
+      if (!isRateLimitError(error)) throw error;
+      const waitMs = parseRetryDelayMs(error);
+      logger.info(`[assistant] rate-limited, retrying in ${waitMs}ms`);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+      result = await invokeOnce();
+    }
 
-    const result = await executor.invoke({ input: question, chat_history: chatHistory, page });
     logger.info(`[assistant] "${question.slice(0, 60)}" took ${Date.now() - startedAt}ms, ${(result.intermediateSteps || []).length} tool call(s)`);
 
     const toolsUsed = (result.intermediateSteps || [])
@@ -361,7 +394,10 @@ export const runAssistant = async ({ userId, question, history = [], page = 'app
     return { success: true, message: sanitizeOutput(result.output), toolsUsed, proposedAction };
   } catch (error) {
     logger.error(`[assistant] failed after ${Date.now() - startedAt}ms:`, error);
-    return { success: false, message: `I ran into an issue: ${error.message}`, toolsUsed: [] };
+    const message = isRateLimitError(error)
+      ? "I'm getting a lot of requests right now — give me a few seconds and try again."
+      : `I ran into an issue: ${error.message}`;
+    return { success: false, message, toolsUsed: [] };
   }
 };
 

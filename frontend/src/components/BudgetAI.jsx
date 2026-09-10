@@ -95,6 +95,12 @@ const BudgetAI = ({ userId, monthYear, firstName, page, messages, setMessages })
 
   // Handle getting summary
   const handleGetSummary = async () => {
+    setMessages(prev => [...prev, {
+      id: Date.now(),
+      type: 'user',
+      text: 'Give me a summary of my budget',
+      timestamp: new Date()
+    }]);
     setLoading(true);
     setError(null);
 
@@ -116,7 +122,16 @@ const BudgetAI = ({ userId, monthYear, firstName, page, messages, setMessages })
         setError('Failed to generate summary');
       }
     } catch (err) {
-      setError(err.message || 'Failed to generate summary');
+      if (err.response?.status === 404) {
+        setMessages(prev => [...prev, {
+          id: Date.now(),
+          type: 'ai',
+          text: `You haven't set a budget for this month yet, so I don't have anything to summarize. Head to "Manage Budget" to set your total (and category) budget, then ask me again!`,
+          timestamp: new Date()
+        }]);
+      } else {
+        setError(err.response?.data?.error || err.response?.data?.message || 'Failed to generate summary');
+      }
     } finally {
       setLoading(false);
     }
