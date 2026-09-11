@@ -11,6 +11,7 @@ import {
 import protect from '../middleware/authMiddleware.js';
 import validate from '../middleware/validate.js';
 import { budgetSchema } from '../validation/schemas.js';
+import { aiLimiter } from '../middleware/rateLimiters.js';
 
 const router = express.Router();
 
@@ -33,7 +34,7 @@ router.get('/:userId/snapshot/:monthYear', getDailySpentSnapshot);
 
 // ── AI Routes ──
 // POST /api/budgets/:userId/summary - Get AI-generated summary
-router.post('/:userId/summary', getBudgetSummary);
+router.post('/:userId/summary', aiLimiter, getBudgetSummary);
 
 // GET /api/budgets/:userId/all - Get all budgets for user
 router.get('/:userId/all', getUserBudgets);

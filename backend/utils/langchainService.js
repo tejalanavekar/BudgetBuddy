@@ -1,5 +1,8 @@
 import { ChatGroq } from '@langchain/groq';
-import { AgentExecutor, createToolCallingAgent } from 'langchain/agents';
+// langchain 1.x moved the classic AgentExecutor/createToolCallingAgent pattern into
+// @langchain/classic (the new default is createAgent, a different LangGraph-based API) —
+// importing from here keeps this file's agent logic unchanged across the 0.3 -> 1.x bump.
+import { AgentExecutor, createToolCallingAgent } from '@langchain/classic/agents';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { tool } from '@langchain/core/tools';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';

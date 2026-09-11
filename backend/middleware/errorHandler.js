@@ -17,7 +17,19 @@ const errorHandler = (err, req, res, next) => {
     return res.status(400).json({ message });
   }
 
-  res.status(err.status || 500).json({ message: err.message || 'Internal server error' });
+  const status = err.status || 500;
+
+  // A deliberate err.status (e.g. a controller throwing a 400/403) carries a message
+  // meant for the client. An unhandled 500 does not — it's whatever the underlying
+  // failure happened to say (a Mongo error, a third-party SDK's error body, a raw stack
+  // fragment), which is exactly the kind of internal detail production shouldn't leak
+  // to anyone who happens to trigger it. Only masked for prod + genuinely unexpected errors.
+  const isUnexpectedProdError = process.env.NODE_ENV === 'production' && status >= 500;
+  const message = isUnexpectedProdError
+    ? 'Something went wrong. Please try again later.'
+    : (err.message || 'Internal server error');
+
+  res.status(status).json({ message });
 };
 
 export default errorHandler;

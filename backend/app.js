@@ -12,6 +12,7 @@ import budgetRoutes from './routes/budgetRoutes.js';
 import subscriptionRoutes from './routes/subscriptionRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
+import { generalApiLimiter } from './middleware/rateLimiters.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,15 +32,23 @@ app.use(express.json());
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Registered before the general limiter below so health checks/monitoring are
+// never throttled — Express matches middleware/routes in registration order,
+// so this responds and short-circuits before the limiter ever runs for this path.
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'Server is running', node: process.version });
+});
+
+// A broad floor under all authenticated API traffic — on top of (not instead of)
+// the stricter per-endpoint limiters (login, password reset, AI) applied inside
+// their own route files.
+app.use('/api', generalApiLimiter);
+
 app.use('/api/users', userRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/ai', aiRoutes);
-
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'Server is running', node: process.version });
-});
 
 // Must be last — catches anything a route/controller's own try/catch missed.
 app.use(errorHandler);

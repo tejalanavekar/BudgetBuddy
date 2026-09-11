@@ -11,4 +11,11 @@ const connectDB = async () => {
     }
 };
 
+// Used during graceful shutdown — a clean disconnect (finishing/aborting in-flight
+// operations properly) instead of just letting the process die mid-connection.
+export const disconnectDB = async () => {
+    await mongoose.connection.close();
+    logger.info('MongoDB connection closed');
+};
+
 export default connectDB;
