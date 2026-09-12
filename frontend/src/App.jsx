@@ -1,31 +1,34 @@
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import React from 'react';
-import ExpensePage from "./pages/ExpensePage";  
-import DashboardPage from "./pages/DashboardPage";
-import BudgetPage from "./pages/BudgetPage";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
+import React, { lazy, Suspense } from 'react';
 import Home from "./pages/Home";
-import ExpenseModal from "./components/ExpenseModal";
-import Profile from "./pages/Profile";
-import SettingsPage from "./pages/SettingsPage";
+import PageLoader from './components/PageLoader';
 import './styles/auth.css';
-import PastExpensesPage from './pages/PastExpensesPage';
-import ReceiptVaultPage from './pages/ReceiptVaultPage';
-import SubscriptionsPage from './pages/SubscriptionsPage';
+
+// Every page below is its own separate file the browser only fetches when a user
+// actually navigates there, instead of all of them being part of one bundle every
+// user downloads on first load regardless of which pages they ever visit.
+// Home is NOT lazy — it's the layout shell (navbar, FloatingChatbot) rendered on
+// every /home/* route, so it belongs in the main bundle like the router itself does.
+const SignIn = lazy(() => import("./pages/SignIn"));
+const SignUp = lazy(() => import("./pages/SignUp"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const ExpensePage = lazy(() => import("./pages/ExpensePage"));
+const PastExpensesPage = lazy(() => import('./pages/PastExpensesPage'));
+const ReceiptVaultPage = lazy(() => import('./pages/ReceiptVaultPage'));
+const BudgetPage = lazy(() => import("./pages/BudgetPage"));
+const SubscriptionsPage = lazy(() => import('./pages/SubscriptionsPage'));
+const Profile = lazy(() => import("./pages/Profile"));
+const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+
 // Simple Error Boundary
 // 1. Protected Route Wrapper -> Bouncer that guards  the  entrance
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth(); //pulls from the Context
 
-  if (loading) return (
-    <div style={{ minHeight: '100vh', width: '100vw', background: 'var(--bg-page)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-on-page)' }}>
-      Loading...
-    </div>
-  ); // loading -> user Refresh or initial check then it should read the localstorage
-  
+  if (loading) return <PageLoader />; // loading -> user Refresh or initial check then it should read the localstorage
+
   if (!isAuthenticated) {
     return <Navigate to="/signin" replace />;
   }
@@ -63,10 +66,11 @@ function App() {
   return (
     <ErrorBoundary>
       
-      <AuthProvider> 
+      <AuthProvider>
         <Router>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
-          
+
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
@@ -104,6 +108,7 @@ function App() {
             <Route path="/" element={<Navigate to="/signin" replace />} />
             <Route path="*" element={<Navigate to="/signin" replace />} />
           </Routes>
+          </Suspense>
         </Router>
       </AuthProvider>
     </ErrorBoundary>

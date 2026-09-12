@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { UserIcon, ReceiptIcon, ArchiveIcon, SettingsIcon, LogoutIcon } from '../components/icons/Icon';
 import FloatingChatbot from '../components/FloatingChatbot.jsx';
+import PageLoader from '../components/PageLoader.jsx';
 import { getUserProfile } from '../api/services';
 import '../styles/dashboard.css';
 const Home = () => {
@@ -120,9 +121,13 @@ const Home = () => {
         </div>
       </nav>
 
-      {/* Main Content Area */}
+      {/* Main Content Area — its own Suspense boundary (not the app-wide one in App.jsx)
+          so navigating between /home/* pages only replaces this area while a lazy
+          chunk loads, instead of the navbar/chatbot above also disappearing. */}
       <div className="main-content">
-        <Outlet />
+        <Suspense fallback={<PageLoader fullScreen={false} />}>
+          <Outlet />
+        </Suspense>
       </div>
 
       <FloatingChatbot />
