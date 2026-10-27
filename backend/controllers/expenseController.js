@@ -1,28 +1,16 @@
 // ── PUT /api/expenses/:id ─────────────────────────────────────────────
 import Expense from '../models/Expense.js';
 import axios from 'axios';
-import fs from 'fs/promises';
-import fssync from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import archiver from 'archiver';
 import logger from '../utils/logger.js';
+import { uploadBuffer, deleteByPublicId } from '../utils/cloudinaryService.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const UPLOADS_DIR = path.join(__dirname, '../uploads');
-
-// Best-effort cleanup — a receipt file that's already gone (e.g. deleted manually, or a
-// stale/duplicate record) shouldn't block the actual delete/update the user asked for.
-const deleteReceiptFile = async (filename) => {
-  try {
-    await fs.unlink(path.join(UPLOADS_DIR, filename));
-  } catch (error) {
-    if (error.code !== 'ENOENT') {
-      logger.error(`Failed to delete receipt file ${filename}:`, error);
-    }
-  }
-};
+// Thin, named wrapper purely for call-site clarity ("delete this expense's receipt"
+// reads better than a bare deleteByPublicId call) — deleteByPublicId already swallows
+// its own failures (an already-gone or never-set resource shouldn't block the actual
+// delete/update the user asked for), so there's nothing more to handle here.
+const deleteReceiptFile = (publicId) => deleteByPublicId(publicId);
 
 
 
@@ -182,20 +170,30 @@ const parseReceiptText = (text) => {
   let amount = '';
   const skipFeeKeywords = ['fee', 'tax', 'tip', 'gratuity', 'discount', 'credit', 'subtotal', 'sub total'];
 
+  // Vision's OCR often splits a label and its price onto separate lines (common
+  // for narrow receipt columns, e.g. "TOTAL" / "27.35" as two consecutive lines
+  // instead of one) — check the line itself first, then fall back to the next
+  // line if it's standalone just a price, before giving up on this keyword match.
+  const amountOnLineOrNext = (lines, i) => {
+    const sameLine = lines[i].match(/[US$₹€]*\s*(\d+[\.,]\d{2})/);
+    if (sameLine) return sameLine;
+    return lines[i + 1] ? lines[i + 1].match(/^[US$₹€]*\s*(\d+[\.,]\d{2})$/) : null;
+  };
+
   // Strategy 1: Look for "TOTAL" or "AMOUNT DUE" lines (case-insensitive)
-  for (const line of lines) {
-    const lower = line.toLowerCase();
+  for (let i = 0; i < lines.length; i++) {
+    const lower = lines[i].toLowerCase();
     if ((lower.includes('total') || lower.includes('amount due') || lower.includes('grand total')) &&
         !skipFeeKeywords.some(keyword => lower.includes(keyword))) {
-      const match = line.match(/[US$₹€]*\s*(\d+[\.,]\d{2})/);
+      const match = amountOnLineOrNext(lines, i);
       if (match) { amount = parseFloat(match[1].replace(',', '.')).toFixed(2); break; }
     }
   }
 
   // Strategy 2: Look for payment method lines
   if (!amount) {
-    for (const line of lines) {
-      const lower = line.toLowerCase();
+    for (let i = 0; i < lines.length; i++) {
+      const lower = lines[i].toLowerCase();
       if (
         lower.includes('visa') ||
         lower.includes('cash') ||
@@ -205,7 +203,7 @@ const parseReceiptText = (text) => {
         lower.includes('amex') ||
         lower.includes('debit')
       ) {
-        const match = line.match(/[US$₹€]*\s*(\d+[\.,]\d{2})/);
+        const match = amountOnLineOrNext(lines, i);
         if (match) { amount = parseFloat(match[1].replace(',', '.')).toFixed(2); break; }
       }
     }
@@ -373,9 +371,8 @@ export const scanReceipt = async (req, res) => {
       return res.status(400).json({ message: 'No image uploaded' });
     }
 
-    // Read file from disk and convert to base64
-    const fileBuffer = await fs.readFile(req.file.path);
-    const base64Image = fileBuffer.toString('base64');
+    // Already in memory (multer's memoryStorage) — no disk read needed.
+    const base64Image = req.file.buffer.toString('base64');
 
     const visionResponse = await axios.post(
       `https://vision.googleapis.com/v1/images:annotate?key=${process.env.GOOGLE_VISION_API_KEY}`,
@@ -421,10 +418,19 @@ export const createExpense = async (req, res) => {
     }
 
 
+    let receiptPath = null;
+    let receiptPublicId = null;
+    if (req.file) {
+      const uploaded = await uploadBuffer(req.file.buffer, 'receipts');
+      receiptPath = uploaded.url;
+      receiptPublicId = uploaded.publicId;
+    }
+
     const expense = new Expense({
       userId, description, amount, category, date,
       items: parsedItems,
-      receiptPath : req.file ? req.file.filename : null
+      receiptPath,
+      receiptPublicId
     });
 
     await expense.save();
@@ -478,17 +484,19 @@ export const updateExpense = async (req, res) => {
         expense.items = [];
       }
     }
-    // Handle new receipt upload — the old file (if any) is replaced, not kept around,
-    // so it doesn't just sit orphaned on disk with nothing left pointing to it.
-    const oldReceiptPath = expense.receiptPath;
+    // Handle new receipt upload — the old one (if any) is replaced, not kept around,
+    // so it doesn't just sit orphaned on Cloudinary with nothing left pointing to it.
+    const oldReceiptPublicId = expense.receiptPublicId;
     if (req.file) {
-      expense.receiptPath = req.file.filename;
+      const uploaded = await uploadBuffer(req.file.buffer, 'receipts');
+      expense.receiptPath = uploaded.url;
+      expense.receiptPublicId = uploaded.publicId;
     }
 
     await expense.save();
 
-    if (req.file && oldReceiptPath) {
-      await deleteReceiptFile(oldReceiptPath);
+    if (req.file && oldReceiptPublicId) {
+      await deleteReceiptFile(oldReceiptPublicId);
     }
 
     res.status(200).json({ message: 'Expense updated successfully', expense });
@@ -508,8 +516,8 @@ export const deleteExpense = async (req, res) => {
     }
     await Expense.findByIdAndDelete(req.params.id);
 
-    if (expense.receiptPath) {
-      await deleteReceiptFile(expense.receiptPath);
+    if (expense.receiptPublicId) {
+      await deleteReceiptFile(expense.receiptPublicId);
     }
 
     res.status(200).json({ message: 'Expense deleted successfully' });
@@ -576,9 +584,19 @@ export const exportReceiptsZip = async (req, res) => {
     archive.pipe(res);
 
     for (const e of expenses) {
-      const filePath = path.join(UPLOADS_DIR, e.receiptPath);
-      if (fssync.existsSync(filePath)) {
-        archive.file(filePath, { name: `${e.date}_${e.description.replace(/[^a-z0-9]/gi, '_')}${path.extname(e.receiptPath)}` });
+      // Only full Cloudinary URLs are fetchable — a bare filename means this record
+      // predates the move off local disk, and that file is long gone (Render's
+      // filesystem is wiped on every redeploy), so there's nothing left to export.
+      if (!e.receiptPath || !e.receiptPath.startsWith('http')) continue;
+      try {
+        const response = await axios.get(e.receiptPath, { responseType: 'arraybuffer' });
+        const ext = path.extname(e.receiptPath) || '.jpg';
+        archive.append(Buffer.from(response.data), {
+          name: `${e.date}_${e.description.replace(/[^a-z0-9]/gi, '_')}${ext}`
+        });
+      } catch (err) {
+        logger.error(`Failed to fetch receipt for export: ${e.receiptPath}`, err);
+        // skip this one, continue exporting the rest
       }
     }
 

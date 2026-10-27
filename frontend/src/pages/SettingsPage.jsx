@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getUserProfile, updateUserProfile, uploadProfilePhoto, deleteAccount, changePassword } from '../api/services';
 import { exportExpensesCSV, exportReceiptsZip, clearMonthExpenses } from '../api/services/expenseService';
 import { exportBudgetsJSON } from '../api/services/budgetService';
+import { getImageUrl } from '../utils/receiptUrl.js';
 import {
   UserIcon, GridIcon, BellIcon, LockIcon, BoxIcon, LogoutIcon,
   UploadIcon, WarningIcon, CheckIcon, LaptopIcon, DownloadIcon, HourglassIcon
@@ -260,8 +261,8 @@ const SettingsPage = () => {
                   <p>Shown on your profile and activity</p>
                 </div>
                 <div className="settings-photo-actions">
-                  {profile?.photoUrl ? (
-                    <img src={`http://localhost:5000/uploads/${profile.photoUrl}`} alt="Profile" className="settings-avatar-img" />
+                  {getImageUrl(profile?.photoUrl) ? (
+                    <img src={getImageUrl(profile.photoUrl)} alt="Profile" className="settings-avatar-img" />
                   ) : (
                     <div className="settings-avatar">{initials}</div>
                   )}

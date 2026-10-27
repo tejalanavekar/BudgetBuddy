@@ -9,7 +9,10 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: function () { return this.authProvider === 'local'; } },
   authProvider: { type: String, enum: ['local', 'google'], default: 'local' },
   googleId: { type: String, unique: true, sparse: true }, // sparse: only enforced unique among docs that have it
+  // photoUrl holds the full Cloudinary URL; photoPublicId is Cloudinary's own id
+  // for the resource, needed to delete the old photo when it's replaced.
   photoUrl: { type: String, default: null },
+  photoPublicId: { type: String, default: null },
   // Forgot-password flow — only a hash of the token is ever stored (same principle as
   // the password itself), so a database leak alone can't be used to reset an account.
   resetPasswordTokenHash: { type: String, default: null },

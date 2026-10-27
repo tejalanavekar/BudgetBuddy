@@ -1,10 +1,9 @@
-import fs from 'fs/promises';
-
 // Multer's fileFilter only sees the client-supplied Content-Type header for the upload —
 // trivially spoofed (rename anything to receipt.png, set the header, done). This checks
-// the actual bytes written to disk against known image file signatures ("magic numbers"),
-// so a mislabeled file is caught after upload instead of trusted at face value. Runs after
-// upload.single(...) in the route chain, since the bytes aren't available before then.
+// the actual bytes against known image file signatures ("magic numbers"), so a mislabeled
+// file is caught before it's ever uploaded to Cloudinary. Runs after upload.single(...)
+// in the route chain, reading directly from req.file.buffer (multer's memoryStorage) —
+// no disk I/O needed since the bytes are already in memory.
 const SIGNATURES = [
   { name: 'JPEG', bytes: [0xFF, 0xD8, 0xFF] },
   { name: 'PNG', bytes: [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A] },
@@ -23,24 +22,14 @@ const isValidImageSignature = (buffer) => {
   );
 };
 
-const validateImageSignature = async (req, res, next) => {
+const validateImageSignature = (req, res, next) => {
   if (!req.file) return next();
 
-  try {
-    const handle = await fs.open(req.file.path, 'r');
-    const buffer = Buffer.alloc(12);
-    await handle.read(buffer, 0, 12, 0);
-    await handle.close();
-
-    if (!isValidImageSignature(buffer)) {
-      await fs.unlink(req.file.path).catch(() => {}); // don't leave the rejected file on disk
-      return res.status(400).json({ message: 'Uploaded file is not a valid image.' });
-    }
-
-    next();
-  } catch (err) {
-    next(err);
+  if (!isValidImageSignature(req.file.buffer)) {
+    return res.status(400).json({ message: 'Uploaded file is not a valid image.' });
   }
+
+  next();
 };
 
 export default validateImageSignature;

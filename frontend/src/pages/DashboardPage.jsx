@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { getExpenses , deleteExpense, updateExpense } from '../api/services/expenseService.js';
 import { CategoryIcon, WalletIcon, CalendarIcon, ReceiptIcon, EditIcon, TrashIcon, ChartIcon, UploadIcon, CheckIcon, WarningIcon, WaveIcon } from '../components/icons/Icon';
 import { getYearMonth } from '../utils/dateUtils';
+import { getImageUrl } from '../utils/receiptUrl.js';
 import '../styles/dashboard.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -149,10 +150,7 @@ useEffect(() => {
     category: expense.category,
     date: expense.date ? expense.date.slice(0, 10) : '',
   });
-  setEditPreview(expense.receiptPath 
-    ? `http://localhost:5000/uploads/${expense.receiptPath}` 
-    : null
-  );
+  setEditPreview(getImageUrl(expense.receiptPath));
   setEditReceipt(null);
   setEditMessage({ type: '', text: '' });
 };

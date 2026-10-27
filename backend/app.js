@@ -4,8 +4,6 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import userRoutes from './routes/userRoutes.js';
 import expenseRoutes from './routes/expenseRoutes.js';
 import budgetRoutes from './routes/budgetRoutes.js';
@@ -13,9 +11,6 @@ import subscriptionRoutes from './routes/subscriptionRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
 import { generalApiLimiter } from './middleware/rateLimiters.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const allowedOrigins = [process.env.FRONTEND_URL || 'http://localhost:5173'];
 
@@ -29,8 +24,6 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
-
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Registered before the general limiter below so health checks/monitoring are
 // never throttled — Express matches middleware/routes in registration order,

@@ -6,6 +6,7 @@ import { Row, Col } from 'react-bootstrap';
 import '../styles/expense.css';
 import '../styles/editExpensePage.css';
 import { UploadIcon, CheckIcon, WarningIcon } from '../components/icons/Icon';
+import { getImageUrl } from '../utils/receiptUrl.js';
 
 const CATEGORIES = ['Food','Transport','Utilities','Entertainment','Health','Education','Shopping','Travel','Savings','Other'];
 
@@ -38,7 +39,7 @@ const EditExpensePage = () => {
           category: expense.category,
           date: expense.date ? expense.date.slice(0, 10) : '',
         });
-        if (expense.receiptPath) setPreview(`http://localhost:5000/uploads/${expense.receiptPath}`);
+        if (expense.receiptPath) setPreview(getImageUrl(expense.receiptPath));
       }
     });
   }, [id, user]);

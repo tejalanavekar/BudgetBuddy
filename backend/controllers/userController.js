@@ -8,6 +8,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import { sendPasswordResetEmail } from '../utils/mailer.js';
+import { uploadBuffer, deleteByPublicId } from '../utils/cloudinaryService.js';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -198,8 +199,13 @@ export const uploadProfilePhoto = async (req, res) => {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        user.photoUrl = req.file.filename;
+        const oldPhotoPublicId = user.photoPublicId;
+        const { url, publicId } = await uploadBuffer(req.file.buffer, 'profile-photos');
+        user.photoUrl = url;
+        user.photoPublicId = publicId;
         await user.save();
+
+        if (oldPhotoPublicId) await deleteByPublicId(oldPhotoPublicId);
         const { password, ...safeUser } = user.toObject();
         res.status(200).json(safeUser);
     } catch (error) {

@@ -12,7 +12,8 @@ dotenv.config();
 const REQUIRED_ENV_VARS = [
     'ATLAS_URI', 'JWT_SECRET', 'GOOGLE_CLIENT_ID',
     'EMAIL_USER', 'EMAIL_APP_PASSWORD', 'FRONTEND_URL',
-    'GOOGLE_VISION_API_KEY', 'GROQ_API_KEY'
+    'GOOGLE_VISION_API_KEY', 'GROQ_API_KEY',
+    'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET'
 ];
 const missingEnvVars = REQUIRED_ENV_VARS.filter((key) => !process.env[key]);
 if (missingEnvVars.length > 0) {

@@ -10,6 +10,7 @@ import { getExpenses, deleteExpense, updateExpense } from '../api/services/expen
 import { CATEGORIES, CATEGORY_COLOR as CATEGORY_COLORS } from '../constants/categoryMeta';
 import { CategoryIcon, CalendarIcon, WalletIcon, ChartIcon, FireIcon, ReceiptIcon, TrendingUpIcon, SearchIcon, EditIcon, TrashIcon, InboxEmptyIcon, UploadIcon, CheckIcon, WarningIcon } from '../components/icons/Icon';
 import { getYearMonth } from '../utils/dateUtils';
+import { getImageUrl } from '../utils/receiptUrl.js';
 import '../styles/pastExpenses.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
@@ -233,7 +234,7 @@ const PastExpensesPage = () => {
       category: expense.category,
       date: expense.date ? expense.date.slice(0, 10) : '',
     });
-    setEditPreview(expense.receiptPath ? `http://localhost:5000/uploads/${expense.receiptPath}` : null);
+    setEditPreview(getImageUrl(expense.receiptPath));
     setEditReceipt(null);
     setEditMessage({ type: '', text: '' });
   };

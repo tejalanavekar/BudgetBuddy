@@ -29,6 +29,12 @@ const GoogleAuthButton = ({ onSuccess, onError, text = 'continue_with' }) => {
         text={text}
         shape="pill"
         width={width}
+        // On a real device already signed into a Google account, the browser can swap
+        // this for its own native "Sign in as [Name]" account-chooser row (FedCM) —
+        // rendered by the browser itself, with its own white background no app CSS can
+        // reach. Disabling it keeps the button's appearance (and color) consistent and
+        // under this app's control everywhere, instead of changing based on the device.
+        use_fedcm_for_button={false}
       />
     </div>
   );

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getAllReceipts } from '../api/services/expenseService.js';
 import { CategoryIcon, ArchiveIcon, InboxEmptyIcon, SearchIcon, ReceiptIcon } from '../components/icons/Icon';
+import { getImageUrl } from '../utils/receiptUrl.js';
 import '../styles/receiptVault.css';
 
 // This page needs a richer {bg, accent, text} shape per category (for folder card
@@ -19,8 +20,6 @@ const CATEGORY_COLORS = {
   Savings:       { bg: '#f0fdf4', accent: '#10b981', text: '#065f46' },
   Other:         { bg: '#f8fafc', accent: '#9966FF', text: '#6b21a8' },
 };
-
-const BASE_URL = 'http://localhost:5000/uploads/';
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '—';
@@ -175,7 +174,7 @@ const ReceiptVaultPage = () => {
                       }}
                     >
                       <img
-                        src={BASE_URL + item.receiptPath}
+                        src={getImageUrl(item.receiptPath)}
                         alt=""
                         onError={e => { e.target.style.display = 'none'; }}
                       />
@@ -276,7 +275,7 @@ const ReceiptVaultPage = () => {
               <div key={r._id} className="rv-receipt-card" onClick={() => setLightbox(r)}>
                 <div className="rv-receipt-img-wrap">
                   <img
-                    src={BASE_URL + r.receiptPath}
+                    src={getImageUrl(r.receiptPath)}
                     alt={r.description}
                     className="rv-receipt-img"
                     onError={e => {
@@ -342,9 +341,10 @@ const ReceiptVaultPage = () => {
 
           <div className="rv-lightbox-img-wrap">
             <img
-              src={BASE_URL + lightbox.receiptPath}
+              src={getImageUrl(lightbox.receiptPath)}
               alt={lightbox.description}
               className="rv-lightbox-img"
+              onError={e => { e.target.style.display = 'none'; }}
             />
           </div>
 
