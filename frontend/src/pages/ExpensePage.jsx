@@ -1,5 +1,6 @@
 import { addExpense, scanReceiptWithVision } from '../api/services/expenseService.js';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {Form, Button, Container, Card, Alert, Row, Col} from 'react-bootstrap';
 import '../styles/expense.css';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -203,6 +204,7 @@ const getTodayLocal = () => {
 
 const ExpensePage = () => {
   const { user } = useAuth(); // Get the authenticated user from context
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     description: '',
     amount: '',
@@ -315,6 +317,8 @@ try {
     setPreview(null);
     setExtractedItems([]);
     setIsSubmitting(false); // <-- Add this
+    // Brief delay so the success message is actually visible before leaving the page.
+    setTimeout(() => navigate('/home/dashboard'), 1200);
   } catch (err) {
     if (err.response?.data?.message === 'Expense added successfully') {
       setMessage({ type: 'success', text: 'Expense added successfully!' });
@@ -323,6 +327,7 @@ try {
       setPreview(null);
       setExtractedItems([]);
       setIsSubmitting(false); // <-- Add this
+      setTimeout(() => navigate('/home/dashboard'), 1200);
       return;
     }
     const msg = err.response?.data?.message || 'Failed to add expense.';
