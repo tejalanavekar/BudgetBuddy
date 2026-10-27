@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import Home from "./pages/Home";
 import PageLoader from './components/PageLoader';
 import './styles/auth.css';
@@ -36,6 +36,16 @@ const ProtectedRoute = ({ children }) => {
   return children; //user logged in -> component says go ahead.
 };
 
+// Vite builds every lazy-loaded page as its own file, named with a content hash
+// (e.g. profile-Dssz-sTD.css). After a new deploy, those old-hash files are gone —
+// a browser tab that was already open before the deploy still references them, and
+// navigating to a not-yet-visited lazy page throws exactly this error. It isn't a
+// real app bug, just a stale tab; reloading picks up the current deployment.
+const isStaleChunkError = (error) => {
+  const msg = String(error?.message || '');
+  return /Unable to preload CSS|Failed to fetch dynamically imported module|error loading dynamically imported module|Importing a module script failed/i.test(msg);
+};
+
 //If app crashed the  whole website wont crash instead it will show the error message and the error details in the console.
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -46,7 +56,13 @@ class ErrorBoundary extends React.Component {
     return { hasError: true, error };
   }
   componentDidCatch(error, errorInfo) {
-    // You can log errorInfo here if needed
+    // Reload once automatically for a stale-chunk error — the sessionStorage guard
+    // stops an infinite reload loop if this doesn't actually fix it (a genuinely
+    // broken deploy, not a stale one).
+    if (isStaleChunkError(error) && !sessionStorage.getItem('bt_reloaded_for_stale_chunk')) {
+      sessionStorage.setItem('bt_reloaded_for_stale_chunk', 'true');
+      window.location.reload();
+    }
   }
   render() {
     if (this.state.hasError) {
@@ -63,6 +79,13 @@ class ErrorBoundary extends React.Component {
 
 
 function App() {
+  // Successfully rendering means any earlier stale-chunk reload (if one happened)
+  // actually fixed things — clear the guard so a later deployment in this same
+  // browser session can also trigger one auto-reload instead of being suppressed.
+  useEffect(() => {
+    sessionStorage.removeItem('bt_reloaded_for_stale_chunk');
+  }, []);
+
   return (
     <ErrorBoundary>
       
