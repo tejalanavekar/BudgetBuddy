@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import React, { lazy, Suspense, useEffect } from 'react';
+import React, { lazy, Suspense } from 'react';
 import Home from "./pages/Home";
 import PageLoader from './components/PageLoader';
 import './styles/auth.css';
@@ -79,13 +79,6 @@ class ErrorBoundary extends React.Component {
 
 
 function App() {
-  // Successfully rendering means any earlier stale-chunk reload (if one happened)
-  // actually fixed things — clear the guard so a later deployment in this same
-  // browser session can also trigger one auto-reload instead of being suppressed.
-  useEffect(() => {
-    sessionStorage.removeItem('bt_reloaded_for_stale_chunk');
-  }, []);
-
   return (
     <ErrorBoundary>
       
