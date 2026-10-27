@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap');
+/* Clash Display / Cabinet Grotesk are now loaded once via a <link> in index.html,
+   not imported per-stylesheet — see that file for why. */
 
 /* ── Loading & Error Screens ── */
 .profile-loading {

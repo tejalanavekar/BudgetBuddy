@@ -5,6 +5,14 @@
    <link rel="icon" type="image/png" href="/favicon-32.png?v=2" />
    <link rel="apple-touch-icon" href="/favicon-180.png?v=2" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Loaded as a plain <link>, not a CSS @import inside a component stylesheet —
+         if this request is blocked (ad blockers / privacy browsers commonly block
+         fonts.googleapis.com) or fails, the page just falls back to the sans-serif
+         fallback already set on every font-family rule, instead of that failure
+         getting entangled with Vite's lazy-chunk CSS preloading and crashing the app. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap">
     <title>Budget Buddy</title>
     <style>html, body { background: #BDD9D7; margin: 0; }</style>
   </head>
