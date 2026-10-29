@@ -1,10 +1,14 @@
 import { z } from 'zod';
 
 // Same rule already enforced in registerUser: 8+ chars, at least one digit, no spaces or #, &, $.
-const passwordRule = z.string().regex(
-  /^(?=.*[0-9])(?!.*[#&$ ])(?!.* ).{8,}$/,
-  'Password must be 8+ chars, include a number, and no spaces or #, &, $.'
-);
+// .max(72) matters because bcrypt silently ignores any bytes past 72 — without this,
+// two passwords that differ only after byte 72 would hash identically.
+const passwordRule = z.string()
+  .max(72, 'Password must be 72 characters or fewer.')
+  .regex(
+    /^(?=.*[0-9])(?!.*[#&$ ])(?!.* ).{8,}$/,
+    'Password must be 8+ chars, include a number, and no spaces or #, &, $.'
+  );
 
 export const registerSchema = z.object({
   firstName: z.string().trim().min(1, 'First name is required'),
