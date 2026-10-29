@@ -30,6 +30,14 @@ router.param('userId', (req, res, next, userId) => {
   next();
 });
 
+// Every :monthYear param gets the same format check before any controller runs.
+router.param('monthYear', (req, res, next, monthYear) => {
+  if (!/^\d{4}-\d{2}$/.test(monthYear)) {
+    return res.status(400).json({ message: 'monthYear must be in YYYY-MM format' });
+  }
+  next();
+});
+
 // ── Specific Routes First (More Specific Before Generic) ──
 
 // ── Analytics Routes (Most Specific) ──
