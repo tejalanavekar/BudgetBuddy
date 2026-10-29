@@ -36,7 +36,7 @@ const Profile = () => {
   // Fetch expenses, axios converts into query string for  that params.
  useEffect(() => {
   if (!user?.userId) return;
-  getExpenses(user.userId)
+  getExpenses()
   .then(res => {
     const data = Array.isArray(res.data) ? res.data : [];
     setExpenses(data);

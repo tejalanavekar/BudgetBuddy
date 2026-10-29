@@ -178,6 +178,9 @@ const SettingsPage = () => {
     setExportingKey(key);
     setPrivacyMsg({ type: '', text: '' });
     try {
+      // exportBudgetsJSON still needs userId (budget routes keep it in the URL);
+      // the expense/receipts exports below ignore this extra argument now that the
+      // backend identifies the caller from the JWT instead.
       await fn(user.userId);
     } catch (err) {
       setPrivacyMsg({ type: 'error', text: `Failed to export: ${err.message}` });
@@ -191,7 +194,7 @@ const SettingsPage = () => {
     setIsClearing(true);
     setPrivacyMsg({ type: '', text: '' });
     try {
-      const res = await clearMonthExpenses(user.userId);
+      const res = await clearMonthExpenses();
       setPrivacyMsg({ type: 'success', text: `Cleared ${res.data.deletedCount} expense(s) for this month.` });
     } catch (err) {
       setPrivacyMsg({ type: 'error', text: 'Failed to clear expenses.' });

@@ -1,11 +1,9 @@
 import API from '../axiosInstance';
 import { downloadBlob } from '../../utils/downloadBlob';
 
-//GET /expenses?userId=abc123
-export const getExpenses = (userId) =>
-  API.get('/expenses', { params: { userId } });
-// { params: { userId } } → sends as query string: /expenses?userId=abc123
-// backend reads: req.query.userId
+//GET /expenses — the backend identifies the caller from the JWT, not a client-supplied id
+export const getExpenses = () =>
+  API.get('/expenses');
 
 //POST /expenses
 //// We override Content-Type here as a safety net for file uploads
@@ -40,21 +38,21 @@ export const deleteExpense = (id) =>
   API.delete(`/expenses/${id}`);
 
 //Getting all the exppenses
-export const getAllReceipts = (userId) =>
-  API.get('/expenses/receipts', { params: { userId } });
+export const getAllReceipts = () =>
+  API.get('/expenses/receipts');
 
 //Settings > Data & Privacy — download all expenses as a CSV file
-export const exportExpensesCSV = async (userId) => {
-  const response = await API.get('/expenses/export/csv', { params: { userId }, responseType: 'blob' });
+export const exportExpensesCSV = async () => {
+  const response = await API.get('/expenses/export/csv', { responseType: 'blob' });
   downloadBlob(response.data, 'budget-buddy-expenses.csv');
 };
 
 //Settings > Data & Privacy — download every uploaded receipt image as a ZIP
-export const exportReceiptsZip = async (userId) => {
-  const response = await API.get('/expenses/export/receipts-zip', { params: { userId }, responseType: 'blob' });
+export const exportReceiptsZip = async () => {
+  const response = await API.get('/expenses/export/receipts-zip', { responseType: 'blob' });
   downloadBlob(response.data, 'budget-buddy-receipts.zip');
 };
 
 //Settings > Data & Privacy — permanently delete all expenses for the current month
-export const clearMonthExpenses = (userId) =>
-  API.delete('/expenses/clear-month', { params: { userId } });
+export const clearMonthExpenses = () =>
+  API.delete('/expenses/clear-month');

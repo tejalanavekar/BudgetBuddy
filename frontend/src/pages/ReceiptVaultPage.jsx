@@ -44,7 +44,7 @@ const ReceiptVaultPage = () => {
   useEffect(() => {
   if (!user?.userId) return;
   setLoading(true);
-  getAllReceipts(user.userId)
+  getAllReceipts()
     .then(res => {
       const data = Array.isArray(res.data) ? res.data : [];
       setReceipts(data);

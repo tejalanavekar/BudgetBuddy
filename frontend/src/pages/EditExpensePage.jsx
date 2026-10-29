@@ -30,7 +30,7 @@ const EditExpensePage = () => {
 
   useEffect(() => {
     if (!user?.userId) return;
-    getExpenses(user.userId).then(res => {
+    getExpenses().then(res => {
       const expense = res.data.find(e => e._id === id);
       if (expense) {
         setForm({

@@ -62,7 +62,7 @@ const PastExpensesPage = () => {
   useEffect(() => {
   if (!user?.userId) return;
   setLoading(true);
-  getExpenses(user.userId)
+  getExpenses()
     .then(res => {
       const data = Array.isArray(res.data) ? res.data : [];
       setAllExpenses(data);

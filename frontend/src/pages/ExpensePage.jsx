@@ -297,8 +297,8 @@ const handleFileChange = async (e) => {
     }
     
     // 3. Constructing FormData for Multipart Upload (Text + File)
+    // The backend identifies the caller from the JWT, not a client-supplied userId.
     const formData = new FormData();
-    formData.append('userId', user.userId); // Include userId in the form data
     formData.append('description', form.description);
     formData.append('amount', form.amount);
     formData.append('category', form.category);

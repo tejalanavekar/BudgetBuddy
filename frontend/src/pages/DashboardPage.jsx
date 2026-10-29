@@ -79,7 +79,7 @@ const DashboardPage = () => {
   // ── Fetch Expenses ────────────────────────────────────────────────
 useEffect(() => {
   if (!user?.userId) return;
-  getExpenses(user.userId)
+  getExpenses()
     .then(res => {
       console.log('Type:', typeof res.data);
       console.log('Is array:', Array.isArray(res.data));

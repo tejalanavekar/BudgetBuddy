@@ -53,7 +53,7 @@ const SubscriptionsPage = () => {
 
   useEffect(() => {
     if (!user?.userId) return;
-    getSubscriptions(user.userId)
+    getSubscriptions()
       .then(setSubscriptions)
       .catch(() => setSubscriptions([]))
       .finally(() => setLoading(false));
@@ -63,7 +63,7 @@ const SubscriptionsPage = () => {
   // here if that happens while this page is open, so it doesn't look stale.
   useEffect(() => {
     if (!user?.userId) return;
-    const handler = () => getSubscriptions(user.userId).then(setSubscriptions).catch(() => {});
+    const handler = () => getSubscriptions().then(setSubscriptions).catch(() => {});
     window.addEventListener(SUBSCRIPTIONS_CHANGED, handler);
     return () => window.removeEventListener(SUBSCRIPTIONS_CHANGED, handler);
   }, [user]);
@@ -143,7 +143,7 @@ const SubscriptionsPage = () => {
         const updated = await updateSubscription(editingSub._id, payload);
         setSubscriptions(prev => prev.map(s => s._id === editingSub._id ? updated : s));
       } else {
-        const created = await addSubscription(user.userId, payload);
+        const created = await addSubscription(payload);
         setSubscriptions(prev => [created, ...prev]);
       }
 

@@ -2,9 +2,10 @@ import axiosInstance from '../axiosInstance';
 
 const SUBSCRIPTION_API = '/subscriptions';
 
-export const getSubscriptions = async (userId) => {
+// The backend identifies the caller from the JWT, not a client-supplied id.
+export const getSubscriptions = async () => {
   try {
-    const response = await axiosInstance.get(SUBSCRIPTION_API, { params: { userId } });
+    const response = await axiosInstance.get(SUBSCRIPTION_API);
     return response.data;
   } catch (error) {
     console.error('Error fetching subscriptions:', error);
@@ -12,9 +13,9 @@ export const getSubscriptions = async (userId) => {
   }
 };
 
-export const addSubscription = async (userId, subscription) => {
+export const addSubscription = async (subscription) => {
   try {
-    const response = await axiosInstance.post(SUBSCRIPTION_API, { userId, ...subscription });
+    const response = await axiosInstance.post(SUBSCRIPTION_API, subscription);
     return response.data;
   } catch (error) {
     console.error('Error adding subscription:', error);
