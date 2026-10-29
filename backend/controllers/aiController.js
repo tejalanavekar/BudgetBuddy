@@ -6,7 +6,7 @@ import logger from '../utils/logger.js';
 // ── POST /api/ai/:userId/chat — chat with the assistant (budget, expenses, subscriptions, tips) ──
 export const chatWithAssistant = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.userId;
     const { question, history, page } = req.body;
 
     if (!question || !question.trim()) {
