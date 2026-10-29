@@ -2,29 +2,14 @@
 import dotenv from 'dotenv';
 import connectDB, { disconnectDB } from './config/db.js';
 import logger from './utils/logger.js';
+import { validateEnv } from './utils/validateEnv.js';
 
 // Initialize environment variables
 dotenv.config();
 
-// Fail fast with a clear message if a required secret/config value is missing,
-// rather than starting "successfully" and only breaking later when some request
-// happens to hit the code path that needed it.
-const REQUIRED_ENV_VARS = [
-    'ATLAS_URI', 'JWT_SECRET', 'GOOGLE_CLIENT_ID',
-    'EMAIL_USER', 'EMAIL_APP_PASSWORD', 'FRONTEND_URL',
-    'GOOGLE_VISION_API_KEY', 'GROQ_API_KEY',
-    'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET'
-];
-const missingEnvVars = REQUIRED_ENV_VARS.filter((key) => !process.env[key]);
-if (missingEnvVars.length > 0) {
-    logger.error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
-    process.exit(1);
-}
-
-// A short JWT_SECRET is brute-forceable — every token in the system (everyone's login
-// session) is only as strong as this one value.
-if (process.env.JWT_SECRET.length < 32) {
-    logger.error('JWT_SECRET must be at least 32 characters long.');
+const envErrors = validateEnv(process.env);
+if (envErrors.length > 0) {
+    envErrors.forEach((error) => logger.error(error));
     process.exit(1);
 }
 
