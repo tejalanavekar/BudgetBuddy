@@ -399,7 +399,7 @@ export const runAssistant = async ({ userId, question, history = [], page = 'app
     logger.error(`[assistant] failed after ${Date.now() - startedAt}ms:`, error);
     const message = isRateLimitError(error)
       ? "I'm getting a lot of requests right now — give me a few seconds and try again."
-      : `I ran into an issue: ${error.message}`;
+      : "I ran into an issue answering that — please try again in a moment.";
     return { success: false, message, toolsUsed: [] };
   }
 };
