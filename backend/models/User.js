@@ -17,6 +17,9 @@ const userSchema = new mongoose.Schema({
   // the password itself), so a database leak alone can't be used to reset an account.
   resetPasswordTokenHash: { type: String, default: null, select: false },
   resetPasswordExpires: { type: Date, default: null, select: false },
+  // Set on every password change/reset — lets `protect` reject any JWT issued before
+  // this moment, the minimal way to sign out other sessions after a password change.
+  passwordChangedAt: { type: Date, default: null },
   preferences: {
     currency: { type: String, default: 'USD' },
     dateFormat: { type: String, default: 'MM/DD/YYYY' },

@@ -21,6 +21,13 @@ if (missingEnvVars.length > 0) {
     process.exit(1);
 }
 
+// A short JWT_SECRET is brute-forceable — every token in the system (everyone's login
+// session) is only as strong as this one value.
+if (process.env.JWT_SECRET.length < 32) {
+    logger.error('JWT_SECRET must be at least 32 characters long.');
+    process.exit(1);
+}
+
 // Connect to MongoDB
 connectDB();
 

@@ -12,6 +12,13 @@ import { uploadBuffer, deleteByPublicId } from '../utils/cloudinaryService.js';
 import logger from '../utils/logger.js';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const BCRYPT_COST = 12;
+
+// A fixed, valid bcrypt hash of an arbitrary string — compared against whenever there's
+// no real password to check (unknown email, or a Google-only account), so a bcrypt.compare
+// call still runs and takes the same time either way. Without this, a timing attacker could
+// tell "no such user" apart from "wrong password" purely from response latency.
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync('not-a-real-password', BCRYPT_COST);
 
 //Inpput validation, checking for  the user if it  already exists  and also is the  password stroong enough and  also storing the password in hashed format in DB
 //POST/users
@@ -37,7 +44,7 @@ export const registerUser = async (req, res, next) => {
         if (existing) return res.status(409).json({ message: 'Email already registered' });
 
         // Security: Hash the password
-        const salt = await bcrypt.genSalt(10);
+        const salt = await bcrypt.genSalt(BCRYPT_COST);
         const hashedPassword = await bcrypt.hash(password, salt);
 
         const user = new User({ firstName, lastName, email, password: hashedPassword });
@@ -48,7 +55,7 @@ export const registerUser = async (req, res, next) => {
         const token = jwt.sign(
             { userId: user._id },
             process.env.JWT_SECRET,
-            { expiresIn: '7d' }
+            { expiresIn: '7d', algorithm: 'HS256' }
         );
 
         res.status(201).json({ message: 'User registered', userId: user._id, firstName: user.firstName, token });
@@ -63,18 +70,21 @@ export const loginUser = async (req, res, next) =>{
     try{
         const {email, password} = req.body;
         const user = await User.findOne({email});
-        
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if(!isPasswordValid) {
-            return res.status(401).json({ message: 'Invalid password' });
+
+        // Same response (status, message, and — via the dummy-hash compare below —
+        // roughly the same timing) whether the email doesn't exist, the password is
+        // wrong, or the account has no password at all (Google-only). Telling these
+        // apart would let an attacker enumerate which emails are registered.
+        const genericInvalid = () => res.status(401).json({ message: 'Invalid email or password' });
+
+        const isPasswordValid = await bcrypt.compare(password, user?.password || DUMMY_PASSWORD_HASH);
+        if (!user || !user.password || !isPasswordValid) {
+            return genericInvalid();
         }
         const token = jwt.sign(
             { userId: user._id },        // what to store inside token
             process.env.JWT_SECRET,      // secret key from .env
-            { expiresIn: '7d' }          // token expires in 7 days
+            { expiresIn: '7d', algorithm: 'HS256' }          // token expires in 7 days
         );
 
         res.status(200).json({
@@ -104,7 +114,14 @@ export const googleLogin = async (req, res) => {
             audience: process.env.GOOGLE_CLIENT_ID
         });
         const payload = ticket.getPayload();
-        const { email, given_name, family_name, sub: googleId } = payload;
+        const { email, email_verified, given_name, family_name, sub: googleId } = payload;
+
+        // Google lets an account exist with an unconfirmed email — trusting it here would let
+        // someone sign up (or worse, auto-link to an existing password account) with an email
+        // they don't actually control.
+        if (!email_verified) {
+            return res.status(401).json({ message: 'Google account email is not verified' });
+        }
 
         let user = await User.findOne({ $or: [{ googleId }, { email }] });
 
@@ -128,7 +145,7 @@ export const googleLogin = async (req, res) => {
         const token = jwt.sign(
             { userId: user._id },
             process.env.JWT_SECRET,
-            { expiresIn: '7d' }
+            { expiresIn: '7d', algorithm: 'HS256' }
         );
 
         res.status(200).json({
@@ -267,12 +284,18 @@ export const changePassword = async (req, res, next) => {
         const { currentPassword, newPassword } = req.body;
         //Find user WITH password this time (we need it to compare)
         const user = await User.findById(req.params.userId);
+        if (!user.password) {
+            return res.status(400).json({ message: "This account signed up with Google and doesn't have a password to change." });
+        }
         // 2. Check current password is correct
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Current password is incorrect' });
 
         // 3. Hash the new password and save
-        user.password = await bcrypt.hash(newPassword, 10);
+        user.password = await bcrypt.hash(newPassword, BCRYPT_COST);
+        // Lets `protect` reject any token issued before this moment — the minimal way
+        // to sign out other sessions after a password change.
+        user.passwordChangedAt = new Date();
         await user.save();
         res.status(200).json({ message: 'Password updated successfully' });
     } catch (error) {
@@ -332,10 +355,12 @@ export const resetPassword = async (req, res, next) => {
             return res.status(400).json({ message: 'This reset link is invalid or has expired. Please request a new one.' });
         }
 
-        user.password = await bcrypt.hash(newPassword, 10);
+        user.password = await bcrypt.hash(newPassword, BCRYPT_COST);
         // Single-use: clear the token so this same link can't be replayed.
         user.resetPasswordTokenHash = null;
         user.resetPasswordExpires = null;
+        // Same reasoning as changePassword — invalidates any session issued before this reset.
+        user.passwordChangedAt = new Date();
         await user.save();
 
         res.status(200).json({ message: 'Password reset successfully' });
