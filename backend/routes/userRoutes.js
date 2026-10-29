@@ -5,6 +5,7 @@ import protect from '../middleware/authMiddleware.js';
 import upload from '../middleware/uploadMiddleware.js';
 import validateImageSignature from '../middleware/validateImageSignature.js';
 import validate from '../middleware/validate.js';
+import validateObjectId from '../middleware/validateObjectId.js';
 import { loginLimiter, passwordResetLimiter } from '../middleware/rateLimiters.js';
 import { registerSchema, loginSchema, googleLoginSchema, forgotPasswordSchema, resetPasswordSchema, changePasswordSchema } from '../validation/schemas.js';
 const router = express.Router();
@@ -22,12 +23,12 @@ router.post('/google-login', validate(googleLoginSchema), googleLogin);
 router.post('/forgot-password', passwordResetLimiter, validate(forgotPasswordSchema), forgotPassword);
 router.post('/reset-password', passwordResetLimiter, validate(resetPasswordSchema), resetPassword);
 
-router.get('/:userId', protect, getUserProfile);
-router.put('/:userId', protect, updateUserProfile);
-router.put('/:userId/photo', protect, upload.single('photo'), validateImageSignature, uploadProfilePhoto);
-router.delete('/:userId', protect, deleteAccount);
+router.get('/:userId', protect, validateObjectId('userId'), getUserProfile);
+router.put('/:userId', protect, validateObjectId('userId'), updateUserProfile);
+router.put('/:userId/photo', protect, validateObjectId('userId'), upload.single('photo'), validateImageSignature, uploadProfilePhoto);
+router.delete('/:userId', protect, validateObjectId('userId'), deleteAccount);
 
 //Update the user password
-router.put('/:userId/password', protect, validate(changePasswordSchema), changePassword);
+router.put('/:userId/password', protect, validateObjectId('userId'), validate(changePasswordSchema), changePassword);
 
 export default router;

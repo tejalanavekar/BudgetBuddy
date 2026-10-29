@@ -8,6 +8,7 @@ import {
   deleteBudget,
   exportBudgetsJSON
 } from '../controllers/budgetController.js';
+import mongoose from 'mongoose';
 import protect from '../middleware/authMiddleware.js';
 import validate from '../middleware/validate.js';
 import { budgetSchema } from '../validation/schemas.js';
@@ -20,6 +21,9 @@ router.use(protect);
 // Every route below starts with :userId — check ownership once here instead of
 // repeating it in each controller function.
 router.param('userId', (req, res, next, userId) => {
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: 'Invalid id' });
+  }
   if (userId !== req.userId) {
     return res.status(403).json({ message: 'Unauthorized' });
   }
