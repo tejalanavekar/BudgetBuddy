@@ -4,7 +4,7 @@ import { runAssistant } from '../utils/langchainService.js';
 import logger from '../utils/logger.js';
 
 // ── POST /api/ai/:userId/chat — chat with the assistant (budget, expenses, subscriptions, tips) ──
-export const chatWithAssistant = async (req, res) => {
+export const chatWithAssistant = async (req, res, next) => {
   try {
     const userId = req.userId;
     const { question, history, page } = req.body;
@@ -32,9 +32,6 @@ export const chatWithAssistant = async (req, res) => {
     });
   } catch (error) {
     logger.error('Error in AI assistant chat:', error);
-    res.status(500).json({
-      error: 'Failed to process your question',
-      details: error.message
-    });
+    next(error);
   }
 };
