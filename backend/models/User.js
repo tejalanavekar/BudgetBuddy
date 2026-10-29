@@ -15,8 +15,8 @@ const userSchema = new mongoose.Schema({
   photoPublicId: { type: String, default: null },
   // Forgot-password flow — only a hash of the token is ever stored (same principle as
   // the password itself), so a database leak alone can't be used to reset an account.
-  resetPasswordTokenHash: { type: String, default: null },
-  resetPasswordExpires: { type: Date, default: null },
+  resetPasswordTokenHash: { type: String, default: null, select: false },
+  resetPasswordExpires: { type: Date, default: null, select: false },
   preferences: {
     currency: { type: String, default: 'USD' },
     dateFormat: { type: String, default: 'MM/DD/YYYY' },

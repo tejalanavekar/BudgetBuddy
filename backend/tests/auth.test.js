@@ -130,7 +130,7 @@ describe('POST /api/users/forgot-password + reset-password', () => {
   it('sets a hashed reset token on the user when registered', async () => {
     await request(app).post('/api/users').send(validUser);
     await request(app).post('/api/users/forgot-password').send({ email: validUser.email });
-    const user = await User.findOne({ email: validUser.email });
+    const user = await User.findOne({ email: validUser.email }).select('+resetPasswordTokenHash +resetPasswordExpires');
     expect(user.resetPasswordTokenHash).toBeTruthy();
     expect(user.resetPasswordExpires.getTime()).toBeGreaterThan(Date.now());
   });
