@@ -47,7 +47,7 @@ const refreshNextBillingDate = async (sub) => {
   return sub;
 };
 
-export const createSubscription = async (req, res) => {
+export const createSubscription = async (req, res, next) => {
   try {
     const { name, cost, billingCycle, category, purchaseDate } = req.body;
     const userId = req.userId;
@@ -71,11 +71,11 @@ export const createSubscription = async (req, res) => {
     await subscription.save();
     res.status(201).json(subscription);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to create subscription', error: error.message });
+    next(error);
   }
 };
 
-export const getSubscriptions = async (req, res) => {
+export const getSubscriptions = async (req, res, next) => {
   try {
     const userId = req.userId;
 
@@ -83,11 +83,11 @@ export const getSubscriptions = async (req, res) => {
     const refreshed = await Promise.all(subscriptions.map(refreshNextBillingDate));
     res.json(refreshed);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch subscriptions', error: error.message });
+    next(error);
   }
 };
 
-export const updateSubscription = async (req, res) => {
+export const updateSubscription = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, cost, billingCycle, category, status, purchaseDate } = req.body;
@@ -110,11 +110,11 @@ export const updateSubscription = async (req, res) => {
     await subscription.save();
     res.json(subscription);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to update subscription', error: error.message });
+    next(error);
   }
 };
 
-export const deleteSubscription = async (req, res) => {
+export const deleteSubscription = async (req, res, next) => {
   try {
     const { id } = req.params;
     const subscription = await Subscription.findOneAndDelete({ _id: id, userId: req.userId });
@@ -123,6 +123,6 @@ export const deleteSubscription = async (req, res) => {
     }
     res.json({ message: 'Subscription deleted' });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to delete subscription', error: error.message });
+    next(error);
   }
 };
