@@ -9,6 +9,7 @@ import crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import { sendPasswordResetEmail } from '../utils/mailer.js';
 import { uploadBuffer, deleteByPublicId } from '../utils/cloudinaryService.js';
+import logger from '../utils/logger.js';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -221,6 +222,21 @@ export const deleteAccount = async (req, res) => {
         if (userId !== req.userId) {
             return res.status(403).json({ message: 'Unauthorized' });
         }
+
+        const user = await User.findById(userId);
+        const expensesWithReceipts = await Expense.find({ userId, receiptPublicId: { $exists: true, $ne: null } });
+
+        // Best-effort: a Cloudinary hiccup shouldn't block the account deletion the user asked for.
+        await Promise.all([
+            ...expensesWithReceipts.map(e => deleteByPublicId(e.receiptPublicId).catch(err =>
+                logger.error(`Failed to delete receipt ${e.receiptPublicId} during account deletion:`, err)
+            )),
+            user?.photoPublicId
+                ? deleteByPublicId(user.photoPublicId).catch(err =>
+                    logger.error(`Failed to delete profile photo ${user.photoPublicId} during account deletion:`, err)
+                  )
+                : Promise.resolve()
+        ]);
 
         await Promise.all([
             Expense.deleteMany({ userId }),
