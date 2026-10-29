@@ -365,7 +365,7 @@ const parseReceiptText = (text) => {
 
 
 // ── POST /api/expenses/scan-receipt ──────────────────────────────
-export const scanReceipt = async (req, res) => {
+export const scanReceipt = async (req, res, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No image uploaded' });
@@ -375,13 +375,16 @@ export const scanReceipt = async (req, res) => {
     const base64Image = req.file.buffer.toString('base64');
 
     const visionResponse = await axios.post(
-      `https://vision.googleapis.com/v1/images:annotate?key=${process.env.GOOGLE_VISION_API_KEY}`,
+      'https://vision.googleapis.com/v1/images:annotate',
       {
         requests: [{
           image: { content: base64Image },
           features: [{ type: 'DOCUMENT_TEXT_DETECTION' }]
         }]
-      }
+      },
+      // Keeps the key out of the URL — a query string can end up in server access
+      // logs, proxy logs, or browser history in a way a request header doesn't.
+      { headers: { 'X-Goog-Api-Key': process.env.GOOGLE_VISION_API_KEY } }
     );
 
     const fullText = visionResponse.data.responses[0]?.fullTextAnnotation?.text || '';
@@ -398,7 +401,7 @@ export const scanReceipt = async (req, res) => {
 
   } catch (error) {
     logger.error('Google Vision error:', error.response?.data || error.message);
-    res.status(500).json({ message: 'Receipt scan failed', error: error.message });
+    next(error);
   }
 };
 
@@ -434,13 +437,14 @@ export const createExpense = async (req, res) => {
     res.status(201).json({ message: 'Expense added successfully', expense });
 
   } catch (error) {
-    res.status(400).json({ message: 'Error adding expense', error: error.message });
+    logger.error('Error adding expense:', error);
+    res.status(400).json({ message: 'Error adding expense' });
   }
 };
 
 
 // ── GET /api/expenses ─────────────────────────────────────────────
-export const getExpenses = async (req, res) => {
+export const getExpenses = async (req, res, next) => {
   try {
     const userId = req.userId;
 
@@ -448,7 +452,7 @@ export const getExpenses = async (req, res) => {
     res.status(200).json(expenses);
 
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching expenses', error: error.message });
+    next(error);
   }
 };
 
@@ -497,11 +501,12 @@ export const updateExpense = async (req, res) => {
 
     res.status(200).json({ message: 'Expense updated successfully', expense });
   } catch (error) {
-    res.status(400).json({ message: 'Error updating expense', error: error.message });
+    logger.error('Error updating expense:', error);
+    res.status(400).json({ message: 'Error updating expense' });
   }
 };
 // Delete an expense
-export const deleteExpense = async (req, res) => {
+export const deleteExpense = async (req, res, next) => {
   try {
     const expense = await Expense.findById(req.params.id);
     if (!expense) return res.status(404).json({ message: 'Expense not found' });
@@ -518,24 +523,24 @@ export const deleteExpense = async (req, res) => {
 
     res.status(200).json({ message: 'Expense deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting expense', error: error.message });
+    next(error);
   }
 };
 
 // Get all expenses with receipts for a user
-export const getAllReceipts = async (req, res) => {
+export const getAllReceipts = async (req, res, next) => {
   try {
     const userId = req.userId;
 
     const expenses = await Expense.find({ userId, receiptPath: { $exists: true, $ne: null } }).sort({ date: -1 });
     res.status(200).json(expenses);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching receipts', error: error.message });
+    next(error);
   }
 };
 
 // Settings > Data & Privacy — download all expenses as a CSV file
-export const exportExpensesCSV = async (req, res) => {
+export const exportExpensesCSV = async (req, res, next) => {
   try {
     const userId = req.userId;
 
@@ -552,7 +557,7 @@ export const exportExpensesCSV = async (req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename="budget-buddy-expenses.csv"');
     res.status(200).send(csv);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to export expenses', error: error.message });
+    next(error);
   }
 };
 
@@ -571,7 +576,7 @@ export const exportReceiptsZip = async (req, res) => {
     // handle it here directly instead of throwing (which would just crash uncaught).
     archive.on('error', (err) => {
       logger.error('Archiver error:', err);
-      if (!res.headersSent) res.status(500).json({ message: 'Failed to export receipts', error: err.message });
+      if (!res.headersSent) res.status(500).json({ message: 'Failed to export receipts' });
       else res.end();
     });
     archive.pipe(res);
@@ -597,13 +602,13 @@ export const exportReceiptsZip = async (req, res) => {
   } catch (error) {
     logger.error('Export receipts zip error:', error);
     if (!res.headersSent) {
-      res.status(500).json({ message: 'Failed to export receipts', error: error.message });
+      res.status(500).json({ message: 'Failed to export receipts' });
     }
   }
 };
 
 // Settings > Data & Privacy — permanently delete all expenses for the current calendar month
-export const clearMonthExpenses = async (req, res) => {
+export const clearMonthExpenses = async (req, res, next) => {
   try {
     const userId = req.userId;
 
@@ -613,6 +618,6 @@ export const clearMonthExpenses = async (req, res) => {
     const result = await Expense.deleteMany({ userId, date: { $regex: `^${monthYear}` } });
     res.status(200).json({ message: 'Cleared', deletedCount: result.deletedCount });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to clear expenses', error: error.message });
+    next(error);
   }
 };
