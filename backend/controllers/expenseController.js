@@ -406,11 +406,8 @@ export const scanReceipt = async (req, res) => {
 // ── POST /api/expenses ────────────────────────────────────────────
 export const createExpense = async (req, res) => {
   try {
-    const { userId, description, amount, category, date, items } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({ message: 'User ID is required' });
-    }
+    const { description, amount, category, date, items } = req.body;
+    const userId = req.userId;
 
     let parsedItems = [];
     if (items) {
@@ -445,8 +442,7 @@ export const createExpense = async (req, res) => {
 // ── GET /api/expenses ─────────────────────────────────────────────
 export const getExpenses = async (req, res) => {
   try {
-    const { userId } = req.query;
-    if (!userId) return res.status(400).json({ message: 'User ID required' });
+    const userId = req.userId;
 
     const expenses = await Expense.find({ userId }).sort({ date: -1 });
     res.status(200).json(expenses);
@@ -467,9 +463,9 @@ export const updateExpense = async (req, res) => {
       return res.status(404).json({ message: 'Expense not found' });
     }
 
-    // ✅ Verify ownership before updating (same check deleteExpense already does)
+    // Don't reveal that the expense exists for a different user — same response as "not found".
     if (expense.userId.toString() !== req.userId) {
-      return res.status(403).json({ message: 'Unauthorized' });
+      return res.status(404).json({ message: 'Expense not found' });
     }
 
     // Update fields if provided
@@ -510,9 +506,9 @@ export const deleteExpense = async (req, res) => {
     const expense = await Expense.findById(req.params.id);
     if (!expense) return res.status(404).json({ message: 'Expense not found' });
 
-    // ✅ Verify ownership before deleting
+    // Don't reveal that the expense exists for a different user — same response as "not found".
     if (expense.userId.toString() !== req.userId) {
-      return res.status(403).json({ message: 'Unauthorized' });
+      return res.status(404).json({ message: 'Expense not found' });
     }
     await Expense.findByIdAndDelete(req.params.id);
 
@@ -529,8 +525,7 @@ export const deleteExpense = async (req, res) => {
 // Get all expenses with receipts for a user
 export const getAllReceipts = async (req, res) => {
   try {
-    const { userId } = req.query;
-    if (!userId) return res.status(400).json({ message: 'User ID required' });
+    const userId = req.userId;
 
     const expenses = await Expense.find({ userId, receiptPath: { $exists: true, $ne: null } }).sort({ date: -1 });
     res.status(200).json(expenses);
@@ -542,8 +537,7 @@ export const getAllReceipts = async (req, res) => {
 // Settings > Data & Privacy — download all expenses as a CSV file
 export const exportExpensesCSV = async (req, res) => {
   try {
-    const { userId } = req.query;
-    if (!userId) return res.status(400).json({ message: 'User ID required' });
+    const userId = req.userId;
 
     const expenses = await Expense.find({ userId }).sort({ date: -1 });
 
@@ -565,8 +559,7 @@ export const exportExpensesCSV = async (req, res) => {
 // Settings > Data & Privacy — download every uploaded receipt image as a ZIP
 export const exportReceiptsZip = async (req, res) => {
   try {
-    const { userId } = req.query;
-    if (!userId) return res.status(400).json({ message: 'User ID required' });
+    const userId = req.userId;
 
     const expenses = await Expense.find({ userId, receiptPath: { $exists: true, $ne: null } });
 
@@ -612,8 +605,7 @@ export const exportReceiptsZip = async (req, res) => {
 // Settings > Data & Privacy — permanently delete all expenses for the current calendar month
 export const clearMonthExpenses = async (req, res) => {
   try {
-    const { userId } = req.query;
-    if (!userId) return res.status(400).json({ message: 'User ID required' });
+    const userId = req.userId;
 
     const now = new Date();
     const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;

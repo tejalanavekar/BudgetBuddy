@@ -85,6 +85,6 @@ describe('Expense CRUD', () => {
       .put(`/api/expenses/${expenseId}`)
       .set('Authorization', `Bearer ${otherToken}`)
       .field('amount', '999');
-    expect(update.status).toBe(403);
+    expect(update.status).toBe(404);
   });
 });
