@@ -1,13 +1,27 @@
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
-// Login: throttle brute-force password guessing. Keyed on IP + the submitted email
-// (not IP alone) so one attacker can't spread guesses against a single account across
-// many IPs to dodge a per-IP limit, and one IP hammering many different emails doesn't
-// exhaust a single shared bucket.
+// Login: two limiters stacked, each catching what the other can't.
+//
+// loginLimiter (IP + email) stops one attacker grinding guesses against a single
+// account — including by spreading those guesses across many IPs, since each IP
+// gets its own bucket *per email* rather than being blocked outright.
 export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   keyGenerator: (req) => `${ipKeyGenerator(req.ip)}:${String(req.body?.email || '').toLowerCase()}`,
+  message: { message: 'Too many login attempts. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// loginLimiterByIp (IP alone) catches the case the email-keyed limiter above can't:
+// one attacker spraying a *different* email on every attempt from the same IP (a
+// credential-stuffing list, not a single-account grind) — each email would get its
+// own fresh loginLimiter bucket, so without this an attacker could try unlimited
+// accounts from one IP as long as they never repeat an email.
+export const loginLimiterByIp = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
   message: { message: 'Too many login attempts. Please try again later.' },
   standardHeaders: true,
   legacyHeaders: false

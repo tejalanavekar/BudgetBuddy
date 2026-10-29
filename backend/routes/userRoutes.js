@@ -6,7 +6,7 @@ import upload from '../middleware/uploadMiddleware.js';
 import validateImageSignature from '../middleware/validateImageSignature.js';
 import validate from '../middleware/validate.js';
 import validateObjectId from '../middleware/validateObjectId.js';
-import { loginLimiter, authLimiter, passwordResetLimiter } from '../middleware/rateLimiters.js';
+import { loginLimiter, loginLimiterByIp, authLimiter, passwordResetLimiter } from '../middleware/rateLimiters.js';
 import { registerSchema, loginSchema, googleLoginSchema, forgotPasswordSchema, resetPasswordSchema, changePasswordSchema } from '../validation/schemas.js';
 const router = express.Router();
 
@@ -14,7 +14,7 @@ const router = express.Router();
 router.post('/', authLimiter, validate(registerSchema), registerUser);
 
 // Maps to POST /api/users/login
-router.post('/login', loginLimiter, validate(loginSchema), loginUser);
+router.post('/login', loginLimiterByIp, loginLimiter, validate(loginSchema), loginUser);
 
 // Maps to POST /api/users/google-login — handles both Google sign-in and sign-up
 router.post('/google-login', authLimiter, validate(googleLoginSchema), googleLogin);

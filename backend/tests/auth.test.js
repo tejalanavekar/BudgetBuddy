@@ -314,4 +314,14 @@ describe('POST /api/users/login rate limiting', () => {
       .send({ email: validUser.email, password: 'WrongPass1' });
     expect(fromIpB.status).toBe(401);
   }, 15000);
+
+  it('still throttles one IP spraying a different email on every attempt (the per-email limiter alone would never trip)', async () => {
+    const attempts = Array.from({ length: 21 }, (_, i) =>
+      request(app).post('/api/users/login')
+        .set('X-Forwarded-For', '10.0.0.4')
+        .send({ email: `nouser${i}@test.com`, password: 'WrongPass1' })
+    );
+    const results = await Promise.all(attempts);
+    expect(results.some((r) => r.status === 429)).toBe(true);
+  }, 15000);
 });
