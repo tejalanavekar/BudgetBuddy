@@ -49,10 +49,11 @@ const refreshNextBillingDate = async (sub) => {
 
 export const createSubscription = async (req, res) => {
   try {
-    const { userId, name, cost, billingCycle, category, purchaseDate } = req.body;
+    const { name, cost, billingCycle, category, purchaseDate } = req.body;
+    const userId = req.userId;
 
-    if (!userId || !name || cost === undefined || !purchaseDate) {
-      return res.status(400).json({ message: 'userId, name, cost, and purchaseDate are required' });
+    if (!name || cost === undefined || !purchaseDate) {
+      return res.status(400).json({ message: 'name, cost, and purchaseDate are required' });
     }
 
     const resolvedCycle = billingCycle || 'Monthly';
@@ -76,10 +77,7 @@ export const createSubscription = async (req, res) => {
 
 export const getSubscriptions = async (req, res) => {
   try {
-    const { userId } = req.query;
-    if (!userId) {
-      return res.status(400).json({ message: 'userId is required' });
-    }
+    const userId = req.userId;
 
     const subscriptions = await Subscription.find({ userId }).sort({ createdAt: -1 });
     const refreshed = await Promise.all(subscriptions.map(refreshNextBillingDate));
@@ -94,7 +92,7 @@ export const updateSubscription = async (req, res) => {
     const { id } = req.params;
     const { name, cost, billingCycle, category, status, purchaseDate } = req.body;
 
-    const subscription = await Subscription.findById(id);
+    const subscription = await Subscription.findOne({ _id: id, userId: req.userId });
     if (!subscription) {
       return res.status(404).json({ message: 'Subscription not found' });
     }
@@ -119,7 +117,7 @@ export const updateSubscription = async (req, res) => {
 export const deleteSubscription = async (req, res) => {
   try {
     const { id } = req.params;
-    const subscription = await Subscription.findByIdAndDelete(id);
+    const subscription = await Subscription.findOneAndDelete({ _id: id, userId: req.userId });
     if (!subscription) {
       return res.status(404).json({ message: 'Subscription not found' });
     }

@@ -46,7 +46,6 @@ export const budgetSchema = z.object({
 });
 
 export const subscriptionCreateSchema = z.object({
-  userId: z.string().min(1, 'userId is required'),
   name: z.string().trim().min(1, 'name is required'),
   cost: z.coerce.number().nonnegative('cost must be a positive number'),
   billingCycle: z.string().optional(),
