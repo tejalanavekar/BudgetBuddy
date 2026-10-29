@@ -1,10 +1,24 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
-// Login: throttle brute-force password guessing per IP.
+// Login: throttle brute-force password guessing. Keyed on IP + the submitted email
+// (not IP alone) so one attacker can't spread guesses against a single account across
+// many IPs to dodge a per-IP limit, and one IP hammering many different emails doesn't
+// exhaust a single shared bucket.
 export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
+  keyGenerator: (req) => `${ipKeyGenerator(req.ip)}:${String(req.body?.email || '').toLowerCase()}`,
   message: { message: 'Too many login attempts. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Register/Google-login: no password to brute-force here, but still worth capping —
+// unbounded account creation is spam, and Google-login calls Google's own verifyIdToken
+// on every hit.
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
   standardHeaders: true,
   legacyHeaders: false
 });

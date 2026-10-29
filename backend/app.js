@@ -17,6 +17,12 @@ const allowedOrigins = [process.env.FRONTEND_URL || 'http://localhost:5173'];
 
 const app = express();
 
+// Without this, every request behind a reverse proxy (Render/Railway/Fly/Vercel) looks
+// like it comes from the proxy's own IP, so every user shares one rate-limit bucket —
+// one attacker can lock everyone out. The number is how many proxy hops are trusted to
+// have set X-Forwarded-For correctly; set TRUST_PROXY_HOPS to match the actual deployment.
+app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS ?? 1));
+
 app.use(helmet());
 app.use(cors({
     origin: allowedOrigins,
