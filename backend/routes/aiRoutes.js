@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import { chatWithAssistant } from '../controllers/aiController.js';
 import protect from '../middleware/authMiddleware.js';
 import { aiLimiter } from '../middleware/rateLimiters.js';
+import validate from '../middleware/validate.js';
+import { aiChatSchema } from '../validation/schemas.js';
 
 const router = express.Router();
 
@@ -21,6 +23,6 @@ router.param('userId', (req, res, next, userId) => {
   next();
 });
 
-router.post('/:userId/chat', aiLimiter, chatWithAssistant);
+router.post('/:userId/chat', aiLimiter, validate(aiChatSchema), chatWithAssistant);
 
 export default router;

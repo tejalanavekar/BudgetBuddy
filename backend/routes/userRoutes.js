@@ -7,7 +7,7 @@ import validateImageSignature from '../middleware/validateImageSignature.js';
 import validate from '../middleware/validate.js';
 import validateObjectId from '../middleware/validateObjectId.js';
 import { loginLimiter, loginLimiterByIp, authLimiter, passwordResetLimiter } from '../middleware/rateLimiters.js';
-import { registerSchema, loginSchema, googleLoginSchema, forgotPasswordSchema, resetPasswordSchema, changePasswordSchema } from '../validation/schemas.js';
+import { registerSchema, loginSchema, googleLoginSchema, forgotPasswordSchema, resetPasswordSchema, changePasswordSchema, profileUpdateSchema } from '../validation/schemas.js';
 const router = express.Router();
 
 // Maps to POST /api/users
@@ -24,7 +24,7 @@ router.post('/forgot-password', passwordResetLimiter, validate(forgotPasswordSch
 router.post('/reset-password', passwordResetLimiter, validate(resetPasswordSchema), resetPassword);
 
 router.get('/:userId', protect, validateObjectId('userId'), getUserProfile);
-router.put('/:userId', protect, validateObjectId('userId'), updateUserProfile);
+router.put('/:userId', protect, validateObjectId('userId'), validate(profileUpdateSchema), updateUserProfile);
 router.put('/:userId/photo', protect, validateObjectId('userId'), upload.single('photo'), validateImageSignature, uploadProfilePhoto);
 router.delete('/:userId', protect, validateObjectId('userId'), deleteAccount);
 

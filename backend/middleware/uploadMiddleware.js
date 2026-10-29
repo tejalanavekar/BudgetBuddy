@@ -6,9 +6,22 @@ import multer from 'multer';
 // filesystem (Render's free tier wipes local disk on every redeploy/restart).
 const storage = multer.memoryStorage();
 
+// An explicit allowlist, not just "startsWith('image/')" — that would also accept
+// image/svg+xml, which is XML and can carry embedded scripts (stored-XSS risk if ever
+// rendered directly, e.g. in an <img> tag or opened in a new tab). Matches exactly what
+// validateImageSignature's magic-byte check (JPEG/PNG/GIF/WEBP) actually accepts.
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) cb(null, true);
-  else cb(new Error('Only image files are allowed!'), false);
+  if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    cb(null, true);
+    return;
+  }
+  // .status marks this as a client error for errorHandler — otherwise a plain Error
+  // here falls through to the generic masked 500.
+  const error = new Error('Only JPEG, PNG, GIF, or WEBP images are allowed.');
+  error.status = 400;
+  cb(error, false);
 };
 
 // Generous cap for a phone-camera receipt photo, but not unbounded — with memory

@@ -30,7 +30,11 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
     credentials: true
 }));
-app.use(express.json());
+// Explicit cap — the default is already reasonable, but an unbounded JSON body on
+// every endpoint (not just uploads, which have their own 10MB file-size limit) is an
+// easy memory-exhaustion vector. 100kb comfortably covers the largest real payload
+// (a budget with 50 category entries, or 20 chat history turns).
+app.use(express.json({ limit: '100kb' }));
 
 // A short id per request, purely for correlating a client-facing error with the
 // matching server log line — carries no information about the request itself.

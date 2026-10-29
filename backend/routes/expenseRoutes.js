@@ -5,18 +5,20 @@ import protect from '../middleware/authMiddleware.js';
 import upload from '../middleware/uploadMiddleware.js';
 import validateImageSignature from '../middleware/validateImageSignature.js';
 import validateObjectId from '../middleware/validateObjectId.js';
+import validate from '../middleware/validate.js';
+import { expenseCreateSchema, expenseUpdateSchema } from '../validation/schemas.js';
 
 const router = express.Router();
 
 router.post('/scan-receipt', protect, upload.single('receipt'), validateImageSignature, scanReceipt);
-router.post('/', protect, upload.single('receipt'), validateImageSignature, createExpense);
+router.post('/', protect, upload.single('receipt'), validateImageSignature, validate(expenseCreateSchema), createExpense);
 router.get('/', protect, getExpenses);
 
 router.get('/receipts', protect, getAllReceipts);
 router.get('/export/csv', protect, exportExpensesCSV);
 router.get('/export/receipts-zip', protect, exportReceiptsZip);
 router.delete('/clear-month', protect, clearMonthExpenses);
-router.put('/:id', protect, validateObjectId('id'), upload.single('receipt'), validateImageSignature, updateExpense);
+router.put('/:id', protect, validateObjectId('id'), upload.single('receipt'), validateImageSignature, validate(expenseUpdateSchema), updateExpense);
 router.delete('/:id', protect, validateObjectId('id'), deleteExpense);
 
 export default router;

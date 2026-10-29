@@ -409,14 +409,10 @@ export const scanReceipt = async (req, res, next) => {
 // ── POST /api/expenses ────────────────────────────────────────────
 export const createExpense = async (req, res) => {
   try {
+    // items is already a validated, parsed array here — expenseCreateSchema parses
+    // and validates the raw JSON string from the multipart field.
     const { description, amount, category, date, items } = req.body;
     const userId = req.userId;
-
-    let parsedItems = [];
-    if (items) {
-      try { parsedItems = JSON.parse(items); } catch { parsedItems = []; }
-    }
-
 
     let receiptPath = null;
     let receiptPublicId = null;
@@ -428,7 +424,7 @@ export const createExpense = async (req, res) => {
 
     const expense = new Expense({
       userId, description, amount, category, date,
-      items: parsedItems,
+      items: items || [],
       receiptPath,
       receiptPublicId
     });
@@ -477,13 +473,9 @@ export const updateExpense = async (req, res) => {
     if (req.body.amount !== undefined)      expense.amount = Number(req.body.amount);
     if (req.body.category !== undefined)    expense.category = req.body.category;
     if (req.body.date !== undefined) expense.date = req.body.date;
-    if (req.body.items) {
-      try {
-        expense.items = JSON.parse(req.body.items);
-      } catch {
-        expense.items = [];
-      }
-    }
+    // Already a validated, parsed array (or undefined if the client didn't send
+    // items at all) — expenseUpdateSchema handles the JSON parsing and validation.
+    if (req.body.items !== undefined) expense.items = req.body.items;
     // Handle new receipt upload — the old one (if any) is replaced, not kept around,
     // so it doesn't just sit orphaned on Cloudinary with nothing left pointing to it.
     const oldReceiptPublicId = expense.receiptPublicId;

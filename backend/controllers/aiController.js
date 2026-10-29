@@ -7,13 +7,11 @@ import logger from '../utils/logger.js';
 export const chatWithAssistant = async (req, res, next) => {
   try {
     const userId = req.userId;
+    // Already validated (non-empty, length-capped question; capped history; allowlisted page)
+    // by aiChatSchema.
     const { question, history, page } = req.body;
 
-    if (!question || !question.trim()) {
-      return res.status(400).json({ error: 'Question cannot be empty' });
-    }
-
-    const result = await runAssistant({ userId, question, history: history || [], page });
+    const result = await runAssistant({ userId, question, history, page });
 
     // Logged regardless of success/failure — failed exchanges are useful signal too.
     await ChatMessage.create({
