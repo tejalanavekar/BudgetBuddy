@@ -15,7 +15,7 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 //Inpput validation, checking for  the user if it  already exists  and also is the  password stroong enough and  also storing the password in hashed format in DB
 //POST/users
-export const registerUser = async (req, res) => {
+export const registerUser = async (req, res, next) => {
     try {
         const { firstName, lastName, email, password } = req.body;
 
@@ -53,13 +53,13 @@ export const registerUser = async (req, res) => {
 
         res.status(201).json({ message: 'User registered', userId: user._id, firstName: user.firstName, token });
     } catch (error) {
-        res.status(500).json({ message: 'Error creating user', error: error.message });
+        next(error);
     }
 };
 
 //POST/users
 //Check for the password by  comparing with the  hashed in DB
-export const loginUser = async (req, res) =>{
+export const loginUser = async (req, res, next) =>{
     try{
         const {email, password} = req.body;
         const user = await User.findOne({email});
@@ -84,7 +84,7 @@ export const loginUser = async (req, res) =>{
             firstName: user.firstName,
         });
     } catch (error) {
-        res.status(500).json({ message: 'Error logging in', error: error.message });
+        next(error);
     }
 };
 
@@ -138,12 +138,13 @@ export const googleLogin = async (req, res) => {
             firstName: user.firstName
         });
     } catch (error) {
-        res.status(401).json({ message: 'Google authentication failed', error: error.message });
+        logger.error('Google login failed:', error);
+        res.status(401).json({ message: 'Google authentication failed' });
     }
 };
 
 //Profile page
-export const getUserProfile = async (req, res) => {
+export const getUserProfile = async (req, res, next) => {
     try {
         const { userId } = req.params;
         // Authz check: the verified token owner (req.userId) must match the profile being requested,
@@ -155,7 +156,7 @@ export const getUserProfile = async (req, res) => {
         if (!user) return res.status(404).json({ message: 'User not found' });
         res.status(200).json(user);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching profile', error: error.message });
+        next(error);
     }
 };
 
@@ -182,7 +183,8 @@ export const updateUserProfile = async (req, res) => {
         const { password, ...safeUser } = user.toObject();
         res.status(200).json(safeUser);
     } catch (error) {
-        res.status(400).json({ message: 'Failed to update profile', error: error.message });
+        logger.error('Failed to update profile:', error);
+        res.status(400).json({ message: 'Failed to update profile' });
     }
 };
 
@@ -210,13 +212,14 @@ export const uploadProfilePhoto = async (req, res) => {
         const { password, ...safeUser } = user.toObject();
         res.status(200).json(safeUser);
     } catch (error) {
-        res.status(400).json({ message: 'Failed to upload photo', error: error.message });
+        logger.error('Failed to upload photo:', error);
+        res.status(400).json({ message: 'Failed to upload photo' });
     }
 };
 
 //Settings > Data & Privacy — permanently delete the account and all associated data
 //DELETE /api/users/:userId
-export const deleteAccount = async (req, res) => {
+export const deleteAccount = async (req, res, next) => {
     try {
         const { userId } = req.params;
         if (userId !== req.userId) {
@@ -248,13 +251,13 @@ export const deleteAccount = async (req, res) => {
 
         res.status(200).json({ message: 'Account deleted' });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to delete account', error: error.message });
+        next(error);
     }
 };
 
 //Change password
 //PUT /api/users/:userId/password — change password
-export const changePassword = async (req, res) => {
+export const changePassword = async (req, res, next) => {
     try {
         // Authz check: only the token owner can change their own password, regardless of what
         // userId is in the URL.
@@ -273,12 +276,12 @@ export const changePassword = async (req, res) => {
         await user.save();
         res.status(200).json({ message: 'Password updated successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Error updating password', error: error.message });
+        next(error);
     }
 };
 
 //POST /api/users/forgot-password — request a reset link by email
-export const forgotPassword = async (req, res) => {
+export const forgotPassword = async (req, res, next) => {
     try {
         const { email } = req.body;
         if (!email) {
@@ -307,12 +310,12 @@ export const forgotPassword = async (req, res) => {
 
         res.status(200).json(genericResponse);
     } catch (error) {
-        res.status(500).json({ message: 'Failed to process request', error: error.message });
+        next(error);
     }
 };
 
 //POST /api/users/reset-password — consume the token from the emailed link
-export const resetPassword = async (req, res) => {
+export const resetPassword = async (req, res, next) => {
     try {
         const { token, newPassword } = req.body;
         if (!token || !newPassword) {
@@ -337,6 +340,6 @@ export const resetPassword = async (req, res) => {
 
         res.status(200).json({ message: 'Password reset successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to reset password', error: error.message });
+        next(error);
     }
 };
