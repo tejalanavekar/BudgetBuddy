@@ -5,7 +5,10 @@ import logger from '../utils/logger.js';
 // guarantees every error response has the same {message} shape. Must be
 // registered LAST, after all routes.
 const errorHandler = (err, req, res, next) => {
-  logger.error(err);
+  // Log enough to find and diagnose the request (id/method/path) without ever logging
+  // the body, query, or headers — those can carry passwords, tokens, or an Authorization
+  // header.
+  logger.error({ requestId: req.id, method: req.method, path: req.path, err }, 'request error');
   if (res.headersSent) return next(err);
 
   // Multer's own errors (file too large, wrong field name, etc.) are a bad *request*,

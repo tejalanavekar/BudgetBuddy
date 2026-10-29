@@ -2,6 +2,7 @@
 // Split out from server.js so tests can import and exercise it directly via supertest,
 // against a test database, without booting a real server or touching the real one.
 import express from 'express';
+import crypto from 'crypto';
 import cors from 'cors';
 import helmet from 'helmet';
 import userRoutes from './routes/userRoutes.js';
@@ -24,6 +25,13 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
+
+// A short id per request, purely for correlating a client-facing error with the
+// matching server log line — carries no information about the request itself.
+app.use((req, res, next) => {
+  req.id = crypto.randomUUID();
+  next();
+});
 
 // Registered before the general limiter below so health checks/monitoring are
 // never throttled — Express matches middleware/routes in registration order,
