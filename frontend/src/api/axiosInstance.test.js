@@ -75,6 +75,15 @@ describe('axiosInstance — response interceptor (401 handling)', () => {
     expect(window.location.href).toBe(''); // no redirect happened
   });
 
+  it('does NOT force-logout on a 401 from the google-login endpoint (e.g. bad/expired credential, unverified email)', async () => {
+    localStorage.setItem('bt_token', 'some-token');
+
+    await expect(responseErrorInterceptor(make401('/api/users/google-login'))).rejects.toBeDefined();
+
+    expect(localStorage.getItem('bt_token')).toBe('some-token'); // untouched
+    expect(window.location.href).toBe(''); // no redirect happened
+  });
+
   it('does not touch storage or redirect for a non-401 error (e.g. a 500)', async () => {
     localStorage.setItem('bt_token', 'some-token');
     const error = { response: { status: 500, data: {} }, config: { url: '/api/expenses' } };

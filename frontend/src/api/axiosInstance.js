@@ -44,7 +44,12 @@ API.interceptors.response.use(
         const url = error.config?.url || '';
         console.error("Interceptor caught error:", status, url);
         // 3. Global Error Handling
-        if (status === 401 && !url.includes('/login')) {
+        // A 401 from a login attempt itself (wrong password, bad/expired Google
+        // credential, unverified Google email, etc.) is a failed login, not an expired
+        // session — it should surface as a normal form error, not force a hard
+        // logout+redirect. "google-login" doesn't contain "/login" (no slash before
+        // "login"), so matching on "login" alone catches both /login and /google-login.
+        if (status === 401 && !url.includes('login')) {
             // If backend returns 401 (Unauthorized), force logout
                 localStorage.clear();
                 sessionStorage.clear();
