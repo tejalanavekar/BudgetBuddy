@@ -66,14 +66,20 @@
   cursor: pointer;
 }
 
-.pill-select-option:hover,
-.pill-select-option:focus {
+.pill-select-option:not(:disabled):hover,
+.pill-select-option--active:not(:disabled) {
   background: rgba(255, 255, 255, 0.1);
   outline: none;
 }
 
 .pill-select-option--selected {
   font-weight: 700;
+}
+
+.pill-select-option--disabled,
+.pill-select-option:disabled {
+  color: rgba(255, 255, 255, 0.35);
+  cursor: not-allowed;
 }
 
 .pill-select-check {

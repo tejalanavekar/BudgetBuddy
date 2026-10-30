@@ -63,4 +63,41 @@ describe('PillSelect', () => {
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
+
+  it('opens the menu and selects with ArrowDown + Enter', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<PillSelect value="2026-10" onChange={onChange} options={options} />);
+
+    screen.getByRole('button').focus();
+    await user.keyboard('{ArrowDown}'); // opens, highlighting the selected option (October)
+    await user.keyboard('{ArrowDown}'); // moves to September
+    await user.keyboard('{Enter}');
+
+    expect(onChange).toHaveBeenCalledWith('2026-09');
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('marks a disabled option as aria-disabled and skips it in onChange/keyboard nav', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const withDisabled = [
+      { value: '2026-10', label: 'October 2026' },
+      { value: '2026-11', label: 'November 2026', disabled: true },
+      { value: '2026-12', label: 'December 2026', disabled: true }
+    ];
+    render(<PillSelect value="2026-10" onChange={onChange} options={withDisabled} />);
+
+    await user.click(screen.getByRole('button'));
+    const novemberOption = screen.getByRole('option', { name: /November 2026/i });
+    expect(novemberOption).toHaveAttribute('aria-disabled', 'true');
+
+    await user.click(novemberOption);
+    expect(onChange).not.toHaveBeenCalled();
+
+    // ArrowDown from October should skip both disabled months and wrap back to October.
+    await user.keyboard('{ArrowDown}');
+    await user.keyboard('{Enter}');
+    expect(onChange).toHaveBeenCalledWith('2026-10');
+  });
 });

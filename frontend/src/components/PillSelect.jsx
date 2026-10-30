@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 import '../styles/pillSelect.css';
 
 // A custom dropdown used in place of a native <select> for the dark "pill" pickers
@@ -6,37 +6,118 @@ import '../styles/pillSelect.css';
 // by the browser/OS — on some mobile browsers that means the options list renders as a
 // centered overlay on top of the trigger instead of opening below it, hiding which
 // control it belongs to. This renders its own menu, so it's always anchored directly
-// under the button that opened it.
+// under the button that opened it, with its own keyboard navigation (arrow keys move a
+// roving highlight, Enter selects, Escape/outside-click closes).
 //
-// options: [{ value, label }]
+// options: [{ value, label, disabled? }]
 const PillSelect = ({ value, onChange, options, className = '', ariaLabel }) => {
   const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const wrapRef = useRef(null);
+  const menuRef = useRef(null);
+  const optionRefs = useRef([]);
+  const idPrefix = useId();
+
+  const selectedIndex = options.findIndex(o => String(o.value) === String(value));
+  const selected = selectedIndex >= 0 ? options[selectedIndex] : undefined;
+
+  const firstEnabledIndex = () => options.findIndex(o => !o.disabled);
+
+  const openMenu = () => {
+    setActiveIndex(selectedIndex >= 0 && !options[selectedIndex].disabled ? selectedIndex : firstEnabledIndex());
+    setOpen(true);
+  };
 
   useEffect(() => {
     if (!open) return;
     const handleOutside = (e) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
     };
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
     document.addEventListener('mousedown', handleOutside);
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('mousedown', handleOutside);
-      document.removeEventListener('keydown', handleEscape);
-    };
+    return () => document.removeEventListener('mousedown', handleOutside);
   }, [open]);
 
-  const selected = options.find(o => String(o.value) === String(value));
+  // Keep the active option in view — notably so opening the year list scrolls the
+  // already-selected year into view instead of always starting at the top.
+  useEffect(() => {
+    if (open && activeIndex >= 0) {
+      // jsdom (tests) doesn't implement scrollIntoView at all.
+      optionRefs.current[activeIndex]?.scrollIntoView?.({ block: 'nearest' });
+    }
+  }, [open, activeIndex]);
+
+  // Focus the listbox itself when it opens, so arrow keys/Enter/Escape work
+  // immediately without a separate click or tab press.
+  useEffect(() => {
+    if (open) menuRef.current?.focus();
+  }, [open]);
+
+  const moveActive = (delta) => {
+    setActiveIndex((current) => {
+      const count = options.length;
+      let next = current;
+      for (let i = 0; i < count; i++) {
+        next = (next + delta + count) % count;
+        if (!options[next].disabled) return next;
+      }
+      return current;
+    });
+  };
+
+  const selectIndex = (index) => {
+    const opt = options[index];
+    if (!opt || opt.disabled) return;
+    onChange(opt.value);
+    setOpen(false);
+  };
+
+  const handleTriggerKeyDown = (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (!open) openMenu();
+    }
+  };
+
+  const handleMenuKeyDown = (e) => {
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        moveActive(1);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        moveActive(-1);
+        break;
+      case 'Home':
+        e.preventDefault();
+        setActiveIndex(firstEnabledIndex());
+        break;
+      case 'End': {
+        e.preventDefault();
+        const lastEnabled = [...options].map((o, i) => i).reverse().find(i => !options[i].disabled);
+        if (lastEnabled !== undefined) setActiveIndex(lastEnabled);
+        break;
+      }
+      case 'Enter':
+        e.preventDefault();
+        selectIndex(activeIndex);
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setOpen(false);
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
     <div className="pill-select-wrap" ref={wrapRef}>
       <button
         type="button"
         className={`pill-select-trigger ${className}`}
-        onClick={() => setOpen(o => !o)}
+        onClick={() => (open ? setOpen(false) : openMenu())}
+        onKeyDown={handleTriggerKeyDown}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={ariaLabel}
@@ -51,21 +132,41 @@ const PillSelect = ({ value, onChange, options, className = '', ariaLabel }) => 
       </button>
 
       {open && (
-        <ul className="pill-select-menu" role="listbox">
-          {options.map(opt => (
-            <li key={opt.value} role="presentation">
-              <button
-                type="button"
-                role="option"
-                aria-selected={String(opt.value) === String(value)}
-                className={`pill-select-option ${String(opt.value) === String(value) ? 'pill-select-option--selected' : ''}`}
-                onClick={() => { onChange(opt.value); setOpen(false); }}
-              >
-                {String(opt.value) === String(value) && <span className="pill-select-check">✓</span>}
-                {opt.label}
-              </button>
-            </li>
-          ))}
+        <ul
+          className="pill-select-menu"
+          role="listbox"
+          tabIndex={-1}
+          aria-activedescendant={activeIndex >= 0 ? `${idPrefix}-opt-${activeIndex}` : undefined}
+          onKeyDown={handleMenuKeyDown}
+          ref={menuRef}
+        >
+          {options.map((opt, index) => {
+            const isSelected = String(opt.value) === String(value);
+            return (
+              <li key={opt.value} role="presentation">
+                <button
+                  id={`${idPrefix}-opt-${index}`}
+                  type="button"
+                  role="option"
+                  ref={(el) => { optionRefs.current[index] = el; }}
+                  aria-selected={isSelected}
+                  aria-disabled={opt.disabled || undefined}
+                  disabled={opt.disabled}
+                  className={[
+                    'pill-select-option',
+                    isSelected ? 'pill-select-option--selected' : '',
+                    index === activeIndex ? 'pill-select-option--active' : '',
+                    opt.disabled ? 'pill-select-option--disabled' : ''
+                  ].filter(Boolean).join(' ')}
+                  onMouseEnter={() => !opt.disabled && setActiveIndex(index)}
+                  onClick={() => selectIndex(index)}
+                >
+                  {isSelected && <span className="pill-select-check">✓</span>}
+                  {opt.label}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
