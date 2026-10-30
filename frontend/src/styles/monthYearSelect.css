@@ -1,0 +1,51 @@
+/* Month + Year dropdown pair — same dark pill look as the single dropdown it
+   replaced, just split into two narrower triggers side by side. */
+
+.month-year-select-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  /* Lets this row shrink inside a flex header instead of forcing the page wider —
+     the actual "no horizontal scroll on narrow phones" guarantee. */
+  min-width: 0;
+}
+
+.my-select-pill {
+  background: var(--bg-container);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+  min-width: 0;
+}
+
+.my-select-pill--month {
+  flex: 1 1 128px;
+}
+
+.my-select-pill--year {
+  flex: 0 1 88px;
+}
+
+.my-select-pill:hover,
+.my-select-pill:focus,
+.my-select-pill[aria-expanded="true"] {
+  background-color: var(--bg-container);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+@media (max-width: 420px) {
+  .my-select-pill--month {
+    flex-basis: 112px;
+  }
+  .my-select-pill--year {
+    flex-basis: 76px;
+  }
+}
