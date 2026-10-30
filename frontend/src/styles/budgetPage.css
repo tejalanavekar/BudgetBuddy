@@ -79,7 +79,9 @@
 
 .month-selector:hover,
 .month-selector:focus {
-  background: var(--bg-container);
+  /* background-color, not background — the shorthand would reset background-image
+     (the chevron) back to none on hover/focus. */
+  background-color: var(--bg-container);
   border-color: rgba(255, 255, 255, 0.45);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
 }
