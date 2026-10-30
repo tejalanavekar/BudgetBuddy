@@ -5,7 +5,7 @@ import DailySpentSnapshot from '../components/DailySpentSnapshot.jsx';
 import BudgetManager from '../components/BudgetManager.jsx';
 import { WalletIcon, EditIcon } from '../components/icons/Icon';
 import { BUDGET_CHANGED } from '../utils/dataEvents';
-import PillSelect from '../components/PillSelect.jsx';
+import MonthYearSelect from '../components/MonthYearSelect.jsx';
 import '../styles/budgetPage.css';
 
 const BudgetPage = () => {
@@ -36,27 +36,6 @@ const BudgetPage = () => {
     return () => window.removeEventListener(BUDGET_CHANGED, handler);
   }, []);
 
-  const getCurrentMonthISO = () => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  };
-
-  const getLast12Months = () => {
-    const months = [];
-    const now = new Date();
-    for (let i = 0; i < 12; i++) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-    }
-    return months;
-  };
-
-  const formatMonthLabel = (iso) => {
-    const [year, month] = iso.split('-');
-    return new Date(parseInt(year), parseInt(month) - 1, 1)
-      .toLocaleString('default', { month: 'long', year: 'numeric' });
-  };
-
   return (
     <>
       {/* Header */}
@@ -72,13 +51,7 @@ const BudgetPage = () => {
           >
             {hasBudget ? <><EditIcon size={14} /> Edit Budget</> : '+ Set Budget'}
           </button>
-          <PillSelect
-            className="month-selector"
-            value={selectedMonth}
-            onChange={setSelectedMonth}
-            options={getLast12Months().map((d) => ({ value: d, label: formatMonthLabel(d) }))}
-            ariaLabel="Select month"
-          />
+          <MonthYearSelect value={selectedMonth} onChange={setSelectedMonth} />
         </div>
       </div>
 

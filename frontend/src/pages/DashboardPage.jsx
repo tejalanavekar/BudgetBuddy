@@ -4,9 +4,9 @@ import CategoryChart from '../components/CategoryChart';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getExpenses , deleteExpense, updateExpense } from '../api/services/expenseService.js';
 import { CategoryIcon, WalletIcon, CalendarIcon, ReceiptIcon, EditIcon, TrashIcon, ChartIcon, UploadIcon, CheckIcon, WarningIcon, WaveIcon } from '../components/icons/Icon';
-import { getYearMonth } from '../utils/dateUtils';
+import { getYearMonth, getTodayLocalISO } from '../utils/dateUtils';
 import { getImageUrl } from '../utils/receiptUrl.js';
-import PillSelect from '../components/PillSelect.jsx';
+import MonthYearSelect from '../components/MonthYearSelect.jsx';
 import '../styles/dashboard.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -33,22 +33,19 @@ const DashboardPage = () => {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   };
 
+  // The currently-selected month, or today if it IS the current month — used to
+  // pre-fill the date when adding an expense from an empty month, instead of always
+  // defaulting ExpensePage's own date field to today regardless of which month is open.
+  const getPrefillDateForMonth = (monthISO) => (
+    monthISO === getCurrentMonthISO() ? getTodayLocalISO() : `${monthISO}-01`
+  );
+
   const getYearMonth = (dateStr) => {
   if (!dateStr) return [null, null];
   // ✅ Handles both "2026-04-01" and "2026-03-31T18:30:00.000Z"
   const parts = dateStr.split('T')[0].split('-');
   return [parseInt(parts[0]), parseInt(parts[1])];
 };
-
-  const getLast12Months = () => {
-    const months = [];
-    const now = new Date();
-    for (let i = 0; i < 12; i++) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-    }
-    return months;
-  };
 
   const formatMonthLabel = (iso) => {
     const [year, month] = iso.split('-');
@@ -217,13 +214,7 @@ const handleEditSubmit = async (e) => {
         <h2>{greeting()}, {user?.firstName || 'there'} !</h2>
         <p>Here's your spending overview</p>
       </div>
-      <PillSelect
-        className="hero-month-select"
-        value={selectedDate}
-        onChange={setSelectedDate}
-        options={getLast12Months().map(d => ({ value: d, label: formatMonthLabel(d) }))}
-        ariaLabel="Select month"
-      />
+      <MonthYearSelect value={selectedDate} onChange={setSelectedDate} />
     </div>
 
     {/* Stats Strip */}
@@ -321,7 +312,12 @@ const handleEditSubmit = async (e) => {
                 <span className="empty-state-icon"><ReceiptIcon size={40} /></span>
                 <p className="empty-state-title">No expenses found for this month.</p>
                 <p className="empty-state-sub">Add your first expense to see it here.</p>
-                <button className="empty-state-btn" onClick={() => navigate('/home/expense')}>+ Add Expense</button>
+                <button
+                  className="empty-state-btn"
+                  onClick={() => navigate('/home/expense', { state: { date: getPrefillDateForMonth(selectedDate) } })}
+                >
+                  + Add Expense
+                </button>
               </div>
             )}
           </div>

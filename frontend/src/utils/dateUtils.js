@@ -1,3 +1,13 @@
+// Local YYYY-MM-DD for today — toISOString() converts to UTC first, which can
+// show the wrong day for users behind/ahead of UTC.
+export const getTodayLocalISO = () => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
 // Robust year/month extraction from an expense's `date` field. Expenses are supposed to
 // always store "YYYY-MM-DD" (or an ISO datetime), but a handful of older records ended up
 // with a stray `Date.toString()`-style value (e.g. from a stale edit path) — the fast regex

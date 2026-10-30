@@ -1,6 +1,6 @@
 import { addExpense, scanReceiptWithVision } from '../api/services/expenseService.js';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {Form, Button, Container, Card, Alert, Row, Col} from 'react-bootstrap';
 import '../styles/expense.css';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -205,11 +205,15 @@ const getTodayLocal = () => {
 const ExpensePage = () => {
   const { user } = useAuth(); // Get the authenticated user from context
   const navigate = useNavigate();
+  // The Dashboard's "+ Add Expense" empty state (for a month with no expenses yet)
+  // passes the month it was showing via navigate(..., { state: { date } }), so the
+  // form opens pre-filled for that month instead of always defaulting to today.
+  const location = useLocation();
   const [form, setForm] = useState({
     description: '',
     amount: '',
     category: 'Food', // Default to first option
-    date: getTodayLocal() // Defaults to today's date (recomputed on every mount)
+    date: location.state?.date || getTodayLocal() // Defaults to today's date (recomputed on every mount)
   });
 
   const [receipt, setReceipt] = useState(null); //stores the actual binary file of the image uploaded by the user.

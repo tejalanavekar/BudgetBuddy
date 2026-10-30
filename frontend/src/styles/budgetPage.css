@@ -149,7 +149,8 @@
     min-width: 120px;
   }
 
-  .month-selector {
+  .month-selector,
+  .month-year-select-row {
     flex: 1;
     min-width: 140px;
   }
@@ -178,7 +179,8 @@
   }
 
   .set-budget-btn,
-  .month-selector {
+  .month-selector,
+  .month-year-select-row {
     width: 100%;
   }
 }
