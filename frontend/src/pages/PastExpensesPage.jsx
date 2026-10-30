@@ -11,6 +11,7 @@ import { CATEGORIES, CATEGORY_COLOR as CATEGORY_COLORS } from '../constants/cate
 import { CategoryIcon, CalendarIcon, WalletIcon, ChartIcon, FireIcon, ReceiptIcon, TrendingUpIcon, SearchIcon, EditIcon, TrashIcon, InboxEmptyIcon, UploadIcon, CheckIcon, WarningIcon } from '../components/icons/Icon';
 import { getYearMonth } from '../utils/dateUtils';
 import { getImageUrl } from '../utils/receiptUrl.js';
+import PillSelect from '../components/PillSelect.jsx';
 import '../styles/pastExpenses.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
@@ -296,15 +297,13 @@ const PastExpensesPage = () => {
           <h1 className="pe-title"><CalendarIcon /> Past Expenses</h1>
           <p className="pe-subtitle">Your complete spending history, visualized</p>
         </div>
-        <select
-  className="pe-year-select"
-  value={selectedYear}
-  onChange={e => { setSelectedYear(Number(e.target.value)); setSelectedMonth(null); }}
->
-  {availableYears.map(y => (
-    <option key={y} value={y}>{y}</option>
-  ))}
-</select>
+        <PillSelect
+          className="pe-year-select"
+          value={selectedYear}
+          onChange={(y) => { setSelectedYear(Number(y)); setSelectedMonth(null); }}
+          options={availableYears.map(y => ({ value: y, label: String(y) }))}
+          ariaLabel="Select year"
+        />
       </div>
 
       {/* Summary Strip */}

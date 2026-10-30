@@ -6,6 +6,7 @@ import { getExpenses , deleteExpense, updateExpense } from '../api/services/expe
 import { CategoryIcon, WalletIcon, CalendarIcon, ReceiptIcon, EditIcon, TrashIcon, ChartIcon, UploadIcon, CheckIcon, WarningIcon, WaveIcon } from '../components/icons/Icon';
 import { getYearMonth } from '../utils/dateUtils';
 import { getImageUrl } from '../utils/receiptUrl.js';
+import PillSelect from '../components/PillSelect.jsx';
 import '../styles/dashboard.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -216,15 +217,13 @@ const handleEditSubmit = async (e) => {
         <h2>{greeting()}, {user?.firstName || 'there'} !</h2>
         <p>Here's your spending overview</p>
       </div>
-      <select
+      <PillSelect
         className="hero-month-select"
         value={selectedDate}
-        onChange={e => setSelectedDate(e.target.value)}
-      >
-        {getLast12Months().map(d => (
-          <option key={d} value={d}>{formatMonthLabel(d)}</option>
-        ))}
-      </select>
+        onChange={setSelectedDate}
+        options={getLast12Months().map(d => ({ value: d, label: formatMonthLabel(d) }))}
+        ariaLabel="Select month"
+      />
     </div>
 
     {/* Stats Strip */}

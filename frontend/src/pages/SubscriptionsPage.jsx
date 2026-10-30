@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { getSubscriptions, addSubscription, updateSubscription, deleteSubscription } from '../api/services/subscriptionService.js';
 import { SubscriptionCategoryIcon, RefreshIcon, EditIcon, FolderIcon, CalendarIcon } from '../components/icons/Icon';
 import { SUBSCRIPTIONS_CHANGED } from '../utils/dataEvents';
+import PillSelect from '../components/PillSelect.jsx';
 import '../styles/subscriptions.css';
 
 const CATEGORY_META = {
@@ -269,10 +270,13 @@ const SubscriptionsPage = () => {
             </button>
           ))}
         </div>
-        <select className="subs-category-select" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}>
-          <option value="All">All</option>
-          {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-        </select>
+        <PillSelect
+          className="subs-category-select"
+          value={categoryFilter}
+          onChange={setCategoryFilter}
+          options={[{ value: 'All', label: 'All' }, ...CATEGORIES.map(cat => ({ value: cat, label: cat }))]}
+          ariaLabel="Filter by category"
+        />
       </div>
 
       {/* Subscription list */}

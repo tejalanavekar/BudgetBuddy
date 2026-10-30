@@ -5,6 +5,7 @@ import DailySpentSnapshot from '../components/DailySpentSnapshot.jsx';
 import BudgetManager from '../components/BudgetManager.jsx';
 import { WalletIcon, EditIcon } from '../components/icons/Icon';
 import { BUDGET_CHANGED } from '../utils/dataEvents';
+import PillSelect from '../components/PillSelect.jsx';
 import '../styles/budgetPage.css';
 
 const BudgetPage = () => {
@@ -71,17 +72,13 @@ const BudgetPage = () => {
           >
             {hasBudget ? <><EditIcon size={14} /> Edit Budget</> : '+ Set Budget'}
           </button>
-          <select
+          <PillSelect
             className="month-selector"
             value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-          >
-            {getLast12Months().map((d) => (
-              <option key={d} value={d}>
-                {formatMonthLabel(d)}
-              </option>
-            ))}
-          </select>
+            onChange={setSelectedMonth}
+            options={getLast12Months().map((d) => ({ value: d, label: formatMonthLabel(d) }))}
+            ariaLabel="Select month"
+          />
         </div>
       </div>
 
